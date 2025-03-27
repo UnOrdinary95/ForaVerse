@@ -1,5 +1,6 @@
 {
     "name": "un-ordinary/fora-verse",
+    "version": "1.0.0",
     "authors": [
         {
             "name": "UnOrdinary",
@@ -10,7 +11,6 @@
         "classmap": ["app/"]
     },
     "require": {
-        "vlucas/phpdotenv": "^5.6",
-        "": ""
+        "vlucas/phpdotenv": "^5.6"
     }
 }
