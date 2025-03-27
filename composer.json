@@ -1,0 +1,16 @@
+{
+    "name": "un-ordinary/fora-verse",
+    "authors": [
+        {
+            "name": "UnOrdinary",
+            "email": "114882529+UnOrdinary95@users.noreply.github.com"
+        }
+    ],
+    "autoload": {
+        "classmap": ["app/"]
+    },
+    "require": {
+        "vlucas/phpdotenv": "^5.6",
+        "": ""
+    }
+}
