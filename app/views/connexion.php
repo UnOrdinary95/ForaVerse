@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connexion</title>
+    <link rel="icon" type="image/png" href="../../public/images/Logo_ForaVerse.png">
 </head>
 <body>
     <form action="?action=connexion" method="POST" autocomplete="on">

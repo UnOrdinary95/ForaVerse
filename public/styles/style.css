@@ -1,0 +1,17 @@
+@font-face{
+    src: url(../fonts/GameOfSquids.ttf);
+    font-family: GameOfSquids;
+}
+
+#title{
+    font-family: GameOfSquids, serif;
+    font-size: 50px;
+    text-align: center;
+}
+
+.flex{
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+
+}
