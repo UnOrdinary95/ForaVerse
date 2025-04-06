@@ -112,7 +112,7 @@ class InscriptionValidator extends AuthValidatorAbstract
      * @param string $mdp Le mot de passe à valider
      * @return bool True si le mot de passe est valide, False sinon
      */
-    private function validerMdp(string $mdp):bool
+    public function validerMdp(string $mdp):bool
     {
         $validation = false;
 

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Erreur</title>
-    <link rel="icon" type="image/png" href="../../public/images/Logo_ForaVerse.png">
+    <link rel="icon" href="../../public/images/favicon/favicon_foraverse.png"/>
 </head>
 <body>
     <h1>Une erreur est survenue.</h1>

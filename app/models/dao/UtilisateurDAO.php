@@ -1,17 +1,23 @@
 <?php
 
-//require_once "../../utils/test_autoloader.php";
-
 final class UtilisateurDAO
 {
-    private PDO $pdo;
+    public PDO $pdo;
 
     public function __construct()
     {
         $this->pdo = PostgreSQLDB::getConnexion();
     }
 
-    public function getPseudos():array
+    public function getProfilUtilisateurById(int $id):?Utilisateur
+    {
+        $query = $this->pdo->prepare("SELECT idutilisateur, pseudo, email, motdepasse, chemin_photo, bio, date_inscription, est_admin FROM utilisateur WHERE idUtilisateur = ?");
+        $query->execute([$id]);
+        $result = $query->fetch(PDO::FETCH_ASSOC);
+        return new Utilisateur($result['pseudo'], $result['email'], $result['motdepasse'], $result['idutilisateur'],  $result['chemin_photo'], $result['bio'], $result['date_inscription'], $result['est_admin']);
+    }
+
+    public function getPseudos():?array
     {
         $query = $this->pdo->prepare("SELECT pseudo FROM utilisateur");
         $query->execute();
@@ -19,7 +25,7 @@ final class UtilisateurDAO
         return array_column($query->fetchAll(PDO::FETCH_NUM), 0);
     }
 
-    public function getEmails():array
+    public function getEmails():?array
     {
         $query = $this->pdo->prepare("SELECT email FROM utilisateur");
         $query->execute();
@@ -59,6 +65,14 @@ final class UtilisateurDAO
         return $query->fetchColumn();
     }
 
+    public function getPseudoByEmail(string $email):?string
+    {
+        $query = $this->pdo->prepare("SELECT pseudo FROM utilisateur WHERE email = ?");
+        $query->execute([$email]);
+
+        return $query->fetchColumn();
+    }
+
     public function addUtilisateur(string $pseudo, string $email, string $mdp): bool
     {
         $mdp_hash = password_hash($mdp, PASSWORD_DEFAULT);
@@ -67,6 +81,25 @@ final class UtilisateurDAO
         return $query->execute([$pseudo, $email, $mdp_hash]);
     }
 
+    public function getPhotoProfilById(int $id): ?string
+    {
+        $query = $this->pdo->prepare("SELECT chemin_photo FROM utilisateur WHERE idutilisateur = ?");
+        $query->execute([$id]);
+        return $query->fetchColumn();
+    }
+
+    public function updatePhotoProfil(int $id, string $chemin_photo): bool
+    {
+        $query = $this->pdo->prepare("UPDATE utilisateur SET chemin_photo = ? WHERE idutilisateur = ?");
+        return $query->execute([$chemin_photo, $id]);
+    }
+
+    public function updateMdpByEmail(string $email, string $mdp): bool
+    {
+        $mdp_hash = password_hash($mdp, PASSWORD_DEFAULT);
+        $query = $this->pdo->prepare("UPDATE utilisateur SET motdepasse = ? WHERE email = ?");
+        return $query->execute([$mdp_hash, $email]);
+    }
 }
 
 if (php_sapi_name() == 'cli') {

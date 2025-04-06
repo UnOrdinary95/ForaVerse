@@ -8,17 +8,17 @@ final class Utilisateur
     private ?string $mdp;
     private ?string $chemin_photo;
     private ?string $bio;
-    private ?DateTime $date_inscription;
+    private ?string $date_inscription;
     private bool $est_admin;
 
     public function __construct(
-        string $unPseudo,
-        string $unEmail,
-        string $unMdp,
+        string $unPseudo = null,
+        string $unEmail = null,
+        string $unMdp = null,
         int $unId = null,
         string $unCheminPhoto = null,
         string $uneBio = 'Pas de bio.',
-        DateTime $uneDateInscription = null,
+        string $uneDateInscription = null,
         bool $unEstAdmin = false
     ){
         $this->id = $unId;
@@ -29,6 +29,46 @@ final class Utilisateur
         $this->bio = $uneBio;
         $this->date_inscription = $uneDateInscription;
         $this->est_admin = $unEstAdmin;
+    }
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getPseudo(): ?string
+    {
+        return $this->pseudo;
+    }
+
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    public function getMdp(): ?string
+    {
+        return $this->mdp;
+    }
+
+    public function getCheminPhoto(): ?string
+    {
+        return $this->chemin_photo;
+    }
+
+    public function getBio(): ?string
+    {
+        return $this->bio;
+    }
+
+    public function getDateInscription(): ?string
+    {
+        return $this->date_inscription;
+    }
+
+    public function getEstAdmin(): bool
+    {
+        return $this->est_admin;
     }
 
 

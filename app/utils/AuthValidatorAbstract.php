@@ -1,4 +1,5 @@
 <?php
+// TODO : Modifier la doc de valider
 
 /**
  * AuthValidatorAbstract - Classe abstraite pour la validation d'authentification
@@ -24,9 +25,9 @@ abstract class AuthValidatorAbstract
      * @param string $pseudo Le pseudo de l'utilisateur
      * @param string $email L'adresse email de l'utilisateur
      * @param string $mdp Le mot de passe de l'utilisateur
-     * @return bool True si la validation est réussie, False sinon
+     * @return bool | int True si la validation est réussie, False sinon
      */
-    abstract public function valider(string $pseudo, string $email, string $mdp): bool;
+    abstract public function valider(string $pseudo, string $email, string $mdp): bool | int;
 
     /**
      * Retourne l'instance du DAO utilisateur

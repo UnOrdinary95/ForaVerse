@@ -1,4 +1,5 @@
 <?php
+// TODO : Modifier la doc de vérifierUtilisateur
 
 /**
  * ConnexionController - Gère l'authentification des utilisateurs
@@ -69,13 +70,13 @@ class ConnexionController implements ControllerInterface, AuthControllerInterfac
             }
             $mdp = trim(filter_input(INPUT_POST, 'mdp', FILTER_SANITIZE_SPECIAL_CHARS));
 
-            if ($this->validateur->valider($identifiant, $identifiant, $mdp)){
-                if($this->validateur->validerIdentifiant($identifiant) == 1){
-                    $_SESSION['UserID'] = $this->validateur->getUtilisateurDAO()->getIdByEmail($identifiant);
-                }
-                else{
-                    $_SESSION['UserID'] = $this->validateur->getUtilisateurDAO()->getIdByPseudo($identifiant);
-                }
+            if ($this->validateur->valider($identifiant, $identifiant, $mdp) == 1) {
+                $_SESSION['Pseudo'] = $this->validateur->getUtilisateurDAO()->getPseudoByEmail($identifiant);
+                header("Location: ./?action=accueil");
+                exit();
+            }
+            elseif($this->validateur->valider($identifiant, $identifiant, $mdp) == 2){
+                $_SESSION['Pseudo'] = $identifiant;
                 header("Location: ./?action=accueil");
                 exit();
             }
@@ -94,7 +95,7 @@ class ConnexionController implements ControllerInterface, AuthControllerInterfac
      */
     public function deconnexion():void
     {
-        if (isset($_SESSION['UserID'])){
+        if (isset($_SESSION['Pseudo'])){
             session_unset();
             session_destroy();
             header("Location: ./?action=connexion");

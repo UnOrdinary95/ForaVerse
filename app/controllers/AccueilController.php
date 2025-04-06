@@ -1,5 +1,4 @@
 <?php
-
 /**
  * AccueilController - Gère l'affichage de la page d'accueil
  *
@@ -12,8 +11,12 @@ class AccueilController implements ControllerInterface
     /**
      * Constructeur de AccueilController
      */
+    private UtilisateurDAO $utilisateurDAO;
+
     public function __construct()
-    {}
+    {
+        $this->utilisateurDAO = new UtilisateurDAO();
+    }
 
     /**
      * Affiche la vue de la page d'accueil
@@ -27,6 +30,10 @@ class AccueilController implements ControllerInterface
     public function afficherVue():void
     {
         try{
+            if (isset($_SESSION['Pseudo'])){
+                $utilisateur_dao = new UtilisateurDAO();
+                $utilisateur = $this->utilisateurDAO->getProfilUtilisateurById($this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo'])) ?? null;
+            }
             require_once __DIR__ . '/../views/accueil.php';
         } catch (PDOException $e) {
             require_once __DIR__ . '/../views/erreur.php';

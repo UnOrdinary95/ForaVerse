@@ -11,6 +11,8 @@
         "classmap": ["app/"]
     },
     "require": {
-      "ext-pdo": "*"
+      "ext-pdo": "*",
+        "phpmailer/phpmailer": "^6.9",
+        "firebase/php-jwt": "^6.11"
     }
 }

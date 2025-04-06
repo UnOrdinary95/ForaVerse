@@ -1,4 +1,6 @@
 <?php
+// TODO : Modifier la doc de valider et vérifierUtilisateur
+
 
 /**
  * ConnexionValidator - Validateur pour la connexion des utilisateurs
@@ -29,15 +31,18 @@ class ConnexionValidator extends AuthValidatorAbstract
      * @param string $pseudo Le pseudo ou l'email de l'utilisateur
      * @param string $email L'email (non utilisé dans cette implémentation)
      * @param string $mdp Le mot de passe de l'utilisateur
-     * @return bool True si les informations sont valides, False sinon
+     * @return int True si les informations sont valides, False sinon
      */
-    public function valider(string $pseudo, string $email, string $mdp): bool
+    public function valider(string $pseudo, string $email, string $mdp): int
     {
-        if (str_contains($pseudo, '@')) {
-            return $this->validerIdentifiant($email) && $this->validerMdp($mdp, $email);
+        if (str_contains($pseudo, '@') && $this->validerIdentifiant($email) && $this->validerMdp($mdp, $email)){
+            return 1;
+        }
+        elseif($this->validerIdentifiant($pseudo) && $this->validerMdp($mdp, $pseudo)){
+            return 2;
         }
         else{
-            return $this->validerIdentifiant($pseudo) && $this->validerMdp($mdp, $pseudo);
+            return 0;
         }
     }
 
@@ -47,7 +52,7 @@ class ConnexionValidator extends AuthValidatorAbstract
      * @param string $identifiant Le pseudo ou l'email à valider
      * @return bool 1 si email valide, 2 si pseudo valide, False sinon
      */
-    public function validerIdentifiant(string $identifiant):bool
+    private function validerIdentifiant(string $identifiant):bool
     {
         $validation = false;
 
@@ -57,11 +62,11 @@ class ConnexionValidator extends AuthValidatorAbstract
         elseif(!in_array($identifiant, $this->utilisateur_dao->getPseudos()) && !in_array($identifiant, $this->utilisateur_dao->getEmails())){
             $this->erreurs['idmdp'] = "Identifiant ou mot de passe incorrect.";
         }
-        elseif(str_contains($identifiant, '@')) {
-            $validation = 1;
-        }
+//        elseif(str_contains($identifiant, '@')) {
+//            $validation = 1;
+//        }
         else{
-            $validation = 2;
+            $validation = true;
         }
 
         return $validation;

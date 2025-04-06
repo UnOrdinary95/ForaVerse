@@ -12,10 +12,15 @@ $routeur = new Routeur();
 $accueilController = new AccueilController();
 $inscriptionController = new InscriptionController();
 $connexionController = new ConnexionController();
+$profilController = new ProfilController();
+$resetMdpController = new ResetMdpController();
 
 $routeur->ajouterRoute('accueil', [$accueilController, 'afficherVue']);
 $routeur->ajouterRoute('inscription', [$inscriptionController, 'afficherVue']);
 $routeur->ajouterRoute('connexion', [$connexionController, 'afficherVue']);
 $routeur->ajouterRoute('deconnexion', [$connexionController, 'deconnexion']);
+$routeur->ajouterRoute('profil', [$profilController, 'afficherVue']);
+$routeur->ajouterRoute('demande_resetmdp', [$resetMdpController, 'afficherVue']);
+$routeur->ajouterRoute('resetmdp', [$resetMdpController, 'afficherVueResetMdp']);
 
 $routeur->executerRoute();

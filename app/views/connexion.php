@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connexion</title>
-    <link rel="icon" type="image/png" href="../../public/images/Logo_ForaVerse.png">
+    <link rel="icon" href="../../public/images/favicon/favicon_foraverse.png"/>
 </head>
 <body>
     <form action="?action=connexion" method="POST" autocomplete="on">
@@ -22,7 +22,9 @@
         <?php endif; ?>
         <input type="submit" name="connecter" value="Se connecter">
     </form>
+    <br><a href="./?action=demande_resetmdp">Mot de passe oublié ?</a>
     <p>Nouveau dans ForaVerse ?
         <a href="./?action=inscription">Créer un compte</a>
     </p>
 </body>
+</html>

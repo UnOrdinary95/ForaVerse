@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inscription</title>
-    <link rel="icon" type="image/png" href="../../public/images/Logo_ForaVerse.png">
+    <link rel="icon" href="../../public/images/favicon/favicon_foraverse.png"/>
 </head>
 <body>
     <form action="?action=inscription" method="POST" autocomplete="on">
@@ -27,3 +27,4 @@
         <a href="./?action=connexion">Connectez-vous ici</a>
     </p>
 </body>
+</html>
