@@ -58,18 +58,20 @@ class ResetMdpController implements ControllerInterface
         $token = JWT::encode($payload, $secret_key, 'HS256');
         $lien = 'https://foraverse.unordinary-things.tech/index.php?action=resetmdp&token=' . urlencode($token);
         $sujet = "Réinitialisation de votre mot de passe ForaVerse";
-        $message = "
-    <h1>Réinitialisation de votre mot de passe</h1>
-    <p>Bonjour,</p>
-    <p>Nous avons reçu une demande de réinitialisation de votre mot de passe. Cliquez sur le lien ci-dessous pour réinitialiser votre mot de passe (vous avez 5 min) :</p>
-    <p><a href='$lien'>Réinitialiser mon mot de passe</a></p>
-    <p>Si vous n'avez pas demandé cette réinitialisation, veuillez ignorer cet email.</p>
-    <p>Merci,</p>
-    <p>L'équipe ForaVerse</p>
-    <p><small>Cette notification a été envoyée à l'adresse email associée à votre compte ForaVerse. Ce mail est auto-généré. Merci de ne pas y répondre, si vous voulez de l'aide supplémentaire, merci de vous adresser à unordinary. (discord)</small></p>
-    <p><small><a href='https://foraverse.unordinary-things.tech'>foraverse.unordinary-things.tech</a></small></p>
-    ";
-        $this->mailer->envoyer($this->email, $sujet, $message);
+        $message_html = "
+        <h1>Réinitialisation de votre mot de passe</h1>
+        <p>Bonjour,</p>
+        <p>Nous avons reçu une demande de réinitialisation de votre mot de passe. Cliquez sur le lien ci-dessous pour réinitialiser votre mot de passe (vous avez 5 min) :</p>
+        <p><a href='$lien'>Réinitialiser mon mot de passe</a></p>
+        <p>Si vous n'avez pas demandé cette réinitialisation, veuillez ignorer cet email.</p>
+        <p>Merci,</p>
+        <p>L'équipe ForaVerse</p>
+        <p><small>Cette notification a été envoyée à l'adresse email associée à votre compte ForaVerse. Ce mail est auto-généré. Merci de ne pas y répondre, si vous voulez de l'aide supplémentaire, merci de vous adresser à unordinary. (discord)</small></p>
+        <p><small><a href='https://foraverse.unordinary-things.tech'>foraverse.unordinary-things.tech</a></small></p>
+        ";
+
+        $message_txt = "Bonjour,\n\nNous avons reçu une demande de réinitialisation de votre mot de passe. Cliquez sur le lien ci-dessous pour réinitialiser votre mot de passe (vous avez 5 min) :\n\n$lien\n\nSi vous n'avez pas demandé cette réinitialisation, veuillez ignorer cet email.\n\nMerci,\nL'équipe ForaVerse";
+        $this->mailer->envoyer($this->email, $sujet, $message_html, $message_txt);
     }
 
     public function verifierToken($token):bool
