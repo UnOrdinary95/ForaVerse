@@ -47,7 +47,7 @@
 <body>
     <h1><a href="./" style="text-decoration: none; width: 100px">⬅️</a></h1>
     <div>
-        <img src="../../public/<?= $utilisateur->getCheminPhoto() ?: 'images/pp_user/sunday2.jpg' ?>" style="width: 100px; height: 100px; border-radius: 30%; cursor: pointer;"
+        <img src="../../public/<?= $utilisateur->getCheminPhoto() ?: 'images/pp_user/default.jpeg' ?>" style="width: 100px; height: 100px; border-radius: 30%; cursor: pointer;"
              id="profileImage" alt="Profil"
             <?php if ($utilisateur->getPseudo() == $_SESSION['Pseudo']): ?>
                 onclick="document.getElementById('imageInput').click();"

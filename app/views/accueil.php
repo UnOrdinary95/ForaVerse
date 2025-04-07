@@ -24,7 +24,7 @@
             <?="Bonjour " . $_SESSION['Pseudo']?>
             <a href="./?action=deconnexion">Déconnexion</a>
             <a href="./?action=profil&utilisateur=<?= $_SESSION['Pseudo']?>">
-                <img src="../../public/<?= $utilisateur->getCheminPhoto() ?: 'images/pp_user/sunday2.jpg' ?>" alt="Profil" style="width: 50px; height: 50px; border-radius: 30%">
+                <img src="../../public/<?= $utilisateur->getCheminPhoto() ?: 'images/pp_user/default.jpeg' ?>" alt="Profil" style="width: 50px; height: 50px; border-radius: 30%">
             </a>
             <?php endif; ?>
     </div>
