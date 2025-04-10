@@ -21,6 +21,7 @@ $routeur->ajouterRoute('connexion', [$connexionController, 'afficherVue']);
 $routeur->ajouterRoute('deconnexion', [$connexionController, 'deconnexion']);
 $routeur->ajouterRoute('profil', [$profilController, 'afficherVue']);
 $routeur->ajouterRoute('demande_resetmdp', [$resetMdpController, 'afficherVue']);
+$routeur->ajouterRoute('confirmdemande_resetmdp', [$resetMdpController, 'afficherVueDemandeResetMdp']);
 $routeur->ajouterRoute('resetmdp', [$resetMdpController, 'afficherVueResetMdp']);
 
 $routeur->executerRoute();
