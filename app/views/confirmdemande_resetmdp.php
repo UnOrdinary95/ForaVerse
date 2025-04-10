@@ -9,6 +9,10 @@
 
 <body>
     <h1><a href="./" style="text-decoration: none">⬅️</a>Réinitialiser votre mot de passe</h1>
-    <p>Nous avons envoyé un email à l'adresse associée à votre compte ForaVerse. Veuillez vérifier votre boîte de réception et suivre les instructions pour réinitialiser votre mot de passe. Si vous ne trouvez pas l'email, pensez à vérifier votre dossier de spam ou de courriers indésirables.</p>
+    <p>
+        Nous avons envoyé un email à l'adresse associée à votre compte ForaVerse. 
+        Veuillez vérifier votre boîte de réception et suivre les instructions pour réinitialiser votre mot de passe. 
+        Si vous ne trouvez pas l'email, pensez à vérifier votre dossier de spam ou de courriers indésirables.
+    </p>
 </body>
 </html>

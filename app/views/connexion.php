@@ -6,8 +6,9 @@
     <title>Connexion</title>
     <link rel="icon" href="../../public/images/favicon/favicon_foraverse.png"/>
 </head>
+
 <body>
-    <form action="?action=connexion" method="POST" autocomplete="on">
+    <form action="?action=connexion" method="POST" autocomplete="on" novalidate>
         <h1><a href="./" style="text-decoration: none">⬅️</a> Se connecter</h1>
         <input type="text" name="identifiant" placeholder="Adresse email ou pseudo"><br><br>
         <?php if (!empty($erreurs['identifiant'])): ?>
@@ -20,9 +21,9 @@
         <?php if (!empty($erreurs['idmdp'])): ?>
             <span style="color: red"><?= $erreurs['idmdp'] ?></span><br>
         <?php endif; ?>
-        <input type="submit" name="connecter" value="Se connecter">
+        <input type="submit" name="connecter" value="Se connecter"><br>
     </form>
-    <br><a href="./?action=demande_resetmdp">Mot de passe oublié ?</a>
+    <a href="./?action=demande_resetmdp">Mot de passe oublié ?</a>
     <p>Nouveau dans ForaVerse ?
         <a href="./?action=inscription">Créer un compte</a>
     </p>

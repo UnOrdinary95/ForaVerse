@@ -16,17 +16,16 @@
     <div class="flex">
         <img src="../../public/images/Logo_ForaVerse.png" alt="Logo" style="width: 100px; height: auto;">
         <h1 id="title">ForaVerse</h1>
-        <a>
-            <?php if (!isset($_SESSION['Pseudo'])): ?>
+        <?php if (!isset($_SESSION['Pseudo'])): ?>
             <a href="./?action=connexion">Connexion</a>
             <a href="./?action=inscription">Inscription</a>
-            <?php else: ?>
-            <?="Bonjour " . $_SESSION['Pseudo']?>
+        <?php else: ?>
+            <?="Bonjour " . htmlspecialchars($_SESSION['Pseudo'])?>
             <a href="./?action=deconnexion">Déconnexion</a>
-            <a href="./?action=profil&utilisateur=<?= $_SESSION['Pseudo']?>">
-                <img src="../../public/<?= $utilisateur->getCheminPhoto() ?: 'images/pp_user/default.jpeg' ?>" alt="Profil" style="width: 50px; height: 50px; border-radius: 30%">
+            <a href="./?action=profil&utilisateur=<?= htmlspecialchars($_SESSION['Pseudo'])?>">
+                <img src="../../public/<?= htmlspecialchars($utilisateur->getCheminPhoto()) ?>" alt="Profil" style="width: 50px; height: 50px; border-radius: 30%">
             </a>
-            <?php endif; ?>
+        <?php endif; ?>
     </div>
 </body>
 </html>

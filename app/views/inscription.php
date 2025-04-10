@@ -6,8 +6,9 @@
     <title>Inscription</title>
     <link rel="icon" href="../../public/images/favicon/favicon_foraverse.png"/>
 </head>
+
 <body>
-    <form action="?action=inscription" method="POST" autocomplete="on">
+    <form action="?action=inscription" method="POST" autocomplete="on" novalidate>
         <h1><a href="./" style="text-decoration: none">⬅️</a> Créer un compte</h1>
         <input type="text" name="pseudo" placeholder="Pseudo"><br><br>
         <?php if (!empty($erreurs['pseudo'])): ?>
