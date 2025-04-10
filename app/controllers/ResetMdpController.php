@@ -27,7 +27,8 @@ class ResetMdpController implements ControllerInterface
             $this->callbackVue();
             require_once __DIR__ . "/../views/demande_resetmdp.php";
         } catch (Exception $e) {
-            require_once __DIR__ . "/../views/erreur.php";
+            header('HTTP/1.0 404 Not Found');
+            exit();
         }
     }
 
@@ -37,17 +38,19 @@ class ResetMdpController implements ControllerInterface
             if (isset($_GET['token'])) {
                 $this->token = $_GET['token'];
                 if ($this->verifierToken($this->token)) {
-                    // if ($_SERVER['REQUEST_METHOD'] === 'POST')
-                    // {
-                        $this->callbackVueResetMdp();
-                    // }
+                    $this->callbackVueResetMdp();
                     $token = $this->token;
                     $pseudo = $this->utilisateur_dao->getPseudoByEmail($this->email);
                     require_once __DIR__ . "/../views/resetmdp.php";
                 }
+                else{
+                    header('HTTP/1.0 404 Not Found');
+                    exit();
+                }
             }
         } catch (Exception $e) {
-            require_once __DIR__ . "/../views/erreur.php";
+            header('HTTP/1.0 404 Not Found');
+            exit();
         }
     }
 
@@ -56,7 +59,8 @@ class ResetMdpController implements ControllerInterface
         try{
             require_once __DIR__ . "/../views/confirmdemande_resetmdp.php";
         } catch (Exception $e) {
-            require_once __DIR__ . "/../views/erreur.php";
+            header('HTTP/1.0 404 Not Found');
+            exit();
         } 
     }
 
@@ -113,32 +117,27 @@ class ResetMdpController implements ControllerInterface
     public function callbackVueResetMdp(): void
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST'){
-            if (!$this->verifierToken($this->token)) {
-                $_SESSION['erreurs'] = "Token invalide ou expiré.";
-            }
-            else{
-                $mdp = trim(filter_input(INPUT_POST, 'mdp', FILTER_SANITIZE_SPECIAL_CHARS));
-                $this->validateur->validerMdp($mdp);
-                
-                if (empty($this->validateur->getErreurs())) {
-                    try {
-                        print("CONNEXION OK");
-                        if (isset($this->email)){
-                            $this->utilisateur_dao->updateMdpByEmail($this->email, $mdp);
-                            unset($_SESSION['erreurs']);
-                        }
-                        header("Location: ./?action=connexion");
-                        exit();
-                    } catch (Exception $e) {
-                        print("PAS OK");
-                        $_SESSION['erreurs'] = "Erreur lors de la mise à jour du mot de passe.";
-                        require_once __DIR__ . '/../views/erreur.php';
+            $this->validateur->clearErreurs();
+            $mdp = trim(filter_input(INPUT_POST, 'mdp', FILTER_SANITIZE_SPECIAL_CHARS));
+            $this->validateur->validerMdp($mdp);
+            
+            if (empty($this->validateur->getErreurs()['mdp'])) {
+                try {
+                    if (empty($this->email)) {
+                        throw new Exception("Email manquant");
                     }
+
+                    $this->utilisateur_dao->updateMdpByEmail($this->email, $mdp);
+                    unset($_SESSION['erreurs']);
+                    header("Location: ./?action=connexion");
+                    exit();
+                } catch (Exception $e) {
+                    error_log("Erreur lors de la réinitialisation du mot de passe: " . $e->getMessage());
+                    header("Location: ./?action=erreur");
+                    exit();
                 }
-                else {
-                    print("PAS OK");
-                    $_SESSION['erreurs'] = $this->validateur->getErreurs();
-                }
+            } else {
+                $_SESSION['erreurs'] = $this->validateur->getErreurs();
             }
         }
     }
