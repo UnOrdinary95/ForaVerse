@@ -15,7 +15,7 @@
 </head>
 
 <body>
-    <form action="?action=resetmdp&token=<?= urlencode($token)?>" method="POST">
+    <form action="?action=resetmdp&token=<?= urlencode($token)?>" method="POST" novalidate>
         <h1><a href="./" style="text-decoration: none">⬅️</a>Réinitialiser votre mot de passe</h1>
         <p><?= htmlspecialchars($pseudo)?>, saisissez votre nouveau mot de passe.</p>
 
