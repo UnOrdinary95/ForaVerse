@@ -44,7 +44,8 @@ class InscriptionController implements ControllerInterface, AuthControllerInterf
             $erreurs = $this->erreurs;
             require_once __DIR__ . '/../views/inscription.php';
         } catch (PDOException $e) {
-            require_once __DIR__ . '/../views/erreur.php';
+            header('HTTP/1.0 404 Not Found');
+            exit();
         }
     }
 
@@ -71,7 +72,7 @@ class InscriptionController implements ControllerInterface, AuthControllerInterf
                     header("Location: ./?action=connexion");
                     exit();
                 } catch (PDOException $e) {
-                    require_once __DIR__ . '/../views/erreur.php';
+                    header("Location: ./?action=erreur");
                     exit();
                 }
             }

@@ -36,7 +36,8 @@ class AccueilController implements ControllerInterface
             }
             require_once __DIR__ . '/../views/accueil.php';
         } catch (PDOException $e) {
-            require_once __DIR__ . '/../views/erreur.php';
+            header('HTTP/1.0 404 Not Found');
+            exit();
         }
     }
 }

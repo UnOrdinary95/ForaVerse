@@ -16,7 +16,8 @@ class ErreurController implements ControllerInterface
         try {
             require_once __DIR__ . '/../views/erreur.php';
         } catch (Exception $e) {
-            echo "Une erreur est survenue lors de l'affichage de la vue.";
+            header('HTTP/1.0 404 Not Found');
+            exit();
         }
     }
 }

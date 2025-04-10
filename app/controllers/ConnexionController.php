@@ -46,7 +46,8 @@ class ConnexionController implements ControllerInterface, AuthControllerInterfac
             $erreurs = $this->erreurs;
             require_once __DIR__ . '/../views/connexion.php';
         } catch (PDOException $e) {
-            require_once __DIR__ . '/../views/erreur.php';
+            header('HTTP/1.0 404 Not Found');
+            exit();
         }
     }
 

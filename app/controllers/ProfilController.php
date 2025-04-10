@@ -9,6 +9,7 @@ class ProfilController implements ControllerInterface
         $this->utilisateurDAO = new UtilisateurDAO();
         $this->abonneDAO = new AbonneDAO();
     }
+
     public function afficherVue(): void
     {
         try{
@@ -27,7 +28,7 @@ class ProfilController implements ControllerInterface
         }
         catch (PDOException $e)
         {
-            require_once __DIR__ . '/../views/erreur.php';
+            header('HTTP/1.0 404 Not Found');
             exit();
         }
     }
@@ -42,9 +43,7 @@ class ProfilController implements ControllerInterface
         }
         else{
             header("HTTP/1.0 404 Not Found");
-            echo "404 Not Found";
-            return false;
+            exit();
         }
     }
-
 }
