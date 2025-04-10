@@ -10,10 +10,12 @@ class ResetMdpController implements ControllerInterface
     private InscriptionValidator $validateur;
     private Mailer $mailer;
     private string $email;
+    private string $token;
 
     public function __construct()
     {
         $this->email = '';
+        $this->token = '';
         $this->mailer = new Mailer();
         $this->utilisateur_dao = new UtilisateurDAO();
         $this->validateur = new InscriptionValidator();
@@ -33,16 +35,15 @@ class ResetMdpController implements ControllerInterface
     {
         try {
             if (isset($_GET['token'])) {
-                $token = $_GET['token'];
-                if ($this->verifierToken($token)) {
-                    print("Token valide");
-                    $_SESSION['token_reset'] = $token;
+                $this->token = $_GET['token'];
+                if ($this->verifierToken($this->token)) {
+                    // if ($_SERVER['REQUEST_METHOD'] === 'POST')
+                    // {
+                        $this->callbackVueResetMdp();
+                    // }
+                    $token = $this->token;
                     $pseudo = $this->utilisateur_dao->getPseudoByEmail($this->email);
-//                    print("<br> Bonjour $pseudo");
-//                    $this->callbackResetMdp();
-//                    print("<br> Vous pouvez maintenant réinitialiser votre mot de passe");
-                    // TODO : Finir le dimanche
-                    print("Hi ! Pour l'instant ça marche pas cette merde ! :D");
+                    require_once __DIR__ . "/../views/resetmdp.php";
                 }
             }
         } catch (Exception $e) {
@@ -50,6 +51,14 @@ class ResetMdpController implements ControllerInterface
         }
     }
 
+    public function afficherVueDemandeResetMdp(): void
+    {
+        try{
+            require_once __DIR__ . "/../views/confirmdemande_resetmdp.php";
+        } catch (Exception $e) {
+            require_once __DIR__ . "/../views/erreur.php";
+        } 
+    }
 
     public function envoyerMailReset(): void
     {
@@ -82,8 +91,6 @@ class ResetMdpController implements ControllerInterface
             $this->email = $decodeur->email;
             return true;
         } catch (ExpiredException) {
-            echo 'Le token a expiré.';
-            unset($_SESSION['token_reset']);
             return false;
         } catch (Exception $e) {
             echo 'Erreur lors de la vérification du token: ',  $e->getMessage(), "\n";
@@ -93,124 +100,48 @@ class ResetMdpController implements ControllerInterface
 
     public function callbackVue():void
     {
-        if($_SERVER['REQUEST_METHOD'] == 'POST'){
+        if($_SERVER['REQUEST_METHOD'] === 'POST'){
             if ($this->est_enregistre($_POST['email'])){
                 $this->email = trim(filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL));
                 $this->envoyerMailReset();
             }
-            require_once __DIR__ . '/../views/confirmdemande_resetmdp.php';
+            header("Location: ./?action=confirmdemande_resetmdp");
             exit();
         }
     }
 
-//    public function callbackResetMdp():void
-//    {
-//        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-//            $mdp = trim(filter_input(INPUT_POST, 'mdp', FILTER_SANITIZE_SPECIAL_CHARS));
-//            $this->validateur->validerMdp($mdp);
-//            if (empty($this->validateur->getErreurs())) {
-//                try {
-//                    $this->utilisateur_dao->updateMdpByEmail($this->email, $_POST['mdp']);
-//                    header("Location: ./?action=connexion");
-//                    exit();
-//                } catch (PDOException $e) {
-//                    require_once __DIR__ . '/../views/erreur.php';
-//                    exit();
-//                }
-//            }
-//            else{
-//                $_SESSION['erreurs'] = $this->validateur->getErreurs();
-//                if (!isset($_SESSION['reloaded'])) {
-//                    $_SESSION['reloaded'] = true;
-//                    header("Location: ./?action=resetmdp&token=" . urlencode($_GET['token']));
-//                    exit();
-//                } else {
-//                    unset($_SESSION['reloaded']);
-//                }
-//            }
-//        }
-//    }
-
-//    public function callbackResetMdp(): void
-//    {
-//        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-//            $mdp = trim(filter_input(INPUT_POST, 'mdp', FILTER_SANITIZE_SPECIAL_CHARS));
-//            $this->validateur->validerMdp($mdp);
-//
-//            if (empty($this->validateur->getErreurs())) {
-//                try {
-//                    $this->utilisateur_dao->updateMdpByEmail($this->email, $mdp);
-//                    unset($_SESSION['token_reset']); // ⬅️ On nettoie après succès
-//                    header("Location: ./?action=connexion");
-//                    exit();
-//                } catch (PDOException $e) {
-//                    require_once __DIR__ . '/../views/erreur.php';
-//                    exit();
-//                }
-//            } else {
-//                $_SESSION['erreurs'] = $this->validateur->getErreurs();
-//                if (!isset($_SESSION['reloaded'])) {
-//                    $_SESSION['reloaded'] = true;
-//                    $token = $_SESSION['token_reset'] ?? ''; // ⬅️ Récupère le token pour rediriger
-//                    header("Location: ./?action=resetmdp&token=" . urlencode($token));
-//                    exit();
-//                } else {
-//                    unset($_SESSION['reloaded']);
-//                }
-//            }
-//        }
-//    }
-
-    public function callbackResetMdp(): void
+    public function callbackVueResetMdp(): void
     {
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            // Récupérer le token envoyé via POST (champ caché)
-            $token = $_POST['token'] ?? '';
-
-            // Vérification de la validité du token
-            if (!$this->verifierToken($token)) {
-                // Si le token est invalide, afficher une erreur
+        if ($_SERVER['REQUEST_METHOD'] === 'POST'){
+            if (!$this->verifierToken($this->token)) {
                 $_SESSION['erreurs'] = "Token invalide ou expiré.";
-                header("Location: ./?action=resetmdp");
-                exit();
             }
-
-            // Récupérer le mot de passe
-            $mdp = trim(filter_input(INPUT_POST, 'mdp', FILTER_SANITIZE_SPECIAL_CHARS));
-            $this->validateur->validerMdp($mdp);
-
-            if (empty($this->validateur->getErreurs())) {
-                try {
-                    // Utilisation de l'email stocké dans la session
-                    $email = $_SESSION['email_reset'] ?? null;
-                    if (!$email) {
-                        throw new Exception("Email non trouvé en session.");
+            else{
+                $mdp = trim(filter_input(INPUT_POST, 'mdp', FILTER_SANITIZE_SPECIAL_CHARS));
+                $this->validateur->validerMdp($mdp);
+                
+                if (empty($this->validateur->getErreurs())) {
+                    try {
+                        print("CONNEXION OK");
+                        if (isset($this->email)){
+                            $this->utilisateur_dao->updateMdpByEmail($this->email, $mdp);
+                            unset($_SESSION['erreurs']);
+                        }
+                        header("Location: ./?action=connexion");
+                        exit();
+                    } catch (Exception $e) {
+                        print("PAS OK");
+                        $_SESSION['erreurs'] = "Erreur lors de la mise à jour du mot de passe.";
+                        require_once __DIR__ . '/../views/erreur.php';
                     }
-
-                    // Mise à jour du mot de passe dans la base de données
-                    $this->utilisateur_dao->updateMdpByEmail($email, $mdp);
-
-                    // Nettoyage de la session après succès
-                    unset($_SESSION['token_reset'], $_SESSION['email_reset']);
-
-                    // Redirection vers la page de connexion après la réinitialisation
-                    header("Location: ./?action=connexion");
-                    exit();
-                } catch (Exception $e) {
-                    // Gestion des erreurs
-                    $_SESSION['erreurs'] = "Erreur lors de la mise à jour du mot de passe.";
-                    require_once __DIR__ . '/../views/erreur.php';
-                    exit();
                 }
-            } else {
-                // Si des erreurs de validation existent, les renvoyer au formulaire
-                $_SESSION['erreurs'] = $this->validateur->getErreurs();
-                require_once __DIR__ . '/../views/erreur.php';
-                exit();
+                else {
+                    print("PAS OK");
+                    $_SESSION['erreurs'] = $this->validateur->getErreurs();
+                }
             }
         }
     }
-
 
     private function est_enregistre(string $email):bool
     {
