@@ -130,4 +130,13 @@ class InscriptionValidator extends AuthValidatorAbstract
         }
         return $validation;
     }
+
+    public function clearErreurs():void
+    {
+        $this->erreurs = [
+            'pseudo' => "",
+            'email' => "",
+            'mdp' => ""
+        ];
+    }
 }
