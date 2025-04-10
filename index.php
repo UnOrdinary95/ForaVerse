@@ -10,6 +10,7 @@ require_once __DIR__ . '/vendor/autoload.php';
 $routeur = new Routeur();
 
 $accueilController = new AccueilController();
+$erreurController = new ErreurController();
 $inscriptionController = new InscriptionController();
 $connexionController = new ConnexionController();
 $profilController = new ProfilController();
@@ -23,5 +24,6 @@ $routeur->ajouterRoute('profil', [$profilController, 'afficherVue']);
 $routeur->ajouterRoute('demande_resetmdp', [$resetMdpController, 'afficherVue']);
 $routeur->ajouterRoute('confirmdemande_resetmdp', [$resetMdpController, 'afficherVueDemandeResetMdp']);
 $routeur->ajouterRoute('resetmdp', [$resetMdpController, 'afficherVueResetMdp']);
+$routeur->ajouterRoute('erreur', [$erreurController, 'afficherVue']);
 
 $routeur->executerRoute();
