@@ -12,13 +12,13 @@ final class Utilisateur
     private bool $est_admin;
 
     public function __construct(
-        string $unPseudo = null,
-        string $unEmail = null,
-        string $unMdp = null,
-        int $unId = null,
-        string $unCheminPhoto = null,
+        ?string $unPseudo = null,
+        ?string $unEmail = null,
+        ?string $unMdp = null,
+        ?int $unId = null,
+        ?string $unCheminPhoto = null,
         string $uneBio = 'Pas de bio.',
-        string $uneDateInscription = null,
+        ?string $uneDateInscription = null,
         bool $unEstAdmin = false
     ){
         $this->id = $unId;
@@ -70,7 +70,4 @@ final class Utilisateur
     {
         return $this->est_admin;
     }
-
-
-
 }
