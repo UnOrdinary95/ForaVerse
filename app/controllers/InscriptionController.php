@@ -63,7 +63,7 @@ class InscriptionController implements ControllerInterface, AuthControllerInterf
         if ($_SERVER["REQUEST_METHOD"] === "POST"){
             $pseudo = trim(filter_input(INPUT_POST, 'pseudo', FILTER_SANITIZE_SPECIAL_CHARS));
             $email = trim(filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL));
-            $mdp = trim(filter_input(INPUT_POST, 'mdp', FILTER_SANITIZE_SPECIAL_CHARS));
+            $mdp = trim($_POST['mdp']);
 
             if ($this->validateur->valider($pseudo, $email, $mdp)){
                 try{
