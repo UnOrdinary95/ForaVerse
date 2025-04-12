@@ -38,8 +38,6 @@
             <button type="button" id="cancelButton" style="display: block; margin-top: 10px;">Annuler</button>
         </div>
 
-
-
         <h1><?= htmlspecialchars($utilisateur->getPseudo())?></h1>
         <p><?= "\n". htmlspecialchars($utilisateur->getBio())?></p>
         <p id="compteur_abonne"><?= "Abonnés : $abonne\n"?></p>
@@ -55,21 +53,102 @@
             <?php endif; ?>
         <?php endif; ?>
 
-        <!-- Ajoutez ce bouton dans profil.php -->
-        <!-- TODO : Paramètres à implémenter -->
         <?php if ($utilisateur->getPseudo() == $_SESSION['Pseudo']): ?>
             <button id="btnParametres">⚙️ Paramètres</button>
-            <div id="parametres" style="display: none;">
-                <!-- Formulaire des paramètres -->
-                <h1>Paramètres</h1>
-                <p>
-
-                </p>
-
+            <div id="paramContainer" class="modal">
+                <div class="modal-content">
+                    <h1>Paramètres</h1><h1 id="closeContainer" style="cursor: pointer;">❌</h1>
+                    <div id="parametres" style="display: block; border: 1px solid black;">
+                        <div style="border-bottom: 1px solid silver; cursor: pointer;" id="btnPseudo">
+                            <h2>Pseudo</h2>
+                            <p><?=htmlspecialchars($utilisateur->getPseudo())?></p>
+                        </div>
+                        <div style="border-bottom: 1px solid silver; cursor: pointer;" id="btnEmail">
+                            <h2>Adresse email</h2>
+                            <p><?=htmlspecialchars($utilisateur->getEmail())?></p>
+                        </div>
+                        <div style="border-bottom: 1px solid silver; cursor: pointer;" id="btnBio">
+                            <h2>Bio</h2>
+                            <p><?=htmlspecialchars($utilisateur->getBio())?></p>
+                        </div>
+                        <div style="cursor: pointer;" id="btnMdp">
+                            <h2>Mot de passe</h2>
+                            <p>Changer son mot de passe</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         <?php endif; ?>
+        <div class="modal" id="modalPseudo">
+            <div class="modal-content">
+                <h1>Pseudo</h1><h1 id="closePseudo" style="cursor: pointer;">❌</h1>
+                <form action="?action=profil&utilisateur=<?=htmlspecialchars($utilisateur->getPseudo())?>#modalPseudo" method="POST" novalidate>
+                    <p>Veuillez entrer votre nouveau pseudo.</p>
+                    <input type="text" name="modalPseudo" placeholder="<?=htmlspecialchars($utilisateur->getPseudo())?>"><br><br>
+                    <?php if (isset($_SESSION['erreurs']['pseudo'])): ?>
+                        <span style="color: red"><?= $_SESSION['erreurs']['pseudo'] ?></span><br>
+                        <?php unset($_SESSION['erreurs']['pseudo']); ?>
+                    <?php endif; ?>
+                    <input type="submit" name="envoyer" value="Modifier">
+                </form>
+            </div>
+        </div>
+        <div class="modal" id="modalEmail">
+            <div class="modal-content">
+                <h1>Email</h1><h1 id="closeEmail" style="cursor: pointer;">❌</h1>
+                <form action="?action=profil&utilisateur=<?=htmlspecialchars($utilisateur->getPseudo())?>#modalEmail" method="POST" novalidate>
+                    <p>Veuillez entrer votre nouvelle adresse email.</p>
+                    <input type="email" name="modalEmail" placeholder="<?=htmlspecialchars($utilisateur->getEmail())?>"><br><br>
+                    <?php if (isset($_SESSION['erreurs']['email'])): ?>
+                        <span style="color: red"><?= $_SESSION['erreurs']['email'] ?></span><br>
+                        <?php unset($_SESSION['erreurs']['email']); ?>
+                    <?php endif; ?>
+                    <input type="submit" name="envoyer" value="Modifier">
+                </form>
+            </div>
+        </div>
+        <div class="modal" id="modalBio">
+            <div class="modal-content">
+                <h1>Bio</h1><h1 id="closeBio" style="cursor: pointer;">❌</h1>
+                <form action="?action=profil&utilisateur=<?=htmlspecialchars($utilisateur->getPseudo())?>#modalBio" method="POST" novalidate>
+                    <p>Veuillez entrer votre nouvelle bio.</p>
+                    <textarea name="modalBio" rows="5" cols="30" placeholder="<?=htmlspecialchars($utilisateur->getBio())?>"></textarea><br><br>
+                    <?php if (isset($_SESSION['erreurs']['bio'])): ?>
+                        <span style="color: red"><?= $_SESSION['erreurs']['bio'] ?></span><br>
+                        <?php unset($_SESSION['erreurs']['bio']); ?>
+                    <?php endif; ?>
+                    <input type="submit" name="envoyer" value="Modifier">
+                </form>
+            </div>
+        </div>
+        <div class="modal" id="modalMdp">
+            <div class="modal-content">
+                <h1>Changer son mot de passe</h1><h1 id="closeMdp" style="cursor: pointer;">❌</h1>
+                <form action="?action=profil&utilisateur=<?=htmlspecialchars($utilisateur->getPseudo())?>#modalMdp" method="POST" novalidate>
+                    <p>Veuillez entrer votre ancien mot de passe.</p>
+                    <input type="password" name="ancienMdp" placeholder="Ancien mot de passe"><br><br>
+                    <?php if (isset($_SESSION['erreurs']['ancienMdp'])): ?>
+                        <span style="color: red"><?= $_SESSION['erreurs']['ancienMdp'] ?></span><br>
+                        <?php unset($_SESSION['erreurs']['ancienMdp']); ?>
+                    <?php endif; ?>
+                    <p>Veuillez entrer votre nouveau mot de passe.</p>
+                    <input type="password" name="nouveauMdp" placeholder="Nouveau mot de passe"><br><br>
+                    <?php if (isset($_SESSION['erreurs']['nouveauMdp'])): ?>
+                        <span style="color: red"><?= $_SESSION['erreurs']['nouveauMdp'] ?></span><br>
+                        <?php unset($_SESSION['erreurs']['nouveauMdp']); ?>
+                    <?php endif; ?>
+                    <p>Veuillez entrer à nouveau votre nouveau mot de passe.</p>
+                    <input type="password" name="confirmationMdp" placeholder="Confirmation mot de passe"><br><br>
+                    <?php if (isset($_SESSION['erreurs']['confirmationMdp'])): ?>
+                        <span style="color: red"><?= $_SESSION['erreurs']['confirmationMdp'] ?></span><br>
+                        <?php unset($_SESSION['erreurs']['confirmationMdp']); ?>
+                    <?php endif; ?>
+                    <input type="submit" name="envoyer" value="Modifier">
+                </form>
+            </div>
+        </div>
     </div>
-
+    <script src="../../public/scripts/profil_settings.js"></script>
     <script src="../../public/scripts/gestion_abonnement.js"></script>
     <script src="../../public/scripts/image_cropper.js"></script>
 </body>
