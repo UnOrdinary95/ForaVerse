@@ -11,7 +11,7 @@ final class UtilisateurDAO
 
     public function getProfilUtilisateurById(int $id):?Utilisateur
     {
-        $query = $this->pdo->prepare("SELECT idutilisateur, pseudo, email, motdepasse, chemin_photo, bio, date_inscription, est_admin FROM utilisateur WHERE idUtilisateur = ?");
+        $query = $this->pdo->prepare("SELECT * FROM utilisateur WHERE idUtilisateur = ?");
         $query->execute([$id]);
         $result = $query->fetch(PDO::FETCH_ASSOC);
         return new Utilisateur($result['pseudo'], $result['email'], $result['motdepasse'], $result['idutilisateur'],  $result['chemin_photo'], $result['bio'], $result['date_inscription'], $result['est_admin']);
