@@ -22,6 +22,7 @@ final class UtilisateurDAO
         $query = $this->pdo->prepare("SELECT pseudo FROM utilisateur");
         $query->execute();
 
+        // 0 => Chaque élément possède la même clé, c'est une façon de transformer le tableau associatif en tableau numérique sans clé.
         return array_column($query->fetchAll(PDO::FETCH_NUM), 0);
     }
 
@@ -73,19 +74,19 @@ final class UtilisateurDAO
         return $query->fetchColumn();
     }
 
+    public function getPhotoProfilById(int $id): ?string
+    {
+        $query = $this->pdo->prepare("SELECT chemin_photo FROM utilisateur WHERE idutilisateur = ?");
+        $query->execute([$id]);
+        return $query->fetchColumn();
+    }
+
     public function addUtilisateur(string $pseudo, string $email, string $mdp): bool
     {
         $mdp_hash = password_hash($mdp, PASSWORD_DEFAULT);
 
         $query = $this->pdo->prepare("INSERT INTO utilisateur (pseudo, email, motdepasse) VALUES (?, ?, ?)");
         return $query->execute([$pseudo, $email, $mdp_hash]);
-    }
-
-    public function getPhotoProfilById(int $id): ?string
-    {
-        $query = $this->pdo->prepare("SELECT chemin_photo FROM utilisateur WHERE idutilisateur = ?");
-        $query->execute([$id]);
-        return $query->fetchColumn();
     }
 
     public function updatePhotoProfil(int $id, string $chemin_photo): bool
@@ -99,6 +100,31 @@ final class UtilisateurDAO
         $mdp_hash = password_hash($mdp, PASSWORD_DEFAULT);
         $query = $this->pdo->prepare("UPDATE utilisateur SET motdepasse = ? WHERE email = ?");
         return $query->execute([$mdp_hash, $email]);
+    }
+
+    public function updatePseudoByPseudo(string $pseudo, string $newPseudo): bool
+    {
+        $query = $this->pdo->prepare("UPDATE utilisateur SET pseudo = ? WHERE pseudo = ?");
+        return $query->execute([$newPseudo, $pseudo]);
+    }
+
+    public function updateEmailByPseudo(string $pseudo, string $newEmail): bool
+    {
+        $query = $this->pdo->prepare("UPDATE utilisateur SET email = ? WHERE pseudo = ?");
+        return $query->execute([$newEmail, $pseudo]);
+    }
+
+    public function updateBioByPseudo(string $pseudo, string $bio): bool
+    {
+        $query = $this->pdo->prepare("UPDATE utilisateur SET bio = ? WHERE pseudo = ?");
+        return $query->execute([$bio, $pseudo]);
+    }
+
+    public function updateMdpByPseudo(string $pseudo, string $mdp): bool
+    {
+        $mdp_hash = password_hash($mdp, PASSWORD_DEFAULT);
+        $query = $this->pdo->prepare("UPDATE utilisateur SET motdepasse = ? WHERE pseudo = ?");
+        return $query->execute([$mdp_hash, $pseudo]);
     }
 }
 
