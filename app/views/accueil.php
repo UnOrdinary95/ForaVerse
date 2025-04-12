@@ -20,7 +20,7 @@
             <a href="./?action=connexion">Connexion</a>
             <a href="./?action=inscription">Inscription</a>
         <?php else: ?>
-            <?="Bonjour " . htmlspecialchars($_SESSION['Pseudo'])?>
+            <a>➕Créer</a>
             <a href="./?action=deconnexion">Déconnexion</a>
             <a href="./?action=profil&utilisateur=<?= htmlspecialchars($_SESSION['Pseudo'])?>">
                 <img src="../../public/<?= htmlspecialchars($utilisateur->getCheminPhoto()) ?>" alt="Profil" style="width: 50px; height: 50px; border-radius: 30%">
