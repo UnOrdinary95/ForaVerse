@@ -26,4 +26,13 @@ $routeur->ajouterRoute('confirmdemande_resetmdp', [$resetMdpController, 'affiche
 $routeur->ajouterRoute('resetmdp', [$resetMdpController, 'afficherVueResetMdp']);
 $routeur->ajouterRoute('erreur', [$erreurController, 'afficherVue']);
 
+$routesPubliques = ['accueil', 'inscription', 'connexion', 'demande_resetmdp', 'confirmdemande_resetmdp', 'resetmdp', 'erreur'];
+$action = $_GET['action'] ?? 'accueil';
+
+// On vérifie si l'utilisateur doit être connecté pour cette route
+if (!in_array($action, $routesPubliques) && !isset($_SESSION['Pseudo'])) {
+    header('Location: ./?action=connexion');
+    exit();
+}
+
 $routeur->executerRoute();
