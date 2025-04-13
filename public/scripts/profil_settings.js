@@ -56,7 +56,6 @@ document.addEventListener('DOMContentLoaded', function() {
         switch(hash) {
             case "#paramContainer":
                 modal.style.display = "block";
-                clearSessionErrors();
                 break;
             case "#modalPseudo":
                 modaux[0].style.display = "block";
