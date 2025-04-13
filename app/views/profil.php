@@ -112,7 +112,7 @@
                 <h1>Bio</h1><h1 id="closeBio" style="cursor: pointer;">❌</h1>
                 <form action="?action=profil&utilisateur=<?=htmlspecialchars($utilisateur->getPseudo())?>#modalBio" method="POST" novalidate>
                     <p>Veuillez entrer votre nouvelle bio.</p>
-                    <textarea name="modalBio" style="resize: none;" rows="5" cols="30" placeholder="<?=htmlspecialchars($utilisateur->getBio())?>"></textarea><br><br>
+                    <textarea name="modalBio" style="resize: none;" rows="5" cols="50" placeholder="<?=htmlspecialchars($utilisateur->getBio())?>"></textarea><br><br>
                     <?php if (isset($_SESSION['erreurs']['bio'])): ?>
                         <span style="color: red"><?= $_SESSION['erreurs']['bio'] ?></span><br>
                         <?php unset($_SESSION['erreurs']['bio']); ?>
