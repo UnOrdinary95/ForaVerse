@@ -67,4 +67,9 @@ final class CommunauteDAO
         );
     }
     
+    public function updatePhotoProfil(int $id, string $chemin_photo): bool
+    {
+        $query = $this->pdo->prepare("UPDATE communaute SET chemin_photo = ? WHERE idcommunaute = ?");
+        return $query->execute([$chemin_photo, $id]);
+    }
 }
