@@ -54,7 +54,7 @@
         <?php endif; ?>
 
         <?php if ($utilisateur->getPseudo() == $_SESSION['Pseudo']): ?>
-            <button id="btnParametres">⚙️ Paramètres</button>
+            <button id="btnParametres">⚙️Paramètres</button>
             <div id="paramContainer" class="modal">
                 <div class="modal-content">
                     <h1>Paramètres</h1><h1 id="closeContainer" style="cursor: pointer;">❌</h1>
