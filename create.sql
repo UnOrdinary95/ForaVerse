@@ -131,3 +131,14 @@ CREATE TABLE Vote(
     CONSTRAINT fk_vote_user FOREIGN KEY(idUtilisateur) REFERENCES Utilisateur(idUtilisateur),
     CONSTRAINT fk_vote_post FOREIGN KEY(idPublication) REFERENCES Publication(idPublication)
 );
+
+-- Update
+ALTER TABLE Utilisateur
+ALTER COLUMN chemin_photo
+SET DEFAULT 'images/pp_user/default.jpeg';
+
+ALTER TABLE communaute RENAME COLUMN visibilité TO visibilite;
+
+ALTER TABLE Communaute
+ALTER COLUMN chemin_photo
+SET DEFAULT 'images/pp_commu/default.png';
