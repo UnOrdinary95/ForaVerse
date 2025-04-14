@@ -2,17 +2,17 @@
 
 class CommunauteController implements ControllerInterface
 {
-    // private UtilisateurDAO $utilisateurDAO;
     private CommunauteDAO $communauteDAO;
-    // private CommunauteValidator $validateur;
     private Logger $logger;
+    private RoleDAO $roleDAO;
+    private UtilisateurDAO $utilisateurDAO;
 
     public function __construct()
     {
-        // $this->utilisateurDAO = new UtilisateurDAO();
         $this->communauteDAO = new CommunauteDAO();
-        // $this->validateur = new CommunauteValidator();
         $this->logger = new Logger();
+        $this->roleDAO = new RoleDAO();
+        $this->utilisateurDAO = new UtilisateurDAO();
     }
 
     public function afficherVue(): void
@@ -23,6 +23,17 @@ class CommunauteController implements ControllerInterface
             if ($communaute_id){
                 $communaute = $this->communauteDAO->getCommunauteById($communaute_id);
                 $this->logger->info("Communauté trouvée: " . $_GET['nomCommu'] . " (ID: $communaute_id)");
+                $nbr_membres = $this->roleDAO->getNbrRolesByCommunaute($communaute_id);
+                $this->logger->info("Nombre de membres dans la communauté: " . $nbr_membres);
+                if (isset($_SESSION['Pseudo'])){
+                    $role = $this->roleDAO->getRole($this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']), $communaute_id);
+                    if ($role){
+                        $this->logger->info("Rôle de l'utilisateur dans la communauté: " . $role->getRole());
+                    }
+                    else{
+                        $this->logger->info("L'utilisateur n'a pas de rôle dans la communauté.");
+                    }
+                }
                 require_once __DIR__ . '/../views/communaute.php';
             }
             else{

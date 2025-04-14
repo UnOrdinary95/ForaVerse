@@ -1,3 +1,12 @@
+<?php
+/* * Affichage de la communauté
+ * 
+ * @var Communaute $communaute
+ * @var Role $role
+ * @var int $nbr_membres
+*/
+?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -15,7 +24,16 @@
         <div style="width: 80vw; border: 3px solid black;">
             <h1><a href="./" style="text-decoration: none; width: 100px">⬅️</a></h1>
             <img src="../../public/<?= htmlspecialchars($communaute->getCheminPhoto()) ?>" alt="ProfilCommunaute" style="width: 50px; height: 50px; border-radius: 50%">
-            <h1><?= htmlspecialchars($communaute->getNom()) ?></h1>  
+            <h1><?= htmlspecialchars($communaute->getNom()) ?></h1>
+            <?php if (isset($_SESSION['Pseudo'])): ?>
+                <?php if (!$role): ?>
+                    <button id="btnAdhesion" data-communaute_id="<?= $communaute->getId() ?>">Rejoindre</button>
+                <?php elseif ($role->estMembreOuModerateur()): ?>
+                    <button id="btnAdhesion" data-communaute_id="<?= $communaute->getId() ?>">Quitter</button>
+                <?php elseif ($role->estProprietaire()): ?>
+                    <button id="btnGestion">Gérer</button>
+                <?php endif; ?>
+            <?php endif; ?>
         </div>
         <div style="width: 20vw;border: 3px solid black;">
             <img id="communauteImage" src="../../public/<?= htmlspecialchars($communaute->getCheminPhoto()) ?>" alt="ProfilCommunaute" style="width: 75px; height: 75px; border-radius: 50%; cursor: pointer;" 
@@ -34,9 +52,11 @@
             <h1><?= htmlspecialchars($communaute->getNom()) ?></h1>
             <p id="description"><?= nl2br(htmlspecialchars($communaute->getDescription())) ?></p>
             <p>Visibilité : <?= $communaute->getVisibilite() == true ? "Publique" : "Privée" ?></p>
+            <p id="compteurMembres"><?= htmlspecialchars($nbr_membres) . " Membres"?></p>
         </div>
     </div>
     
+    <script src="../../public/scripts/gestion_adhesion.js"></script>
     <script src="../../public/scripts/image_cropper_commu.js"></script>
 </body>
 </html>

@@ -6,6 +6,7 @@ final class Communaute{
     private string $description;
     private bool $visibilite;
     private string $chemin_photo;
+    
 
     public function __construct(
         ?int $unId = null,
@@ -45,6 +46,7 @@ final class Communaute{
     {
         return $this->chemin_photo;
     }
+    
 
 
 }

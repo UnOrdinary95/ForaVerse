@@ -66,6 +66,30 @@ final class CommunauteDAO
             $result['visibilite']
         );
     }
+
+    public function getCommunautes(): array
+    {
+        $query = $this->pdo->prepare("SELECT * FROM communaute");
+        $query->execute();
+        
+        $result = $query->fetchAll(PDO::FETCH_ASSOC);
+        if (!$result) {
+            throw new Exception("Aucune communauté trouvée");
+        }
+        
+        $communautes = [];
+        foreach ($result as $ligne) {
+            $communautes[] = new Communaute(
+                $ligne['idcommunaute'],
+                $ligne['nom'],
+                $ligne['description'],
+                $ligne['chemin_photo'],
+                $ligne['visibilite']
+            );
+        }
+        
+        return $communautes;
+    }
     
     public function updatePhotoProfil(int $id, string $chemin_photo): bool
     {

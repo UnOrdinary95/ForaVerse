@@ -1,6 +1,8 @@
 <?php
 /**
  * @var Utilisateur $utilisateur
+ * @var array $communautes
+ * @var array $erreurs
  */
 ?>
 <!DOCTYPE html>
@@ -47,6 +49,16 @@
                 <img src="../../public/<?= htmlspecialchars($utilisateur->getCheminPhoto()) ?>" alt="Profil" style="width: 50px; height: 50px; border-radius: 30%">
             </a>
         <?php endif; ?>
+    </div>
+    <div>
+        <h1>Liste des communautés :</h1>
+        <?php 
+        foreach($communautes as $communaute){
+            echo "<a style='text-decoration: none;'  href=\"./?action=communaute&nomCommu={$communaute->getNom()}\">
+                    <h3>{$communaute->getNom()}</h3>
+                </a>";
+        } 
+        ?>
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', function() {

@@ -13,6 +13,7 @@ class AccueilController implements ControllerInterface
      */
     private UtilisateurDAO $utilisateurDAO;
     private CommunauteDAO $communauteDAO;
+    private RoleDAO $roleDAO;
     private CommunauteValidator $validateur;
     private array $erreurs;
     private Logger $logger;
@@ -21,6 +22,7 @@ class AccueilController implements ControllerInterface
     {
         $this->utilisateurDAO = new UtilisateurDAO();
         $this->communauteDAO = new CommunauteDAO();
+        $this->roleDAO = new RoleDAO();
         $this->validateur = new CommunauteValidator();
         $this->erreurs = [];
         $this->logger = new Logger();
@@ -47,6 +49,7 @@ class AccueilController implements ControllerInterface
             } else {
                 $this->logger->info("Accès visiteur (non connecté)");
             }
+            $communautes = $this->communauteDAO->getCommunautes();
             require_once __DIR__ . '/../views/accueil.php';
         } catch (PDOException $e) {
             $this->logger->error("Erreur PDO lors de l'affichage de la page d'accueil: " . $e->getMessage());
@@ -70,6 +73,8 @@ class AccueilController implements ControllerInterface
                 try{
                     $this->communauteDAO->addCommunaute($nom, $description, $visibilite);
                     $this->logger->info("Communauté créée avec succès: $nom");
+                    $this->roleDAO->addUtilisateurRole($this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']), $this->communauteDAO->getIdByNom($nom), Role::PROPRIETAIRE);
+                    $this->logger->info("Rôle de propriétaire attribué à l'utilisateur: " . $_SESSION['Pseudo']);
                     header("Location: ./?action=communaute&nomCommu=$nom");
                     exit();
                 } catch (PDOException $e) {

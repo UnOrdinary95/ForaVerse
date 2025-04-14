@@ -44,7 +44,7 @@
         <p><?= "Abonnements : $abonnement"?></p>
         <p><?="Compte créé le ". (new DateTime($utilisateur->getDateInscription()))->format('d/m/Y')?></p>
         <button onclick="partagerURL()">Partager le profil</button><br>
-
+        
         <?php if ($utilisateur->getPseudo() != $_SESSION['Pseudo']): ?>
             <?php if ($abonne_dao->estAbonne($utilisateur_dao->getIdByPseudo($_SESSION['Pseudo']), $utilisateur->getId())): ?>
                 <button id="btnAbonnement" data-pseudo="<?= $utilisateur->getPseudo() ?>">Se désabonner</button>
