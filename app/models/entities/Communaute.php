@@ -3,16 +3,16 @@
 final class Communaute{
     private ?int $id;
     private ?string $nom;
-    private ?string $description;
-    private ?bool $visibilite;
-    private ?string $chemin_photo;
+    private string $description;
+    private bool $visibilite;
+    private string $chemin_photo;
 
     public function __construct(
         ?int $unId = null,
         ?string $unNom = null,
-        ?string $uneDescription = 'Pas de description.',
-        ?string $unCheminPhoto = null,
-        ?bool $uneVisibilite = true
+        string $uneDescription = 'Pas de description.',
+        string $unCheminPhoto = 'images/pp_commu/default.png',
+        bool $uneVisibilite = true
     ){
         $this->id = $unId;
         $this->nom = $unNom;
@@ -45,4 +45,6 @@ final class Communaute{
     {
         return $this->chemin_photo;
     }
+
+
 }

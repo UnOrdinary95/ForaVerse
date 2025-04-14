@@ -6,8 +6,8 @@ final class Utilisateur
     private ?string $pseudo;
     private ?string $email;
     private ?string $mdp;
-    private ?string $chemin_photo;
-    private ?string $bio;
+    private string $chemin_photo;
+    private string $bio;
     private ?string $date_inscription;
     private bool $est_admin;
 
@@ -16,9 +16,9 @@ final class Utilisateur
         ?string $unEmail = null,
         ?string $unMdp = null,
         ?int $unId = null,
-        ?string $unCheminPhoto = null,
-        string $uneBio = 'Pas de bio.',
         ?string $uneDateInscription = null,
+        string $unCheminPhoto = 'images/pp_user/default.jpeg',
+        string $uneBio = 'Pas de bio.',
         bool $unEstAdmin = false
     ){
         $this->id = $unId;
@@ -66,7 +66,7 @@ final class Utilisateur
         return $this->date_inscription;
     }
 
-    public function getEstAdmin(): bool
+    public function estAdministrateur(): bool
     {
         return $this->est_admin;
     }

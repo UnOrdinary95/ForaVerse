@@ -24,9 +24,9 @@ final class UtilisateurDAO
             $result['email'], 
             $result['motdepasse'], 
             $result['idutilisateur'],  
+            $result['date_inscription'], 
             $result['chemin_photo'], 
             $result['bio'], 
-            $result['date_inscription'], 
             $result['est_admin']
         );
     }
