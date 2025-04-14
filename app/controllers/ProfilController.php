@@ -18,7 +18,7 @@ class ProfilController implements ControllerInterface
     {
         try{
             $this->logger->info("Affichage de la page profil pour: " . ($_GET['utilisateur'] ?? 'non spécifié'));
-            $profil_id = $this->estunProfil($_GET['utilisateur']);
+            $profil_id = $this->utilisateurDAO->existeUtilisateur($_GET['utilisateur']);
             if ($profil_id) {
                 $utilisateur = $this->utilisateurDAO->getProfilUtilisateurById($profil_id);
                 $abonne = $this->abonneDAO->getNbrAbonnesById($profil_id) ?? 0;
@@ -50,38 +50,6 @@ class ProfilController implements ControllerInterface
         }
     }
 
-    public function estunProfil($pseudo):bool | int
-    {
-        $this->logger->debug("Vérification de l'existence du profil: $pseudo");
-        $utilisateurs = $this->utilisateurDAO->getPseudos();
-
-        if (in_array($pseudo, $utilisateurs)) {
-            $id = $this->utilisateurDAO->getIdByPseudo($pseudo);
-            $this->logger->debug("Profil trouvé: $pseudo (ID: $id)");
-            return $id;
-        }
-        else{
-            $this->logger->debug("Profil non trouvé: $pseudo");
-            return false;
-        }
-    }
-
-    public function estunEmail($email):bool | int
-    {
-        $this->logger->debug("Vérification de l'existence de l'email: $email");
-        $emails = $this->utilisateurDAO->getEmails();
-
-        if (in_array($email, $emails)) {
-            $id = $this->utilisateurDAO->getIdByEmail($email);
-            $this->logger->debug("Email trouvé: $email (ID: $id)");
-            return $id;
-        }
-        else{
-            $this->logger->debug("Email non trouvé: $email");
-            return false;
-        }
-    }
-
     public function callbackModifierPseudo(): void
     {
         if (isset($_POST['modalPseudo'])) {
@@ -93,7 +61,7 @@ class ProfilController implements ControllerInterface
             
             $this->validateur->validerPseudo($pseudo);
 
-            if ($this->estunProfil($pseudo)){
+            if ($this->utilisateurDAO->existeUtilisateur($pseudo)){
                 $this->logger->warning("Échec de modification de pseudo: le pseudo '$pseudo' existe déjà");
                 $_SESSION['erreurs']['pseudo'] = "Ce pseudo existe déjà.";
             }
@@ -131,7 +99,7 @@ class ProfilController implements ControllerInterface
             
             $this->validateur->validerEmail($email);
 
-            if ($this->estunEmail($email)){
+            if ($this->utilisateurDAO->existeEmail($email)){
                 $this->logger->warning("Échec de modification d'email: l'email '$email' existe déjà");
                 $_SESSION['erreurs']['email'] = "Cette adresse email existe déjà.";
             }

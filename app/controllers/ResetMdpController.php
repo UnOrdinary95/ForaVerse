@@ -135,7 +135,7 @@ class ResetMdpController implements ControllerInterface
             $email = isset($_POST['email']) ? $_POST['email'] : '';
             $this->logger->info("Demande de réinitialisation de mot de passe pour l'email: " . $email);
             
-            if ($this->est_enregistre($email)){
+            if ($this->utilisateur_dao->existeEmail($email)){
                 $this->email = trim(filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL));
                 $this->logger->info("Email valide trouvé dans la base de données: " . $this->email);
                 $this->envoyerMailReset();
@@ -180,19 +180,5 @@ class ResetMdpController implements ControllerInterface
                 $_SESSION['erreurs'] = $this->validateur->getErreurs();
             }
         }
-    }
-
-    private function est_enregistre(string $email):bool
-    {
-        $this->logger->debug("Vérification si l'email est enregistré: " . $email);
-        $result = in_array($email, $this->utilisateur_dao->getEmails());
-        
-        if ($result) {
-            $this->logger->debug("Email trouvé dans la base de données: " . $email);
-        } else {
-            $this->logger->debug("Email non trouvé dans la base de données: " . $email);
-        }
-        
-        return $result;
     }
 }

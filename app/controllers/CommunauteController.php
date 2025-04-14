@@ -19,7 +19,7 @@ class CommunauteController implements ControllerInterface
     {
         try{
             $this->logger->info("Affichage de la page communauté pour: " . ($_GET['nomCommu'] ?? 'non spécifié'));
-            $communaute_id = $this->communauteDAO->estuneCommunaute($_GET['nomCommu']);
+            $communaute_id = $this->communauteDAO->existeCommunaute($_GET['nomCommu']);
             if ($communaute_id){
                 $communaute = $this->communauteDAO->getCommunauteById($communaute_id);
                 $this->logger->info("Communauté trouvée: " . $_GET['nomCommu'] . " (ID: $communaute_id)");

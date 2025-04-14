@@ -8,7 +8,7 @@ final class UtilisateurDAO
     {
         $this->pdo = PostgreSQLDB::getConnexion();
     }
-
+    
     public function getProfilUtilisateurById(int $id): Utilisateur
     {
         $query = $this->pdo->prepare("SELECT * FROM utilisateur WHERE idUtilisateur = ?");
@@ -140,6 +140,21 @@ final class UtilisateurDAO
         $query = $this->pdo->prepare("UPDATE utilisateur SET motdepasse = ? WHERE pseudo = ?");
         return $query->execute([$mdp_hash, $pseudo]);
     }
+
+    public function existeUtilisateur(string $pseudo): bool|int
+    {
+        $query = $this->pdo->prepare("SELECT idUtilisateur FROM utilisateur WHERE pseudo = ?");
+        $query->execute([$pseudo]);
+        return $query->fetchColumn();
+    }
+
+    public function existeEmail(string $email): bool|int
+    {
+        $query = $this->pdo->prepare("SELECT idUtilisateur FROM utilisateur WHERE email = ?");
+        $query->execute([$email]);
+        return $query->fetchColumn();
+    }
+
 }
 
 if (php_sapi_name() == 'cli') {
