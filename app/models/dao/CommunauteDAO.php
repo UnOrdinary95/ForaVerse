@@ -72,4 +72,12 @@ final class CommunauteDAO
         $query = $this->pdo->prepare("UPDATE communaute SET chemin_photo = ? WHERE idcommunaute = ?");
         return $query->execute([$chemin_photo, $id]);
     }
+
+    public function estuneCommunaute(string $nom): bool | int
+    {
+        $query = $this->pdo->prepare("SELECT idcommunaute FROM communaute WHERE nom = ?");
+        $query->execute([$nom]);
+        
+        return $query->fetchColumn() ?: false;
+    }
 }

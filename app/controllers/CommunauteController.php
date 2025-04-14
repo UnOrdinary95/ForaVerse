@@ -19,7 +19,7 @@ class CommunauteController implements ControllerInterface
     {
         try{
             $this->logger->info("Affichage de la page communauté pour: " . ($_GET['nomCommu'] ?? 'non spécifié'));
-            $communaute_id = $this->estuneCommunaute($_GET['nomCommu']);
+            $communaute_id = $this->communauteDAO->estuneCommunaute($_GET['nomCommu']);
             if ($communaute_id){
                 $communaute = $this->communauteDAO->getCommunauteById($communaute_id);
                 $this->logger->info("Communauté trouvée: " . $_GET['nomCommu'] . " (ID: $communaute_id)");
@@ -37,21 +37,5 @@ class CommunauteController implements ControllerInterface
             header('Location: ./?action=erreur');
             exit();
         }
-    }
-
-    public function estuneCommunaute($nom):bool | int
-    {
-        $this->logger->debug("Vérification de l'existence de la communauté: $nom");
-        $communautes = $this->communauteDAO->getNomsCommunautes();
-
-        if (in_array($nom, $communautes)) {
-            $id = $this->communauteDAO->getIdByNom($nom);
-            $this->logger->debug("Communauté trouvée: $nom (ID: $id)");
-            return $id;
-        }
-        else{
-            $this->logger->debug("Communauté non trouvée: $nom");
-            return false;
-        }
-    }
+    }   
 }
