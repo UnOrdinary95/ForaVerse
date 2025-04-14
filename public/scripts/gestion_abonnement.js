@@ -3,7 +3,7 @@ $(document).ready(function() {
         const pseudo = $(this).data('pseudo');
         const action = $(this).text() === 'S\'abonner' ? 'ajouterabonnement' : 'supprimerabonnement';
 
-        $.post('../../app/utils/traitement.php',
+        $.post('../../app/utils/traitement_abonnement.php',
             {
                 action: action,
                 utilisateur: pseudo
