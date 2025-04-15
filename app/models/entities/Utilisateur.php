@@ -10,6 +10,7 @@ final class Utilisateur
     private string $bio;
     private ?string $date_inscription;
     private bool $est_admin;
+    private Abonne $abonne;
 
     public function __construct(
         ?string $unPseudo = null,
@@ -29,6 +30,7 @@ final class Utilisateur
         $this->bio = $uneBio;
         $this->date_inscription = $uneDateInscription;
         $this->est_admin = $unEstAdmin;
+        $this->abonne = new Abonne($this->id);
     }
 
     public function getId(): ?int
@@ -69,5 +71,10 @@ final class Utilisateur
     public function estAdministrateur(): bool
     {
         return $this->est_admin;
+    }
+
+    public function getSystemeAbonnement(): Abonne
+    {
+        return $this->abonne;
     }
 }

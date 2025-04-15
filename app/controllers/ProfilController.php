@@ -3,13 +3,11 @@
 class ProfilController implements ControllerInterface
 {
     private UtilisateurDAO $utilisateurDAO;
-    private AbonneDAO $abonneDAO;
     private InscriptionValidator $validateur;
     private Logger $logger;
 
     public function __construct(){
         $this->utilisateurDAO = new UtilisateurDAO();
-        $this->abonneDAO = new AbonneDAO();
         $this->validateur = new InscriptionValidator();
         $this->logger = new Logger();
     }
@@ -21,8 +19,11 @@ class ProfilController implements ControllerInterface
             $profil_id = $this->utilisateurDAO->existeUtilisateur($_GET['utilisateur']);
             if ($profil_id) {
                 $utilisateur = $this->utilisateurDAO->getProfilUtilisateurById($profil_id);
-                $abonne = $this->abonneDAO->getNbrAbonnesById($profil_id) ?? 0;
-                $abonnement = $this->abonneDAO->getNbrAbonnementsById($profil_id) ?? 0;
+                $session_user = $this->utilisateurDAO->getProfilUtilisateurById($this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']));
+                // $abonne = $this->abonneDAO->getNbrAbonnesById($profil_id) ?? 0;
+                // $abonnement = $this->abonneDAO->getNbrAbonnementsById($profil_id) ?? 0;
+                // $abonne_dao = $this->abonneDAO;
+                // $utilisateur_dao = $this->utilisateurDAO;
                 $this->logger->info("Profil trouvé: " . $_GET['utilisateur'] . " (ID: $profil_id)");
                 
                 // Si c'est le profil de l'utilisateur connecté, on traite les formulaires de modification

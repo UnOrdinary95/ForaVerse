@@ -97,10 +97,22 @@ final class CommunauteDAO
         return $query->execute([$chemin_photo, $id]);
     }
 
+    public function updateNom(int $id, string $nom): bool
+    {
+        $query = $this->pdo->prepare("UPDATE communaute SET nom = ? WHERE idcommunaute = ?");
+        return $query->execute([$nom, $id]);
+    }
+
     public function existeCommunaute(string $nom): bool | int
     {
         $query = $this->pdo->prepare("SELECT idcommunaute FROM communaute WHERE nom = ?");
         $query->execute([$nom]);
         return $query->fetchColumn();
+    }
+
+    public function deleteCommunaute(int $id): bool
+    {
+        $query = $this->pdo->prepare("DELETE FROM communaute WHERE idcommunaute = ?");
+        return $query->execute([$id]);
     }
 }

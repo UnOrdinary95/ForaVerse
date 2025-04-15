@@ -1,4 +1,7 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 class CommunauteController implements ControllerInterface
 {
@@ -6,6 +9,8 @@ class CommunauteController implements ControllerInterface
     private Logger $logger;
     private RoleDAO $roleDAO;
     private UtilisateurDAO $utilisateurDAO;
+    private CommunauteValidator $validateur;
+    private array $erreurs;
 
     public function __construct()
     {
@@ -13,6 +18,8 @@ class CommunauteController implements ControllerInterface
         $this->logger = new Logger();
         $this->roleDAO = new RoleDAO();
         $this->utilisateurDAO = new UtilisateurDAO();
+        $this->validateur = new CommunauteValidator();
+        $this->erreurs = [];
     }
 
     public function afficherVue(): void
@@ -29,11 +36,22 @@ class CommunauteController implements ControllerInterface
                     $role = $this->roleDAO->getRole($this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']), $communaute_id);
                     if ($role){
                         $this->logger->info("Rôle de l'utilisateur dans la communauté: " . $role->getRole());
+                        if($role->estProprietaire()){
+                            $this->logger->info("L'utilisateur est le propriétaire de la communauté.");
+                            $this->callbackSuppressionCommunaute();
+                            $this->callbackRename();
+                            $erreurs_rename = $this->erreurs;
+                            $this->callbackDeleteMod();
+                            $this->callbackAddMod();
+                            $erreurs_addmod = $this->erreurs;
+                        }
                     }
                     else{
                         $this->logger->info("L'utilisateur n'a pas de rôle dans la communauté.");
                     }
                 }
+                $proprio = $this->roleDAO->getProprioByCommunaute($communaute_id);
+                $moderateurs = $this->roleDAO->getModByCommunaute($communaute_id);
                 require_once __DIR__ . '/../views/communaute.php';
             }
             else{
@@ -48,5 +66,119 @@ class CommunauteController implements ControllerInterface
             header('Location: ./?action=erreur');
             exit();
         }
-    }   
+    }
+
+    public function callbackSuppressionCommunaute(): void
+    {
+        if (isset($_POST['supprimerCommunaute'])) {
+            try{
+                $this->logger->info("Suppression de la communauté: " . $_GET['nomCommu']);
+                $this->communauteDAO->deleteCommunaute($this->communauteDAO->getIdByNom($_GET['nomCommu']));
+                header('Location: ./?action=accueil');
+                exit();
+            }
+            catch (PDOException $e)
+            {
+                $this->logger->error("Erreur lors de la suppression de la communauté: " . $e->getMessage());
+                header('Location: ./?action=erreur');
+                exit();
+            }
+        }
+    }
+
+    public function callbackRename(): void
+    {
+        if (isset($_POST['nomCommu'])) {
+            $this->logger->info("Renommage de la communauté: " . $_GET['nomCommu']);
+            $this->validateur->clearErreurs();
+            $nom = trim(filter_input(INPUT_POST, 'nomCommu', FILTER_SANITIZE_SPECIAL_CHARS));
+
+            $this->logger->debug("Nouveau nom de la communauté: $nom");
+            
+            if ($this->validateur->validerNomCommu($nom)){
+                try{
+                    $this->communauteDAO->updateNom($this->communauteDAO->getIdByNom($_GET['nomCommu']), $nom);
+                    $this->logger->info("Communauté renommée avec succès: " . $_GET['nomCommu'] . " -> $nom");
+                    header('Location: ./?action=communaute&nomCommu=' . urlencode($nom). "#ParamCommuContainer");
+                    exit();
+                }
+                catch (PDOException $e)
+                {
+                    $this->logger->error("Erreur lors du renommage de la communauté: " . $e->getMessage());
+                    header('Location: ./?action=erreur');
+                    exit();
+                }
+            }
+            else{
+                $this->erreurs = $this->validateur->getErreurs();
+                $this->logger->warning("Validation échouée pour le renommage de la communauté: " . implode(", ", $this->erreurs));
+            }
+        }
+    }
+
+    public function callbackAddMod(): void
+    {
+        if (isset($_POST['pseudoMembre'])){
+            $this->logger->info("Ajout d'un modérateur: " . $_POST['pseudoMembre']);
+            $pseudo = trim(filter_input(INPUT_POST, 'pseudoMembre', FILTER_SANITIZE_SPECIAL_CHARS));
+
+            $this->logger->debug("Pseudo du modérateur: $pseudo");
+
+            try{
+                $user_id = $this->utilisateurDAO->getIdByPseudo($pseudo);
+                $commu_id = $this->communauteDAO->getIdByNom($_GET['nomCommu']);
+                if(empty($pseudo)){
+                    $this->logger->warning("Aucun pseudo fourni pour le modérateur.");
+                    $this->erreurs['pseudoMembre'] = "Veuillez entrer un pseudo.";
+                }
+                elseif (!$this->utilisateurDAO->existeUtilisateur($pseudo)){
+                    $this->logger->warning("Le membre n'existe pas: " . $pseudo);
+                    $this->erreurs['pseudoMembre'] = "Ce membre n'est pas dans la communauté."; // Mesure de sécurité
+                }
+                elseif (!$this->roleDAO->getRole($user_id, $commu_id)){
+                    $this->logger->warning("Le membre n'est pas dans la communauté: " . $pseudo);
+                    $this->erreurs['pseudoMembre'] = "Ce membre n'est pas dans la communauté.";
+                }               
+                elseif($this->roleDAO->getRole($user_id, $commu_id)->estProprietaire()){
+                    $this->logger->warning("Le membre est propriétaire (Action impossible) => " . $pseudo);
+                    $this->erreurs['pseudoMembre'] = "Vous êtes le propriétaire...";
+                }  
+                elseif ($this->roleDAO->getRole($user_id, $commu_id)->estModerateur()){
+                    $this->logger->warning("Le membre est déjà modérateur: " . $pseudo);
+                    $this->erreurs['pseudoMembre'] = "Ce membre est déjà modérateur.";
+                }
+                else{
+                    $this->roleDAO->setModerateur($user_id, $this->communauteDAO->getIdByNom($_GET['nomCommu']));
+                    $this->logger->info("Modérateur ajouté avec succès: " . $pseudo);
+                    header('Location: ./?action=communaute&nomCommu=' . urlencode($_GET['nomCommu']). '#modalMod');
+                    exit();
+                }
+            }
+            catch (PDOException $e)
+            {
+                $this->logger->error("Erreur lors de l'ajout du modérateur: " . $e->getMessage());
+                header('Location: ./?action=erreur');
+                exit();
+            }
+        }
+    }
+
+    public function callbackDeleteMod(): void
+    {
+        if (isset($_POST['deleteMod'])){
+            $this->logger->info("Suppression du modérateur: " . $_POST['deleteMod']);
+            try{
+                $this->roleDAO->deleteModerateur($_POST['deleteMod'], $this->communauteDAO->getIdByNom($_GET['nomCommu']));
+                $this->logger->info("Modérateur supprimé avec succès: " . $_POST['deleteMod']);
+                header('Location: ./?action=communaute&nomCommu=' . urlencode($_GET['nomCommu']). "#modalMod");
+                exit();
+            }
+            catch (PDOException $e)
+            {
+                $this->logger->error("Erreur lors de la suppression du modérateur: " . $e->getMessage());
+                header('Location: ./?action=erreur');
+                exit();
+            }
+        }
+    }
 }

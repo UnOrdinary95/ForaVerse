@@ -1,9 +1,13 @@
 <?php
-/* * Affichage de la communauté
+/** Affichage de la communauté
  * 
  * @var Communaute $communaute
  * @var Role $role
  * @var int $nbr_membres
+ * @var array $erreurs_addmod
+ * @var array $erreurs_rename
+ * @var array $moderateurs
+ * @var Role $proprio
 */
 ?>
 
@@ -34,6 +38,77 @@
                     <button id="btnGestion">Gérer</button>
                 <?php endif; ?>
             <?php endif; ?>
+            <div id="ParamCommuContainer" class="modal">
+                <div class="modal-content">
+                    <h1>Paramètres de la communauté</h1><h1 id="closeParamCommuContainer" style="cursor: pointer;">❌</h1>
+                    <div id="parametres" style="display: block; border: 1px solid black;">
+                        <div style="border-bottom: 1px solid silver; cursor: pointer;" id="btnMod">
+                                <h2>Gestion des modérateurs</h2>
+                        </div>
+                        <div style="border-bottom: 1px solid silver; cursor: pointer;" id="btnRename">
+                                <h2>Renommer la communauté</h2>
+                                <p><?=htmlspecialchars($communaute->getNom())?></p>
+                        </div>
+                        <div style="cursor: pointer;" id="btnDelete">
+                            <h2>Supprimer la communauté</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal" id="modalMod">
+                <div class="modal-content">
+                    <h1>Gestion des modérateurs</h1><h1 id="closeModalMod" style="cursor: pointer;">❌</h1>
+                    <form method="POST" action="?action=communaute&nomCommu=<?= htmlspecialchars($communaute->getNom()) ?>#modalMod" novalidate>
+                        <h3>Ajouter un modérateur</h3>
+                        <input type="text" name="pseudoMembre" placeholder="Pseudo du membre"><br><br>
+                        <button type="submit">Ajouter comme modérateur</button>
+                        <?php if (!empty($erreurs_addmod['pseudoMembre'])): ?>
+                            <span style="color: red"><?= $erreurs_addmod['pseudoMembre'] ?></span><br>
+                        <?php endif; ?>
+                    </form>
+                    <hr>
+                    <h3>Liste des modérateurs actuels</h3>
+                    <div>
+                        <?php if(isset($moderateurs) && count($moderateurs) > 0): ?>
+                            <?php foreach($moderateurs as $mod): ?>
+                                <span><?= htmlspecialchars($mod->getUtilisateur()->getPseudo()) ?></span>
+                                <form method="POST" action="?action=communaute&nomCommu=<?= htmlspecialchars($communaute->getNom()) ?>#modalMod" style="display:inline">
+                                    <input type="hidden" name="deleteMod" value="<?= $mod->getUtilisateurId() ?>">
+                                    <button type="submit">➖</button>
+                                </form>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <p>Aucun modérateur pour le moment.</p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+            <div class="modal" id="modalRename">
+                <div class="modal-content">
+                    <h1>Renommer la communauté</h1><h1 id="closeModalRename" style="cursor: pointer;">❌</h1>
+                    <form method="POST" action="?action=communaute&nomCommu=<?= htmlspecialchars($communaute->getNom()) ?>#modalRename" novalidate>
+                        <input type="text" name="nomCommu" placeholder="Nouveau nom"><br><br>
+                        <?php if (!empty($erreurs_rename['nomCommu'])): ?>
+                            <span style="color: red"><?= $erreurs_rename['nomCommu'] ?></span><br>
+                        <?php endif; ?>
+                        <button type="submit">Renommer</button>
+                    </form>
+                </div>
+            </div>
+            <div class="modal" id="modalDelete">
+                <div class="modal-content">
+                    <h1>Supprimer la communauté</h1><h1 id="closeModalDelete" style="cursor: pointer;">❌</h1>
+                    <p>Êtes-vous sûr de vouloir supprimer cette communauté ? Cette action est irréversible.</p>
+                    <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+                        <a href="./?action=accueil"><button>Non, annuler</button></a>
+                        
+                        <form method="POST" action="?action=communaute&nomCommu=<?= htmlspecialchars($communaute->getNom()) ?>" novalidate>
+                            <input type="hidden" name="supprimerCommunaute" value="1">
+                            <button type="submit">Oui, supprimer</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
         <div style="width: 20vw;border: 3px solid black;">
             <img id="communauteImage" src="../../public/<?= htmlspecialchars($communaute->getCheminPhoto()) ?>" alt="ProfilCommunaute" style="width: 75px; height: 75px; border-radius: 50%; cursor: pointer;" 
@@ -53,10 +128,32 @@
             <p id="description"><?= nl2br(htmlspecialchars($communaute->getDescription())) ?></p>
             <p>Visibilité : <?= $communaute->getVisibilite() == true ? "Publique" : "Privée" ?></p>
             <p id="compteurMembres"><?= htmlspecialchars($nbr_membres) . " Membres"?></p>
-        </div>
+
+            <h2>Propriétaire</h2>
+            <a href="./?action=profil&utilisateur=<?= htmlspecialchars($proprio->getUtilisateur()->getPseudo()) ?>" style="text-decoration: none;">
+                <span><?= htmlspecialchars($proprio->getUtilisateur()->getPseudo()) ?></span>
+            </a>
+
+            <h2>Modérateurs</h2>
+            <div>
+                <?php if(isset($moderateurs) && count($moderateurs) > 0): ?>
+                    <?php foreach($moderateurs as $mod): ?>
+                        <a href="./?action=profil&utilisateur=<?= htmlspecialchars($mod->getUtilisateur()->getPseudo()) ?>" style="text-decoration: none;">
+                            <span><?= htmlspecialchars($mod->getUtilisateur()->getPseudo()) ?></span>
+                        </a>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <p>Aucun modérateur pour le moment.</p>
+                <?php endif; ?>
+            </div>
     </div>
-    
+    <script>
+        if (window.location.hash === "creerCommu"){
+            window.history.replaceState("", document.title, window.location.pathname + window.location.search);
+        }
+    </script>
     <script src="../../public/scripts/gestion_adhesion.js"></script>
     <script src="../../public/scripts/image_cropper_commu.js"></script>
+    <script src="../../public/scripts/communaute_settings.js"></script>
 </body>
 </html>

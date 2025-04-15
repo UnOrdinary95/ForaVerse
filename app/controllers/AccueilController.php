@@ -75,7 +75,7 @@ class AccueilController implements ControllerInterface
                     $this->logger->info("Communauté créée avec succès: $nom");
                     $this->roleDAO->addUtilisateurRole($this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']), $this->communauteDAO->getIdByNom($nom), Role::PROPRIETAIRE);
                     $this->logger->info("Rôle de propriétaire attribué à l'utilisateur: " . $_SESSION['Pseudo']);
-                    header("Location: ./?action=communaute&nomCommu=$nom");
+                    header("Location: ./?action=communaute&nomCommu=". urlencode($nom));
                     exit();
                 } catch (PDOException $e) {
                     $this->logger->error("Erreur lors de la création de la communauté: " . $e->getMessage());

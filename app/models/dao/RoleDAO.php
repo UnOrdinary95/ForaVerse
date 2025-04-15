@@ -3,10 +3,12 @@
 final class RoleDAO
 {
     private PDO $pdo;
+    private Logger $logger;
 
     public function __construct()
     {
         $this->pdo = PostgreSQLDB::getConnexion();
+        $this->logger = new Logger();
     }
 
     public function getRole(int $utilisateur_id, int $communaute_id): ?Role
@@ -32,13 +34,13 @@ final class RoleDAO
         $result = $query->fetchAll(PDO::FETCH_ASSOC);
         
         if (!$result) {
-            throw new Exception("Aucun rôle trouvé pour la communauté avec l'ID: {$communaute_id}");
+            return [];
         }
 
         $roles = [];
         foreach ($result as $ligne){
             $roles[] = new Role(
-                $ligne['idUtilisateur'],
+                $ligne['idutilisateur'], // Sensible à la casse
                 $communaute_id,
                 $ligne['role']
             );
@@ -46,6 +48,46 @@ final class RoleDAO
 
         return $roles;
     }
+
+    public function getModByCommunaute(int $communaute_id): array
+    {
+        $query = $this->pdo->prepare("SELECT * FROM role WHERE idCommunaute = ? AND role = ?");
+        $query->execute([$communaute_id, Role::MODERATEUR]);
+        $result = $query->fetchAll(PDO::FETCH_ASSOC);
+        
+        if (!$result) {
+            return [];
+        }
+
+        $roles = [];
+        foreach ($result as $ligne){
+            $roles[] = new Role(
+                $ligne['idutilisateur'],
+                $communaute_id,
+                Role::MODERATEUR
+            );
+        }
+
+        return $roles;
+    }
+
+    public function getProprioByCommunaute(int $communaute_id): ?Role
+    {
+        $query = $this->pdo->prepare("SELECT * FROM role WHERE idCommunaute = ? AND role = ?");
+        $query->execute([$communaute_id, Role::PROPRIETAIRE]);
+        $result = $query->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$result) {
+            return null;
+        }
+
+        return new Role(
+            $result['idutilisateur'],
+            $communaute_id,
+            Role::PROPRIETAIRE
+        );
+    }
+    
 
     public function getNbrRolesByCommunaute(int $communaute_id): int
     {
@@ -81,6 +123,4 @@ final class RoleDAO
         
         return $query->execute([$utilisateur_id, $communaute_id]);
     }
-
-
 }

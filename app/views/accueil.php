@@ -83,7 +83,8 @@
                     modal.style.display = "none";
                 }
             }
-
+                        
+            
             window.addEventListener('hashchange', showModalBasedOnHash);
             showModalBasedOnHash();
         });

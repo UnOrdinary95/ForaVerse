@@ -1,10 +1,7 @@
 <?php
 /**
  * @var Utilisateur $utilisateur
- * @var int $abonne
- * @var int $abonnement
- * @var AbonneDAO $abonne_dao
- * @var UtilisateurDAO $utilisateur_dao
+ * @var Utilisateur $session_user
  */
 ?>
 <!DOCTYPE html>
@@ -40,13 +37,13 @@
 
         <h1><?= htmlspecialchars($utilisateur->getPseudo())?></h1>
         <p><?= "\n". htmlspecialchars($utilisateur->getBio())?></p>
-        <p id="compteur_abonne"><?= "Abonnés : $abonne\n"?></p>
-        <p><?= "Abonnements : $abonnement"?></p>
+        <p id="compteur_abonne">Abonnés : <?=count($utilisateur->getSystemeAbonnement()->getAbonnes()) ?></p>
+        <p>Abonnements : <?=count($utilisateur->getSystemeAbonnement()->getAbonnements())?></p>
         <p><?="Compte créé le ". (new DateTime($utilisateur->getDateInscription()))->format('d/m/Y')?></p>
         <button onclick="partagerURL()">Partager le profil</button><br>
         
         <?php if ($utilisateur->getPseudo() != $_SESSION['Pseudo']): ?>
-            <?php if ($abonne_dao->estAbonne($utilisateur_dao->getIdByPseudo($_SESSION['Pseudo']), $utilisateur->getId())): ?>
+            <?php if ($utilisateur->getSystemeAbonnement()->estAbonne($session_user->getId())): ?>
                 <button id="btnAbonnement" data-pseudo="<?= $utilisateur->getPseudo() ?>">Se désabonner</button>
             <?php else: ?>
                 <button id="btnAbonnement" data-pseudo="<?= $utilisateur->getPseudo() ?>">S'abonner</button>
