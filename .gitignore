@@ -6,3 +6,4 @@ vendor
 .htaccess
 logs
 test
+.vscode
