@@ -21,12 +21,16 @@
 <body>
     <h1><a href="./" style="text-decoration: none; width: 100px">⬅️</a></h1>
     <div>
+        <?php if ($utilisateur->getPseudo() == $_SESSION['Pseudo']): ?>
         <img src="../../public/<?= htmlspecialchars($utilisateur->getCheminPhoto())?>" style="width: 100px; height: 100px; border-radius: 30%; cursor: pointer;"
             id="profileImage" alt="Profil"
             <?php if ($utilisateur->getPseudo() == $_SESSION['Pseudo']): ?>
                 onclick="document.getElementById('imageInput').click();"
             <?php endif; ?>
         >
+        <?php else: ?>
+            <img src="../../public/<?= htmlspecialchars($utilisateur->getCheminPhoto())?>" style="width: 100px; height: 100px; border-radius: 30%;" alt="Profil">
+        <?php endif; ?>
 
         <input type="file" id="imageInput" accept="image/*" style="display: none;">
         <div id="cropperContainer">
