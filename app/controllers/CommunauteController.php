@@ -34,10 +34,30 @@ class CommunauteController implements ControllerInterface
                 $this->logger->info("Communauté trouvée: " . $_GET['nomCommu'] . " (ID: $communaute_id)");
                 $nbr_membres = $this->roleDAO->getNbrRolesByCommunaute($communaute_id);
                 $this->logger->info("Nombre de membres dans la communauté: " . $nbr_membres);
+                
+                // Initialisation des variables nécessaires à la vue
+                $liste_refus = [];
+                $liste_attentes = [];
+                $erreurs_rename = [];
+                $erreurs_addmod = [];
+                
                 if (isset($_SESSION['Pseudo'])){
                     $role = $this->roleDAO->getRole($this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']), $communaute_id);
                     if ($role){
                         $this->logger->info("Rôle de l'utilisateur dans la communauté: " . $role->getRole());
+                        if($role->peutModerer()){
+                            $this->logger->info("L'utilisateur peut modérer la communauté.");
+                            foreach($this->adhesionDAO->getRefusByCommunaute($communaute_id) as $refus){
+                                $liste_refus[] = $this->utilisateurDAO->getProfilUtilisateurById($refus->getIdUtilisateur());
+                            }
+
+                            foreach($this->adhesionDAO->getAttentesByCommunaute($communaute_id) as $attente){
+                                $liste_attentes[] = $this->utilisateurDAO->getProfilUtilisateurById($attente->getIdUtilisateur());
+                            }
+                            $this->callbackAnnulerAdhesion();
+                            $this->callbackGestionAdhesion();
+                            $this->logger->info("Liste des membres en attente d'adhésion: " . implode(", ", array_map(fn($u) => $u->getPseudo(), $liste_attentes)));
+                        }
                         if($role->estProprietaire()){
                             $this->logger->info("L'utilisateur est le propriétaire de la communauté.");
                             $this->callbackSuppressionCommunaute();
@@ -183,5 +203,49 @@ class CommunauteController implements ControllerInterface
                 exit();
             }
         }
+    }
+
+    public function callbackAnnulerAdhesion():void
+    {
+        if(isset($_POST['annulerAdhesion']) && isset($_POST['idAdhesion'])){
+            $this->logger->info("Annulation de l'adhésion: " . $_POST['annulerAdhesion']);
+            try{
+                $this->adhesionDAO->deleteAdhesion($_POST['idAdhesion'], $this->communauteDAO->getIdByNom($_GET['nomCommu']));
+                $this->logger->info("Adhésion annulée avec succès: " . $_POST['annulerAdhesion']);
+                header('Location: ./?action=communaute&nomCommu=' . urlencode($_GET['nomCommu']). "#gestionAdhesionContainer");
+                exit();
+            }
+            catch (PDOException $e)
+            {
+                $this->logger->error("Erreur lors de l'annulation de l'adhésion: " . $e->getMessage());
+                header('Location: ./?action=erreur');
+                exit();
+            }    
+        }
+    }
+
+    public function callbackGestionAdhesion():void
+    {
+        if(isset($_POST['validerAdhesion']) || isset($_POST['refuserAdhesion']) && isset($_POST['idAdhesion'])){
+            $this->logger->info("Gestion de l'adhésion: " . $_POST['validerAdhesion'] ?? $_POST['refuserAdhesion']);
+            try{
+                if(isset($_POST['validerAdhesion'])){
+                    $this->adhesionDAO->acceptAdhesion($_POST['idAdhesion'], $this->communauteDAO->getIdByNom($_GET['nomCommu']));
+                    $this->logger->info("Adhésion validée avec succès: " . $_POST['idAdhesion']);
+                }
+                elseif(isset($_POST['refuserAdhesion'])){
+                    $this->adhesionDAO->rejectAdhesion($_POST['idAdhesion'], $this->communauteDAO->getIdByNom($_GET['nomCommu']));
+                    $this->logger->info("Adhésion refusée avec succès: " . $_POST['idAdhesion']);
+                }
+                header('Location: ./?action=communaute&nomCommu=' . urlencode($_GET['nomCommu']). "#gestionAdhesionContainer");
+                exit();
+            }
+            catch (PDOException $e)
+            {
+                $this->logger->error("Erreur lors de la gestion de l'adhésion: " . $e->getMessage());
+                header('Location: ./?action=erreur');
+                exit();
+            }    
+        }            
     }
 }

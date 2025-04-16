@@ -48,6 +48,51 @@ final class AdhesionDAO
         return $adhesions;
     }
 
+    public function getRefusByCommunaute(int $idCommunaute): array
+    {
+        $query = $this->pdo->prepare("SELECT * FROM DemandeAdhesion WHERE idCommunaute = ? AND statut = ?");
+        $query->execute([$idCommunaute, Adhesion::REFUSEE]);
+        $result = $query->fetchAll(PDO::FETCH_ASSOC);
+        
+        if (!$result) {
+            return [];
+        }
+
+        $adhesions = [];
+        foreach ($result as $ligne){
+            $adhesions[] = new Adhesion(
+                $ligne['idutilisateur'],
+                $idCommunaute,
+                $ligne['statut']
+            );
+        }
+
+        return $adhesions;
+    }
+
+    public function getAttentesByCommunaute(int $idCommunaute): array
+    {
+        $query = $this->pdo->prepare("SELECT * FROM DemandeAdhesion WHERE idCommunaute = ? AND statut = 'en attente'");
+        $query->execute([$idCommunaute]);
+        $result = $query->fetchAll(PDO::FETCH_ASSOC);
+        
+        if (!$result) {
+            return [];
+        }
+
+        $adhesions = [];
+        foreach ($result as $ligne){
+            $adhesions[] = new Adhesion(
+                $ligne['idutilisateur'],
+                $idCommunaute,
+                $ligne['statut']
+            );
+        }
+
+        return $adhesions;
+    }
+
+
     public function addAdhesion(int $idUtilisateur, int $idCommunaute): bool
     {
         $query = $this->pdo->prepare("INSERT INTO DemandeAdhesion (idUtilisateur, idCommunaute) VALUES (?, ?)");
@@ -62,13 +107,13 @@ final class AdhesionDAO
 
     public function acceptAdhesion(int $idUtilisateur, int $idCommunaute): bool
     {
-        $query = $this->pdo->prepare("UPDATE DemandeAdhesion SET statut = 'accepté' WHERE idUtilisateur = ? AND idCommunaute = ?");
+        $query = $this->pdo->prepare("UPDATE DemandeAdhesion SET statut = 'acceptée' WHERE idUtilisateur = ? AND idCommunaute = ?");
         return $query->execute([$idUtilisateur, $idCommunaute]);
     }
 
     public function rejectAdhesion(int $idUtilisateur, int $idCommunaute): bool
     {
-        $query = $this->pdo->prepare("UPDATE DemandeAdhesion SET statut = 'rejeté' WHERE idUtilisateur = ? AND idCommunaute = ?");
+        $query = $this->pdo->prepare("UPDATE DemandeAdhesion SET statut = 'refusée' WHERE idUtilisateur = ? AND idCommunaute = ?");
         return $query->execute([$idUtilisateur, $idCommunaute]);
     }
 }

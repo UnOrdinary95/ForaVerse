@@ -6,6 +6,10 @@ final class Adhesion
     private int $idCommunaute;
     private string $statut;
 
+    const EN_ATTENTE = 'en attente';
+    const ACCEPTEE = 'acceptée';
+    const REFUSEE = 'refusée';
+
     public function __construct(int $idUtilisateur, int $idCommunaute, string $statut)
     {
         $this->idUtilisateur = $idUtilisateur;

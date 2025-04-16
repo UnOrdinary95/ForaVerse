@@ -77,7 +77,7 @@ final class Role
 
     public function estMembreOuModerateur(): bool
     {
-        return $this->estModerateur() || $this->estMembre();
+        return $this->estModerateur() || $this->estMembre() || $this->utilisateur->estAdministrateur();
     }
 
 }

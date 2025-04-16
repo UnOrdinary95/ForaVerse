@@ -9,6 +9,8 @@
  * @var array $moderateurs
  * @var Role $proprio
  * @var ?Adhesion $adhesion
+ * @var array $liste_refus
+ * @var array $liste_attentes
 */
 ?>
 
@@ -52,6 +54,65 @@
                     <button id="btnGestion">Gérer</button>
                 <?php endif; ?>
             <?php endif; ?>
+            <?php if(isset($_SESSION['Pseudo']) && $role && $role->peutModerer()): ?>
+                <button id="btnModeration">Modération</button>
+            <?php endif; ?>
+                <div id="modContainer" class="modal">
+                <div class="modal-content">
+                    <h1>Modération</h1><h1 id="closeModContainer" style="cursor: pointer;">❌</h1>
+                    <div id="param_moderation" style="display: block; border: 1px solid black;">
+                        <div style="border-bottom: 1px solid silver; cursor: pointer;" id="gestionadhesion">
+                            <h2>Gestion des adhésions</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="gestionAdhesionContainer" class="modal">
+                <div class="modal-content">
+                    <h1>Gestion des demandes d'adhésion</h1><h1 id="closeGestionAdhesionContainer" style="cursor: pointer;">❌</h1>
+                    <div id="adhesionList" style="display: block; border: 1px solid black;">
+                        <div>
+                            <h2 id="demandeadh" style="text-decoration: underline; text-decoration-color: red; color: red; cursor: pointer;">Liste des demandes d'adhésion</h2>
+                            <h2 id="refusadh" style="text-decoration: none; text-decoration-color: none; color: black; cursor: pointer;">Liste des refus</h2>
+                        </div>
+                        <div id="demandeblock" style="display: block;">
+                            <?php if (count($liste_attentes) > 0): ?>
+                                <?php foreach ($liste_attentes as $adhesion): ?>
+                                    <div>
+                                        <span><?= htmlspecialchars($adhesion->getPseudo()) ?></span>
+                                        <form method="POST" action="?action=communaute&nomCommu=<?= htmlspecialchars($communaute->getNom()) ?>#gestionAdhesion" style="display:inline">
+                                            <input type="hidden" name="idAdhesion" value="<?= $adhesion->getId() ?>">
+                                            <button type="submit" name="validerAdhesion">✔️</button>
+                                            <button type="submit" name="refuserAdhesion">❌</button>
+                                        </form>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <p>Aucune demande d'adhésion pour le moment.</p>
+                            <?php endif; ?>
+                        </div>
+
+                        <div id="refusblock" style="display: none;">
+                            <?php if (count($liste_refus) > 0): ?>
+                                <?php foreach ($liste_refus as $adhesion): ?>
+                                    <div>
+                                        <span><?= htmlspecialchars($adhesion->getPseudo()) ?></span>
+                                        <form method="POST" action="?action=communaute&nomCommu=<?= htmlspecialchars($communaute->getNom()) ?>#gestionAdhesion" style="display:inline">
+                                            <input type="hidden" name="idAdhesion" value="<?= $adhesion->getId() ?>">
+                                            <button type="submit" name="annulerAdhesion">➖</button>
+                                        </form>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <p>Aucun refus pour le moment.</p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+
+
             <div id="ParamCommuContainer" class="modal">
                 <div class="modal-content">
                     <h1>Paramètres de la communauté</h1><h1 id="closeParamCommuContainer" style="cursor: pointer;">❌</h1>
@@ -170,5 +231,6 @@
     <script src="../../public/scripts/gestion_adhesion.js"></script>
     <script src="../../public/scripts/image_cropper_commu.js"></script>
     <script src="../../public/scripts/communaute_settings.js"></script>
+    <script src="../../public/scripts/commu_moderation_settings.js"></script>
 </body>
 </html>
