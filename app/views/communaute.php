@@ -42,13 +42,13 @@
                         <button id="btnAdhesionPrivee" data-communaute_id="<?= $communaute->getId() ?>">Demander à rejoindre</button>
                     <?php elseif (!$role && isset($adhesion) && $adhesion->getStatut() == 'en attente'): ?>
                         <button id="btnAdhesionPrivee" data-communaute_id="<?= $communaute->getId() ?>">Demande en attente</button>
-                    <?php elseif (!$role && isset($adhesion) && $adhesion->getStatut() == 'refusé'): ?>
+                    <?php elseif (!$role && isset($adhesion) && $adhesion->getStatut() == 'refusée'): ?>
                         <button id="btnAdhesionPrivee" data-communaute_id="<?= $communaute->getId() ?>">Demande refusé</button>
                     <?php elseif ($role->estMembreOuModerateur()): ?>
                         <button id="btnAdhesionPrivee" data-communaute_id="<?= $communaute->getId() ?>">Quitter</button>
                     <?php endif; ?>
                 <?php endif; ?>
-                <?php if ($role->estProprietaire()): ?>
+                <?php if (isset($role) && $role->estProprietaire()): ?>
                     <button id="btnGestion">Gérer</button>
                 <?php endif; ?>
             <?php endif; ?>

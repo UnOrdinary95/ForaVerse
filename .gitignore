@@ -7,3 +7,4 @@ vendor
 logs
 test
 .vscode
+error.log
