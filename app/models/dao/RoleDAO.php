@@ -3,12 +3,10 @@
 final class RoleDAO
 {
     private PDO $pdo;
-    private Logger $logger;
 
     public function __construct()
     {
         $this->pdo = PostgreSQLDB::getConnexion();
-        $this->logger = new Logger();
     }
 
     public function getRole(int $utilisateur_id, int $communaute_id): ?Role
