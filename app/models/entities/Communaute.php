@@ -6,8 +6,9 @@ final class Communaute{
     private string $description;
     private bool $visibilite;
     private string $chemin_photo;
-    
 
+    private array $adhesions;
+    
     public function __construct(
         ?int $unId = null,
         ?string $unNom = null,
@@ -20,6 +21,10 @@ final class Communaute{
         $this->description = $uneDescription;
         $this->visibilite = $uneVisibilite;
         $this->chemin_photo = $unCheminPhoto;
+        if (!$this->visibilite){
+            $adhesion_dao = new AdhesionDAO();
+            $this->adhesions = $adhesion_dao->getAdhesionByCommunaute($this->id);
+        }
     }
 
     public function getId(): ?int
@@ -47,6 +52,9 @@ final class Communaute{
         return $this->chemin_photo;
     }
     
-
+    public function getAdhesions(): array
+    {
+        return $this->adhesions;
+    }
 
 }

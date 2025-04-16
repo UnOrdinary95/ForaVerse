@@ -8,6 +8,7 @@
  * @var array $erreurs_rename
  * @var array $moderateurs
  * @var Role $proprio
+ * @var ?Adhesion $adhesion
 */
 ?>
 
@@ -30,11 +31,24 @@
             <img src="../../public/<?= htmlspecialchars($communaute->getCheminPhoto()) ?>" alt="ProfilCommunaute" style="width: 50px; height: 50px; border-radius: 50%">
             <h1><?= htmlspecialchars($communaute->getNom()) ?></h1>
             <?php if (isset($_SESSION['Pseudo'])): ?>
-                <?php if (!$role): ?>
-                    <button id="btnAdhesion" data-communaute_id="<?= $communaute->getId() ?>">Rejoindre</button>
-                <?php elseif ($role->estMembreOuModerateur()): ?>
-                    <button id="btnAdhesion" data-communaute_id="<?= $communaute->getId() ?>">Quitter</button>
-                <?php elseif ($role->estProprietaire()): ?>
+                <?php if ($communaute->getVisibilite()):?>
+                    <?php if (!$role): ?>
+                        <button id="btnAdhesion" data-communaute_id="<?= $communaute->getId() ?>">Rejoindre</button>
+                    <?php elseif ($role->estMembreOuModerateur()): ?>
+                        <button id="btnAdhesion" data-communaute_id="<?= $communaute->getId() ?>">Quitter</button>
+                    <?php endif; ?>
+                <?php else: ?>
+                    <?php if (!$role && !isset($adhesion)):?>
+                        <button id="btnAdhesionPrivee" data-communaute_id="<?= $communaute->getId() ?>">Demander à rejoindre</button>
+                    <?php elseif (!$role && isset($adhesion) && $adhesion->getStatut() == 'en attente'): ?>
+                        <button id="btnAdhesionPrivee" data-communaute_id="<?= $communaute->getId() ?>">Demande en attente</button>
+                    <?php elseif (!$role && isset($adhesion) && $adhesion->getStatut() == 'refusé'): ?>
+                        <button id="btnAdhesionPrivee" data-communaute_id="<?= $communaute->getId() ?>">Demande refusé</button>
+                    <?php elseif ($role->estMembreOuModerateur()): ?>
+                        <button id="btnAdhesionPrivee" data-communaute_id="<?= $communaute->getId() ?>">Quitter</button>
+                    <?php endif; ?>
+                <?php endif; ?>
+                <?php if ($role->estProprietaire()): ?>
                     <button id="btnGestion">Gérer</button>
                 <?php endif; ?>
             <?php endif; ?>
@@ -146,6 +160,7 @@
                     <p>Aucun modérateur pour le moment.</p>
                 <?php endif; ?>
             </div>
+        </div>
     </div>
     <script>
         if (window.location.hash === "creerCommu"){

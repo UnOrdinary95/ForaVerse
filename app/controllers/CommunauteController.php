@@ -10,6 +10,7 @@ class CommunauteController implements ControllerInterface
     private RoleDAO $roleDAO;
     private UtilisateurDAO $utilisateurDAO;
     private CommunauteValidator $validateur;
+    private AdhesionDAO $adhesionDAO;
     private array $erreurs;
 
     public function __construct()
@@ -18,6 +19,7 @@ class CommunauteController implements ControllerInterface
         $this->logger = new Logger();
         $this->roleDAO = new RoleDAO();
         $this->utilisateurDAO = new UtilisateurDAO();
+        $this->adhesionDAO = new AdhesionDAO();
         $this->validateur = new CommunauteValidator();
         $this->erreurs = [];
     }
@@ -47,6 +49,7 @@ class CommunauteController implements ControllerInterface
                         }
                     }
                     else{
+                        $adhesion = $this->adhesionDAO->getAdhesionById($this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']), $communaute_id);
                         $this->logger->info("L'utilisateur n'a pas de rôle dans la communauté.");
                     }
                 }
