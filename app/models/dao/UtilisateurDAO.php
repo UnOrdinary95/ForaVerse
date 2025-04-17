@@ -95,6 +95,13 @@ final class UtilisateurDAO
         return (bool)$query->fetchColumn();
     }
 
+    public function getPpById(int $id):string
+    {
+        $query = $this->pdo->prepare("SELECT chemin_photo FROM utilisateur WHERE idutilisateur = ?");
+        $query->execute([$id]);
+        return $query->fetchColumn();
+    }
+
     public function addUtilisateur(string $pseudo, string $email, string $mdp):bool
     {
         $mdp_hash = password_hash($mdp, PASSWORD_DEFAULT);

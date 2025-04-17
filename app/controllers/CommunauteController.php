@@ -45,15 +45,19 @@ class CommunauteController implements ControllerInterface
                         if($role->peutModerer()){
                             $this->logger->info("L'utilisateur peut modérer la communauté.");
                             foreach($this->adhesionDAO->getRefusByCommunaute($communaute_id) as $refus){
-                                $liste_refus[] = $this->utilisateurDAO->getProfilUtilisateurById($refus->getIdUtilisateur());
+                                $liste_refus[$this->utilisateurDAO->getPseudoById($refus->getIdUtilisateur())] = $refus->getIdUtilisateur();
                             }
 
                             foreach($this->adhesionDAO->getAttentesByCommunaute($communaute_id) as $attente){
-                                $liste_attentes[] = $this->utilisateurDAO->getProfilUtilisateurById($attente->getIdUtilisateur());
+                                $liste_attentes[$this->utilisateurDAO->getPseudoById($attente->getIdUtilisateur())] = [
+                                    'id' => $attente->getIdUtilisateur(),
+                                    'datedemande' => $attente->getDateDemande()
+                                ];
                             }
+
                             $this->callbackAnnulerAdhesion();
                             $this->callbackGestionAdhesion();
-                            $this->logger->info("Liste des membres en attente d'adhésion: " . implode(", ", array_map(fn($u) => $u->getPseudo(), $liste_attentes)));
+                            $this->logger->info("Initialisation des tableaux de gestion des adhésions en attente et refusées.");
                         }
                         if($role->peutGererCommunaute()){
                             $this->logger->info("L'utilisateur est le propriétaire de la communauté.");
@@ -70,15 +74,27 @@ class CommunauteController implements ControllerInterface
                         $this->logger->info("L'utilisateur n'a pas de rôle dans la communauté.");
                     }
                 }
-                $pseudo_proprio = $this->utilisateurDAO->getPseudoById($this->roleDAO->getProprioByCommunaute($communaute_id)->getUtilisateurId());
-                $pseudos_mod = [];
+                $proprio = [
+                    'pseudo' => $this->utilisateurDAO->getPseudoById($this->roleDAO->getProprioByCommunaute($communaute_id)->getUtilisateurId()),
+                    'pp' => $this->utilisateurDAO->getPpById($this->roleDAO->getProprioByCommunaute($communaute_id)->getUtilisateurId())
+                ];
+
+                $mods = [];
                 foreach($this->roleDAO->getModsByCommunaute($communaute_id) as $moderateur){
-                    $pseudos_mod[] = $this->utilisateurDAO->getPseudoById($moderateur->getUtilisateurId());
+                    $mods[] = [
+                        'pseudo' => $this->utilisateurDAO->getPseudoById($moderateur->getUtilisateurId()),
+                        'pp' => $this->utilisateurDAO->getPpById($moderateur->getUtilisateurId())
+                    ];
                 }
-                $pseudos_membre = [];
-                foreach($this->roleDAO->getMembresByCommunaute($communaute_id) as $membre){
-                    $pseudos_membre[] = $this->utilisateurDAO->getPseudoById($membre->getUtilisateurId());
+
+                $membres = [];
+                foreach($this->roleDAO->getMembresByCommunaute($communaute_id) as $unMembre){
+                    $membres[] = [
+                        'pseudo' => $this->utilisateurDAO->getPseudoById($unMembre->getUtilisateurId()),
+                        'pp' => $this->utilisateurDAO->getPpById($unMembre->getUtilisateurId())
+                    ];
                 }
+
                 require_once __DIR__ . '/../views/communaute.php';
             }
             else{

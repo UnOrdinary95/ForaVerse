@@ -30,8 +30,7 @@ final class Role
 
     public function estAdmin(): bool
     {
-        $utilisateur_dao = new UtilisateurDAO();
-        return $utilisateur_dao->getAdminById($this->utilisateur_id);
+        return (new UtilisateurDAO())->getAdminById($this->utilisateur_id);
     } 
 
     public function getRole(): string

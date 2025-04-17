@@ -78,8 +78,7 @@ final class Utilisateur
 
     public function getRoles(): array
     {
-        $roles_dao = new RoleDAO();
-        return $roles_dao->getRolesByUtilisateur($this->id);
+        return (new RoleDAO())->getRolesByUtilisateur($this->id);
     }
 
     public function getCommuCommunModeration(Utilisateur $utilisateur): array

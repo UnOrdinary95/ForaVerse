@@ -22,31 +22,10 @@ final class AdhesionDAO
         return new Adhesion(
             $idUtilisateur,
             $idCommunaute,
-            $result['statut']
+            $result['statut'],
+            $result['datetime_demande']
         );
     }
-
-    // public function getAdhesionByCommunaute(int $idCommunaute): array
-    // {
-    //     $query = $this->pdo->prepare("SELECT * FROM DemandeAdhesion WHERE idCommunaute = ?");
-    //     $query->execute([$idCommunaute]);
-    //     $result = $query->fetchAll(PDO::FETCH_ASSOC);
-        
-    //     if (!$result) {
-    //         return [];
-    //     }
-
-    //     $adhesions = [];
-    //     foreach ($result as $ligne){
-    //         $adhesions[] = new Adhesion(
-    //             $ligne['idutilisateur'],
-    //             $idCommunaute,
-    //             $ligne['statut']
-    //         );
-    //     }
-
-    //     return $adhesions;
-    // }
 
     public function getRefusByCommunaute(int $idCommunaute): array
     {
@@ -63,7 +42,8 @@ final class AdhesionDAO
             $adhesions[] = new Adhesion(
                 $ligne['idutilisateur'],
                 $idCommunaute,
-                $ligne['statut']
+                $ligne['statut'],
+                $ligne['datetime_demande']
             );
         }
 
@@ -85,7 +65,8 @@ final class AdhesionDAO
             $adhesions[] = new Adhesion(
                 $ligne['idutilisateur'],
                 $idCommunaute,
-                $ligne['statut']
+                $ligne['statut'],
+                $ligne['datetime_demande']
             );
         }
 
