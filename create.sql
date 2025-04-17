@@ -142,3 +142,43 @@ ALTER TABLE communaute RENAME COLUMN visibilité TO visibilite;
 ALTER TABLE Communaute
 ALTER COLUMN chemin_photo
 SET DEFAULT 'images/pp_commu/default.png';
+
+ALTER TABLE Abonne
+DROP CONSTRAINT fk_abo_user,
+ADD CONSTRAINT fk_abo_user
+FOREIGN KEY(idUtilisateur) REFERENCES Utilisateur(idUtilisateur)
+ON DELETE CASCADE;
+
+ALTER TABLE Abonne
+DROP CONSTRAINT fk_abo_follower,
+ADD CONSTRAINT fk_abo_follower
+FOREIGN KEY(idAbonne) REFERENCES Utilisateur(idUtilisateur)
+ON DELETE CASCADE;
+
+ALTER TABLE Role
+DROP CONSTRAINT fk_role_user,
+ADD CONSTRAINT fk_role_user
+FOREIGN KEY(idUtilisateur) REFERENCES Utilisateur(idUtilisateur)
+ON DELETE CASCADE;
+
+ALTER TABLE Role
+DROP CONSTRAINT fk_role_commu,
+ADD CONSTRAINT fk_role_commu
+FOREIGN KEY(idCommunaute) REFERENCES Communaute(idCommunaute)
+ON DELETE CASCADE;
+
+-- Si 'accepté' alors, user devient membre de la communauté (L'implémentation était facultatif, on pouvait gérer ça au niveau du backend)
+CREATE OR REPLACE FUNCTION addMembre()
+RETURNS TRIGGER AS $$
+    BEGIN
+       IF NEW.statut = 'acceptée' THEN
+           INSERT INTO Role (idUtilisateur, idCommunaute) VALUES (NEW.idUtilisateur, NEW.idCommunaute);
+        END IF;
+        RETURN NEW;
+    END;
+    $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER after_acceptAdhesion
+    AFTER UPDATE ON DemandeAdhesion
+    FOR EACH ROW
+    EXECUTE FUNCTION addMembre();
