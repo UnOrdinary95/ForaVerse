@@ -69,7 +69,7 @@ final class RoleDAO
         return $roles;
     }
 
-    public function getModByCommunaute(int $communaute_id): array
+    public function getModsByCommunaute(int $communaute_id): array
     {
         $query = $this->pdo->prepare("SELECT * FROM role WHERE idCommunaute = ? AND role = ?");
         $query->execute([$communaute_id, Role::MODERATEUR]);
