@@ -3,11 +3,13 @@
 class ProfilController implements ControllerInterface
 {
     private UtilisateurDAO $utilisateurDAO;
+    private RoleDAO $roleDAO;
     private InscriptionValidator $validateur;
     private Logger $logger;
 
     public function __construct(){
         $this->utilisateurDAO = new UtilisateurDAO();
+        $this->roleDAO = new RoleDAO();
         $this->validateur = new InscriptionValidator();
         $this->logger = new Logger();
     }
@@ -20,10 +22,7 @@ class ProfilController implements ControllerInterface
             if ($profil_id) {
                 $utilisateur = $this->utilisateurDAO->getProfilUtilisateurById($profil_id);
                 $session_user = $this->utilisateurDAO->getProfilUtilisateurById($this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']));
-                // $abonne = $this->abonneDAO->getNbrAbonnesById($profil_id) ?? 0;
-                // $abonnement = $this->abonneDAO->getNbrAbonnementsById($profil_id) ?? 0;
-                // $abonne_dao = $this->abonneDAO;
-                // $utilisateur_dao = $this->utilisateurDAO;
+                $liste_commu_moderation = $utilisateur->getCommuCommunModeration($session_user);
                 $this->logger->info("Profil trouvé: " . $_GET['utilisateur'] . " (ID: $profil_id)");
                 
                 // Si c'est le profil de l'utilisateur connecté, on traite les formulaires de modification
@@ -34,6 +33,13 @@ class ProfilController implements ControllerInterface
                     $this->callbackModifierBio();
                     $this->callbackModifierMdp();
                 }
+
+                if ($_SESSION['Pseudo'] != $_GET['utilisateur'] && count($liste_commu_moderation) > 0){
+                    $this->logger->info("L'utilisateur " . $_SESSION['Pseudo'] . " est modérateur dans les communautés de " . $_GET['utilisateur']);
+                }
+
+
+                                
                 
                 require_once __DIR__ . '/../views/profil.php';
             }

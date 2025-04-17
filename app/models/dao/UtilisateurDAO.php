@@ -72,10 +72,10 @@ final class UtilisateurDAO
         return $query->fetchColumn();
     }
 
-    public function getIdByEmail(string $email):int
+    public function getPseudoById(int $id):string
     {
-        $query = $this->pdo->prepare("SELECT idUtilisateur FROM utilisateur WHERE email = ?");
-        $query->execute([$email]);
+        $query = $this->pdo->prepare("SELECT pseudo FROM utilisateur WHERE idUtilisateur = ?");
+        $query->execute([$id]);
 
         return $query->fetchColumn();
     }
@@ -88,11 +88,11 @@ final class UtilisateurDAO
         return $query->fetchColumn();
     }
 
-    public function getPhotoProfilById(int $id):string
+    public function getAdminById(int $id):bool
     {
-        $query = $this->pdo->prepare("SELECT chemin_photo FROM utilisateur WHERE idutilisateur = ?");
+        $query = $this->pdo->prepare("SELECT est_admin FROM utilisateur WHERE idutilisateur = ?");
         $query->execute([$id]);
-        return $query->fetchColumn();
+        return (bool)$query->fetchColumn();
     }
 
     public function addUtilisateur(string $pseudo, string $email, string $mdp):bool
@@ -155,22 +155,4 @@ final class UtilisateurDAO
         return $query->fetchColumn();
     }
 
-}
-
-if (php_sapi_name() == 'cli') {
-    print("Test de la connexion à la base de données PostgreSQL\n");
-    echo "getPseudos() : \n";
-    $utilisateurDAO = new UtilisateurDAO();
-    $tab = $utilisateurDAO->getPseudos();
-    print("Tableau des pseudos : \n");
-    foreach ($tab as $pseudo) {
-        print($pseudo . "\n");
-    }
-
-    echo "getEmails() : \n";
-    $tab = $utilisateurDAO->getEmails();
-    print("Tableau des emails : \n");
-    foreach ($tab as $email) {
-        print($email . "\n");
-    }
 }

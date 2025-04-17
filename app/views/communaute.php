@@ -6,8 +6,9 @@
  * @var int $nbr_membres
  * @var array $erreurs_addmod
  * @var array $erreurs_rename
- * @var array $moderateurs
- * @var Role $proprio
+ * @var array $pseudos_mod
+ * @var string $pseudo_proprio
+ * @var array $pseudos_membre
  * @var ?Adhesion $adhesion
  * @var array $liste_refus
  * @var array $liste_attentes
@@ -61,9 +62,12 @@
                 <div class="modal-content">
                     <h1>Modération</h1><h1 id="closeModContainer" style="cursor: pointer;">❌</h1>
                     <div id="param_moderation" style="display: block; border: 1px solid black;">
-                        <div style="border-bottom: 1px solid silver; cursor: pointer;" id="gestionadhesion">
-                            <h2>Gestion des adhésions</h2>
-                        </div>
+                        
+                        <?php if (!$communaute->getVisibilite()): ?>
+                            <div style="border-bottom: 1px solid silver; cursor: pointer;" id="gestionadhesion">
+                                <h2>Gestion des adhésions</h2>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -144,11 +148,11 @@
                     <hr>
                     <h3>Liste des modérateurs actuels</h3>
                     <div>
-                        <?php if(isset($moderateurs) && count($moderateurs) > 0): ?>
-                            <?php foreach($moderateurs as $mod): ?>
-                                <span><?= htmlspecialchars($mod->getUtilisateur()->getPseudo()) ?></span>
+                        <?php if(isset($pseudos_mod) && count($pseudos_mod) > 0): ?>
+                            <?php foreach($pseudos_mod as $pseudo_mod): ?>
+                                <span><?= htmlspecialchars($pseudo_mod) ?></span>
                                 <form method="POST" action="?action=communaute&nomCommu=<?= htmlspecialchars($communaute->getNom()) ?>#modalMod" style="display:inline">
-                                    <input type="hidden" name="deleteMod" value="<?= $mod->getUtilisateurId() ?>">
+                                    <input type="hidden" name="deleteMod" value="<?= $pseudo_mod ?>">
                                     <button type="submit">➖</button>
                                 </form>
                             <?php endforeach; ?>
@@ -205,20 +209,33 @@
             <p id="compteurMembres"><?= htmlspecialchars($nbr_membres) . " Membres"?></p>
 
             <h2>Propriétaire</h2>
-            <a href="./?action=profil&utilisateur=<?= htmlspecialchars($proprio->getUtilisateur()->getPseudo()) ?>" style="text-decoration: none;">
-                <span><?= htmlspecialchars($proprio->getUtilisateur()->getPseudo()) ?></span>
+            <a href="./?action=profil&utilisateur=<?= htmlspecialchars($pseudo_proprio) ?>" style="text-decoration: none;">
+                <span><?= htmlspecialchars($pseudo_proprio) ?></span>
             </a>
 
             <h2>Modérateurs</h2>
             <div>
-                <?php if(isset($moderateurs) && count($moderateurs) > 0): ?>
-                    <?php foreach($moderateurs as $mod): ?>
-                        <a href="./?action=profil&utilisateur=<?= htmlspecialchars($mod->getUtilisateur()->getPseudo()) ?>" style="text-decoration: none;">
-                            <span><?= htmlspecialchars($mod->getUtilisateur()->getPseudo()) ?></span>
+                <?php if(isset($pseudos_mod) && count($pseudos_mod) > 0): ?>
+                    <?php foreach($pseudos_mod as $pseudo_mod): ?>
+                        <a href="./?action=profil&utilisateur=<?= htmlspecialchars($pseudo_mod) ?>" style="text-decoration: none;">
+                            <span><?= htmlspecialchars($pseudo_mod) ?></span>
                         </a>
                     <?php endforeach; ?>
                 <?php else: ?>
                     <p>Aucun modérateur pour le moment.</p>
+                <?php endif; ?>
+            </div>
+
+            <h2>Membres</h2>
+            <div>
+                <?php if(isset($pseudos_membre) && count($pseudos_membre) > 0): ?>
+                    <?php foreach($pseudos_membre as $pseudo_membre): ?>
+                        <a href="./?action=profil&utilisateur=<?= htmlspecialchars($pseudo_membre) ?>" style="text-decoration: none;">
+                            <span><?= htmlspecialchars($pseudo_membre) ?></span>
+                        </a>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <p>Aucun membre pour le moment.</p>
                 <?php endif; ?>
             </div>
         </div>

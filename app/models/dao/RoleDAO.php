@@ -108,6 +108,27 @@ final class RoleDAO
         );
     }
     
+    public function getMembresByCommunaute(int $communaute_id): array
+    {
+        $query = $this->pdo->prepare("SELECT * FROM role WHERE idCommunaute = ? AND role = ?");
+        $query->execute([$communaute_id, Role::MEMBRE]);
+        $result = $query->fetchAll(PDO::FETCH_ASSOC);
+        
+        if (!$result) {
+            return [];
+        }
+
+        $roles = [];
+        foreach ($result as $ligne){
+            $roles[] = new Role(
+                $ligne['idutilisateur'],
+                $communaute_id,
+                Role::MEMBRE
+            );
+        }
+
+        return $roles;
+    }
 
     public function getNbrRolesByCommunaute(int $communaute_id): int
     {

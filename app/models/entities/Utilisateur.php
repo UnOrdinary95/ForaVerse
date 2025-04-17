@@ -10,9 +10,6 @@ final class Utilisateur
     private string $bio;
     private ?string $date_inscription;
     private bool $est_admin;
-    private Abonne $abonne;
-
-    private array $roles;
 
     public function __construct(
         ?string $unPseudo = null,
@@ -32,9 +29,6 @@ final class Utilisateur
         $this->bio = $uneBio;
         $this->date_inscription = $uneDateInscription;
         $this->est_admin = $unEstAdmin;
-        $this->abonne = new Abonne($this->id);
-        $roles_dao = new RoleDAO();
-        $this->roles = $roles_dao->getRolesByUtilisateur($this->id);
     }
 
     public function getId(): ?int
@@ -79,23 +73,36 @@ final class Utilisateur
 
     public function getSystemeAbonnement(): Abonne
     {
-        return $this->abonne;
+        return new Abonne($this->id);
+    }
+
+    public function getRoles(): array
+    {
+        $roles_dao = new RoleDAO();
+        return $roles_dao->getRolesByUtilisateur($this->id);
     }
 
     public function getCommuCommunModeration(Utilisateur $utilisateur): array
-    {        
-        if ($utilisateur->estAdministrateur()) {
-            return $this->roles;
-        }
-        
-        $commu = [];
-        foreach ($this->roles as $role) {
-            foreach($utilisateur->roles as $role2) {
-                if ($role->getCommunauteId() === $role2->getCommunauteId() && $role2->peutModerer()) {
-                    $commu[] = $role->getCommunaute();
-                }
+    {   
+        $communautes = [];         
+        $mesRoles = $this->getRoles();
+        $rolesUtilisateur = $utilisateur->getRoles();
+
+        $commu_moderation = [];
+        foreach ($rolesUtilisateur as $role){
+            if ($role->peutModerer()) {
+                $commu_moderation[$role->getCommunauteId()] = $role->getRole();
             }
         }
-        return $commu;
+
+        foreach ($mesRoles as $role) {
+            if (array_key_exists($role->getCommunauteId(), $commu_moderation)) {
+                if ($role->estMembre()){
+                    $communautes[$role->getCommunauteId()] = $commu_moderation[$role->getCommunauteId()];
+                } 
+            }
+        }
+
+        return $communautes;
     }
 }

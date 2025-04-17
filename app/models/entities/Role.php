@@ -5,8 +5,6 @@ final class Role
     private int $utilisateur_id;
     private int $communaute_id;
     private string $role;
-    private Utilisateur $utilisateur;
-    private Communaute $communaute;
 
     const PROPRIETAIRE = 'propriétaire';
     const MODERATEUR = 'modérateur';
@@ -17,11 +15,8 @@ final class Role
         $this->utilisateur_id = $utilisateur_id;
         $this->communaute_id = $communaute_id;
         $this->role = $role;
-        $utilisateur_dao = new UtilisateurDAO();
-        $communaute_dao = new CommunauteDAO();
-        $this->utilisateur = $utilisateur_dao->getProfilUtilisateurById($utilisateur_id);
-        $this->communaute = $communaute_dao->getCommunauteById($communaute_id);
     }
+
 
     public function getUtilisateurId(): int
     {
@@ -33,15 +28,11 @@ final class Role
         return $this->communaute_id;
     }
 
-    public function getUtilisateur(): Utilisateur
+    public function estAdmin(): bool
     {
-        return $this->utilisateur;
-    }
-
-    public function getCommunaute(): Communaute
-    {
-        return $this->communaute;
-    }
+        $utilisateur_dao = new UtilisateurDAO();
+        return $utilisateur_dao->getAdminById($this->utilisateur_id);
+    } 
 
     public function getRole(): string
     {
@@ -65,17 +56,17 @@ final class Role
 
     public function peutModerer(): bool
     {
-        return $this->estProprietaire() || $this->estModerateur() || $this->utilisateur->estAdministrateur();
+        return $this->estProprietaire() || $this->estModerateur() || $this->estAdmin();
     }
 
     public function peutGererCommunaute(): bool
     {
-        return $this->estProprietaire() || $this->utilisateur->estAdministrateur();
+        return $this->estProprietaire() || $this->estAdmin();
     }
 
     public function estMembreOuModerateur(): bool
     {
-        return $this->estModerateur() || $this->estMembre() || $this->utilisateur->estAdministrateur();
+        return $this->estModerateur() || $this->estMembre() || $this->estAdmin();
     }
 
 }

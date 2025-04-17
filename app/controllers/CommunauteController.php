@@ -1,7 +1,4 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 
 class CommunauteController implements ControllerInterface
 {
@@ -58,7 +55,7 @@ class CommunauteController implements ControllerInterface
                             $this->callbackGestionAdhesion();
                             $this->logger->info("Liste des membres en attente d'adhésion: " . implode(", ", array_map(fn($u) => $u->getPseudo(), $liste_attentes)));
                         }
-                        if($role->estProprietaire()){
+                        if($role->peutGererCommunaute()){
                             $this->logger->info("L'utilisateur est le propriétaire de la communauté.");
                             $this->callbackSuppressionCommunaute();
                             $this->callbackRename();
@@ -73,8 +70,15 @@ class CommunauteController implements ControllerInterface
                         $this->logger->info("L'utilisateur n'a pas de rôle dans la communauté.");
                     }
                 }
-                $proprio = $this->roleDAO->getProprioByCommunaute($communaute_id);
-                $moderateurs = $this->roleDAO->getModByCommunaute($communaute_id);
+                $pseudo_proprio = $this->utilisateurDAO->getPseudoById($this->roleDAO->getProprioByCommunaute($communaute_id)->getUtilisateurId());
+                $pseudos_mod = [];
+                foreach($this->roleDAO->getModsByCommunaute($communaute_id) as $moderateur){
+                    $pseudos_mod[] = $this->utilisateurDAO->getPseudoById($moderateur->getUtilisateurId());
+                }
+                $pseudos_membre = [];
+                foreach($this->roleDAO->getMembresByCommunaute($communaute_id) as $membre){
+                    $pseudos_membre[] = $this->utilisateurDAO->getPseudoById($membre->getUtilisateurId());
+                }
                 require_once __DIR__ . '/../views/communaute.php';
             }
             else{

@@ -2,6 +2,7 @@
 /**
  * @var Utilisateur $utilisateur
  * @var Utilisateur $session_user
+ * @var array $liste_commu_moderation
  */
 ?>
 <!DOCTYPE html>
@@ -53,6 +54,11 @@
                 <button id="btnAbonnement" data-pseudo="<?= $utilisateur->getPseudo() ?>">S'abonner</button>
             <?php endif; ?>
         <?php endif; ?>
+        
+        <?php if (count($liste_commu_moderation) > 0): ?>
+            <button id="btnModeration">⚙️Modération</button>
+        <?php endif; ?>
+
 
         <?php if ($utilisateur->getPseudo() == $_SESSION['Pseudo']): ?>
             <button id="btnParametres">⚙️Paramètres</button>
