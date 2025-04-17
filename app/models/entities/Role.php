@@ -5,8 +5,6 @@ final class Role
     private int $utilisateur_id;
     private int $communaute_id;
     private string $role;
-    private UtilisateurDAO $utilisateur_dao;
-    private CommunauteDAO $communaute_dao;
     private Utilisateur $utilisateur;
     private Communaute $communaute;
 
@@ -19,10 +17,10 @@ final class Role
         $this->utilisateur_id = $utilisateur_id;
         $this->communaute_id = $communaute_id;
         $this->role = $role;
-        $this->utilisateur_dao = new UtilisateurDAO();
-        $this->communaute_dao = new CommunauteDAO();
-        $this->utilisateur = $this->utilisateur_dao->getProfilUtilisateurById($utilisateur_id);
-        $this->communaute = $this->communaute_dao->getCommunauteById($communaute_id);
+        $utilisateur_dao = new UtilisateurDAO();
+        $communaute_dao = new CommunauteDAO();
+        $this->utilisateur = $utilisateur_dao->getProfilUtilisateurById($utilisateur_id);
+        $this->communaute = $communaute_dao->getCommunauteById($communaute_id);
     }
 
     public function getUtilisateurId(): int
