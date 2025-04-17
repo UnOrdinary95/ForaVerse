@@ -47,6 +47,28 @@ final class RoleDAO
         return $roles;
     }
 
+    public function getRolesByUtilisateur(int $utilisateur_id): array
+    {
+        $query = $this->pdo->prepare("SELECT * FROM role WHERE idUtilisateur = ?");
+        $query->execute([$utilisateur_id]);
+        $result = $query->fetchAll(PDO::FETCH_ASSOC);
+        
+        if (!$result) {
+            return [];
+        }
+
+        $roles = [];
+        foreach ($result as $ligne){
+            $roles[] = new Role(
+                $utilisateur_id,
+                $ligne['idcommunaute'],
+                $ligne['role']
+            );
+        }
+
+        return $roles;
+    }
+
     public function getModByCommunaute(int $communaute_id): array
     {
         $query = $this->pdo->prepare("SELECT * FROM role WHERE idCommunaute = ? AND role = ?");
