@@ -6,9 +6,9 @@
  * @var int $nbr_membres
  * @var array $erreurs_addmod
  * @var array $erreurs_rename
- * @var array $pseudos_mod
- * @var string $pseudo_proprio
- * @var array $pseudos_membre
+ * @var array $mods
+ * @var string $proprio
+ * @var array $membres
  * @var ?Adhesion $adhesion
  * @var array $liste_refus
  * @var array $liste_attentes
@@ -81,11 +81,11 @@
                         </div>
                         <div id="demandeblock" style="display: block;">
                             <?php if (count($liste_attentes) > 0): ?>
-                                <?php foreach ($liste_attentes as $adhesion): ?>
+                                <?php foreach ($liste_attentes as $pseudo_adhesion => $adhesion): ?>
                                     <div>
-                                        <span><?= htmlspecialchars($adhesion->getPseudo()) ?></span>
+                                        <a href="./?action=profil&utilisateur=<?=$pseudo_adhesion?>"><span><?= htmlspecialchars($pseudo_adhesion) . " - le " . (new DateTime($adhesion['datedemande']))->format('d/m/Y') ?></span></a>
                                         <form method="POST" action="?action=communaute&nomCommu=<?= htmlspecialchars($communaute->getNom()) ?>#gestionAdhesion" style="display:inline">
-                                            <input type="hidden" name="idAdhesion" value="<?= $adhesion->getId() ?>">
+                                            <input type="hidden" name="idAdhesion" value="<?= $adhesion['id'] ?>">
                                             <button type="submit" name="validerAdhesion">✔️</button>
                                             <button type="submit" name="refuserAdhesion">❌</button>
                                         </form>
@@ -98,11 +98,11 @@
 
                         <div id="refusblock" style="display: none;">
                             <?php if (count($liste_refus) > 0): ?>
-                                <?php foreach ($liste_refus as $adhesion): ?>
+                                <?php foreach ($liste_refus as $pseudo_adhesion => $id_adhesion): ?>
                                     <div>
-                                        <span><?= htmlspecialchars($adhesion->getPseudo()) ?></span>
+                                        <a href="./?action=profil&utilisateur=<?=$pseudo_adhesion?>"><span><?= htmlspecialchars($pseudo_adhesion) ?></span></a>
                                         <form method="POST" action="?action=communaute&nomCommu=<?= htmlspecialchars($communaute->getNom()) ?>#gestionAdhesion" style="display:inline">
-                                            <input type="hidden" name="idAdhesion" value="<?= $adhesion->getId() ?>">
+                                            <input type="hidden" name="idAdhesion" value="<?= $id_adhesion ?>">
                                             <button type="submit" name="annulerAdhesion">➖</button>
                                         </form>
                                     </div>
@@ -209,16 +209,18 @@
             <p id="compteurMembres"><?= htmlspecialchars($nbr_membres) . " Membres"?></p>
 
             <h2>Propriétaire</h2>
-            <a href="./?action=profil&utilisateur=<?= htmlspecialchars($pseudo_proprio) ?>" style="text-decoration: none;">
-                <span><?= htmlspecialchars($pseudo_proprio) ?></span>
+            <a href="./?action=profil&utilisateur=<?= htmlspecialchars($proprio['pseudo']) ?>" style="text-decoration: none; display:flex; align-items: center; gap: 3px;">
+                <img src="../../public/<?= htmlspecialchars($proprio['pp'])?>" style="width: 40px; height: 40px; border-radius: 30%;" alt="Profil">
+                <span style="font-size: 18px;"><?= htmlspecialchars($proprio['pseudo']) ?></span>
             </a>
 
             <h2>Modérateurs</h2>
             <div>
-                <?php if(isset($pseudos_mod) && count($pseudos_mod) > 0): ?>
-                    <?php foreach($pseudos_mod as $pseudo_mod): ?>
-                        <a href="./?action=profil&utilisateur=<?= htmlspecialchars($pseudo_mod) ?>" style="text-decoration: none;">
-                            <span><?= htmlspecialchars($pseudo_mod) ?></span>
+                <?php if(isset($mods) && count($mods) > 0): ?>
+                    <?php foreach($mods as $mod): ?>
+                        <a href="./?action=profil&utilisateur=<?= htmlspecialchars($mod['pseudo']) ?>" style="text-decoration: none; display:flex; align-items: center; gap: 3px;">
+                            <img src="../../public/<?= htmlspecialchars($mod['pp'])?>" style="width: 40px; height: 40px; border-radius: 30%;" alt="Profil">
+                            <span style="font-size: 18px;"><?= htmlspecialchars($mod['pseudo']) ?></span>
                         </a>
                     <?php endforeach; ?>
                 <?php else: ?>
@@ -228,10 +230,11 @@
 
             <h2>Membres</h2>
             <div>
-                <?php if(isset($pseudos_membre) && count($pseudos_membre) > 0): ?>
-                    <?php foreach($pseudos_membre as $pseudo_membre): ?>
-                        <a href="./?action=profil&utilisateur=<?= htmlspecialchars($pseudo_membre) ?>" style="text-decoration: none;">
-                            <span><?= htmlspecialchars($pseudo_membre) ?></span>
+                <?php if(isset($membres) && count($membres) > 0): ?>
+                    <?php foreach($membres as $membre): ?>
+                        <a href="./?action=profil&utilisateur=<?= htmlspecialchars($membre['pseudo']) ?>" style="text-decoration: none; display:flex; align-items: center; gap: 3px;">
+                            <img src="../../public/<?= htmlspecialchars($membre['pp'])?>" style="width: 40px; height: 40px; border-radius: 30%;" alt="Profil">
+                            <span style="font-size: 18px;"><?= htmlspecialchars($membre['pseudo']) ?></span>
                         </a>
                     <?php endforeach; ?>
                 <?php else: ?>
