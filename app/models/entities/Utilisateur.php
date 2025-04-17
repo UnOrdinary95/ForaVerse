@@ -12,6 +12,8 @@ final class Utilisateur
     private bool $est_admin;
     private Abonne $abonne;
 
+    private array $roles;
+
     public function __construct(
         ?string $unPseudo = null,
         ?string $unEmail = null,
@@ -31,6 +33,8 @@ final class Utilisateur
         $this->date_inscription = $uneDateInscription;
         $this->est_admin = $unEstAdmin;
         $this->abonne = new Abonne($this->id);
+        $roles_dao = new RoleDAO();
+        $this->roles = $roles_dao->getRolesByUtilisateur($this->id);
     }
 
     public function getId(): ?int
@@ -76,5 +80,22 @@ final class Utilisateur
     public function getSystemeAbonnement(): Abonne
     {
         return $this->abonne;
+    }
+
+    public function getCommuCommunModeration(Utilisateur $utilisateur): array
+    {        
+        if ($utilisateur->estAdministrateur()) {
+            return $this->roles;
+        }
+        
+        $commu = [];
+        foreach ($this->roles as $role) {
+            foreach($utilisateur->roles as $role2) {
+                if ($role->getCommunauteId() === $role2->getCommunauteId() && $role2->peutModerer()) {
+                    $commu[] = $role->getCommunaute();
+                }
+            }
+        }
+        return $commu;
     }
 }
