@@ -48,14 +48,23 @@ final class CommunauteDAO
         return $query->fetchColumn();
     }
 
-    public function getCommunauteById(int $id): Communaute
+    public function getNomById($id): string
+    {
+        $query = $this->pdo->prepare("SELECT nom FROM communaute WHERE idcommunaute = ?");
+        $query->execute([$id]);
+        
+        return $query->fetchColumn();
+    }
+
+    public function getCommunauteById(int $id): ?Communaute
     {
         $query = $this->pdo->prepare("SELECT * FROM communaute WHERE idCommunaute = ?");
         $query->execute([$id]);
         
         $result = $query->fetch(PDO::FETCH_ASSOC);
+        
         if (!$result) {
-            throw new Exception("Communauté introuvable");
+            return null;
         }
         
         return new Communaute(
@@ -73,8 +82,9 @@ final class CommunauteDAO
         $query->execute();
         
         $result = $query->fetchAll(PDO::FETCH_ASSOC);
+
         if (!$result) {
-            throw new Exception("Aucune communauté trouvée");
+            return [];
         }
         
         $communautes = [];
