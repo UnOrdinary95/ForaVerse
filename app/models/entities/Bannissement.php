@@ -1,0 +1,74 @@
+<?php
+
+final class Bannissement
+{
+    private int $id;
+    private int $idModerateur;
+    private int $idUtilisateur;
+    private ?int $idCommunaute;
+    private string $dateDebut;
+    private ?string $dateFin;
+    private ?string $raison;
+    private bool $estGlobal;
+    
+
+    public function __construct(
+        int $unId,
+        int $unIdModerateur,
+        int $unIdUtilisateur,
+        ?int $unIdCommunaute = null,
+        string $uneDateDebut,
+        string $uneDateFin,
+        bool $estGlobal,
+        string $uneRaison = '',
+    ) {
+        $this->id = $unId;
+        $this->idModerateur = $unIdModerateur;
+        $this->idUtilisateur = $unIdUtilisateur;
+        $this->idCommunaute = $unIdCommunaute;
+        $this->raison = $uneRaison;
+        $this->dateDebut = $uneDateDebut;
+        $this->dateFin = $uneDateFin;
+        $this->estGlobal = $estGlobal;
+    }
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getIdModerateur(): ?int
+    {
+        return $this->idModerateur;
+    }
+
+    public function getIdUtilisateur(): ?int
+    {
+        return $this->idUtilisateur;
+    }
+
+    public function getIdCommunaute(): ?int
+    {
+        return $this->idCommunaute;
+    }
+
+    public function getRaison(): string
+    {
+        return $this->raison;
+    }
+
+    public function getDateDebut(): string
+    {
+        return $this->dateDebut;
+    }
+    
+    public function getDateFin(): ?string
+    {
+        return $this->dateFin;
+    }
+    
+    public function getEstGlobal(): bool
+    {
+        return $this->estGlobal;
+    }
+}
