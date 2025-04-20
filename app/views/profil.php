@@ -3,6 +3,7 @@
  * @var Utilisateur $utilisateur
  * @var Utilisateur $session_user
  * @var array $liste_commu_moderation
+ * @var ?Bannissement $est_banni_global
  */
 ?>
 <!DOCTYPE html>
@@ -55,10 +56,108 @@
             <?php endif; ?>
         <?php endif; ?>
         
-        <?php if (count($liste_commu_moderation) > 0): ?>
+        <?php if (count($liste_commu_moderation) > 0 || $session_user->estAdministrateur() && $utilisateur->getPseudo() != $_SESSION['Pseudo']): ?>
             <button id="btnModeration">⚙️Modération</button>
+            <div id="profilmodContainer" class="modal">
+                <div class="modal-content">
+                    <h1>Modération</h1><h1 id="closeModContainer" style="cursor: pointer;">❌</h1>
+                    <div id="profilmodCommu" style="display: block; border: 1px solid black;">
+                        <div style="border-bottom: 1px solid silver; cursor: pointer;" id="btnwarn">
+                            <h2><?= "Avertir " . htmlspecialchars($utilisateur->getPseudo()) ?></h2>
+                        </div>
+                        <div style="border-bottom: 1px solid silver; cursor: pointer;" id="btnban">
+                            <h2><?= "Bannir " . htmlspecialchars($utilisateur->getPseudo()) ?></h2>
+                        </div>
+                        <?php if($est_banni_global !== null):?>
+                            <div style="border-bottom: 1px solid silver; cursor: pointer;" id="btncancel">
+                                <h2>Annuler le bannissement global</h2>
+                            </div>
+                        <?php endif;?>
+                        <?php if($session_user->estAdministrateur()): ?>
+                            <div style="cursor: pointer;" id="btndelete">
+                                <h2><?= "Supprimer " . htmlspecialchars($utilisateur->getPseudo()) ?></h2>
+                            </div>
+                        <?php endif;?>
+                    </div>
+                </div>
+            </div>
         <?php endif; ?>
 
+        <div id="modalWarn" class="modal">
+            <div class="modal-content">
+                <h1>Avertir</h1><h1 id="closeWarn" style="cursor: pointer;">❌</h1>
+                <form action="?action=profil&utilisateur=<?=htmlspecialchars($utilisateur->getPseudo())?>#modalWarn" method="POST" novalidate>
+                    <div style="display: inline;">
+                        <p>Communauté : </p>
+                        <select name="liste_commu">
+                            <?php foreach ($liste_commu_moderation as $id_commu => $info_commu): ?>
+                                <option value="<?= htmlspecialchars($id_commu) ?>"><?= htmlspecialchars($info_commu['nom']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <p>Motif de l'avertissement :</p>
+                    <textarea name="raisonWarn" style="resize: none;" rows="5" cols="80"></textarea><br><br>
+                    <?php if (isset($_SESSION['erreurs']['raisonWarn'])): ?>
+                        <span style="color: red"><?= $_SESSION['erreurs']['raisonWarn'] ?></span><br>
+                        <?php unset($_SESSION['erreurs']['raisonWarn']); ?>
+                    <?php endif; ?>
+                    <button type="submit" name="envoyer" value="Avertir">Avertir</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="modalBan" class="modal">
+            <div class="modal-content">
+                <h1>Bannir</h1><h1 id="closeBan" style="cursor: pointer;">❌</h1>
+                <form action="?action=profil&utilisateur=<?=htmlspecialchars($utilisateur->getPseudo())?>#modalBan" method="POST" novalidate>
+                    <div style="display: inline;">
+                        <p>Communauté : </p>
+                        <select name="liste_commu">
+                            <?php if($session_user->estAdministrateur()): ?>
+                                <option value="global">🌐Global</option>
+                            <?php endif; ?>
+                            <?php foreach ($liste_commu_moderation as $id_commu => $info_commu):
+                                if (!$info_commu['estbanni']): ?>
+                                    <option value="<?= htmlspecialchars($id_commu) ?>"><?= htmlspecialchars($info_commu['nom']) ?></option>
+                                <?php endif; ?>
+                            <?php endforeach;?>
+                        </select>
+                    </div>
+                    <p>Durée du bannissement :</p>
+                    <input type="radio" name="dureeban" value="1m">
+                    <label for="1month">1 mois</label><br>
+                    <input type="radio" name="dureeban" value="P">
+                    <label for="perm">Permanent</label><br>
+                    <p>Motif du bannissement :</p>
+                    <textarea name="raisonBan" style="resize: none;" rows="5" cols="80"></textarea><br><br>
+                    <?php if (isset($_SESSION['erreurs']['raisonBan'])): ?>
+                        <span style="color: red"><?= $_SESSION['erreurs']['raisonBan'] ?></span><br>
+                        <?php unset($_SESSION['erreurs']['raisonBan']); ?>
+                    <?php endif; ?>
+                    <button type="submit" name="envoyer" value="Bannir">Bannir</button>
+                </form>
+            </div>
+        </div>
+        
+        <div id="modalCancel" class="modal">
+            <div class="modal-content">
+                <h1>Annuler le bannissement</h1><h1 id="closeCancel" style="cursor: pointer;">❌</h1>
+                <form action="?action=profil&utilisateur=<?=htmlspecialchars($utilisateur->getPseudo())?>#modalCancel" method="POST" novalidate>
+                    <p>Êtes-vous sûr de vouloir annuler le bannissement global ?</p>
+                    <input type="submit" name="AnnulerBanGlobal" value="Annuler">
+                </form>
+            </div>
+        </div>
+
+        <div id="modalSuppr" class="modal">
+            <div class="modal-content">
+                <h1>Supprimer</h1><h1 id="closeSuppr" style="cursor: pointer;">❌</h1>
+                <form action="?action=profil&utilisateur=<?=htmlspecialchars($utilisateur->getPseudo())?>#modalSuppr" method="POST" novalidate>
+                    <p>Êtes-vous sûr de vouloir supprimer ce compte ?</p>
+                    <input type="submit" name="Suppr" value="Supprimer">
+                </form>
+            </div>
+        </div>
 
         <?php if ($utilisateur->getPseudo() == $_SESSION['Pseudo']): ?>
             <button id="btnParametres">⚙️Paramètres</button>
@@ -156,6 +255,7 @@
         </div>
     </div>
     <script src="../../public/scripts/profil_settings.js"></script>
+    <script src="../../public/scripts/profil_moderation_settings.js"></script>
     <script src="../../public/scripts/gestion_abonnement.js"></script>
     <script src="../../public/scripts/image_cropper.js"></script>
 </body>

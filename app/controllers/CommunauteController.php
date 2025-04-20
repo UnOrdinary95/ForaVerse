@@ -8,6 +8,8 @@ class CommunauteController implements ControllerInterface
     private UtilisateurDAO $utilisateurDAO;
     private CommunauteValidator $validateur;
     private AdhesionDAO $adhesionDAO;
+    private AvertissementDAO $avertissementDAO;
+    private BannissementDAO $bannissementDAO;
     private array $erreurs;
 
     public function __construct()
@@ -17,6 +19,8 @@ class CommunauteController implements ControllerInterface
         $this->roleDAO = new RoleDAO();
         $this->utilisateurDAO = new UtilisateurDAO();
         $this->adhesionDAO = new AdhesionDAO();
+        $this->avertissementDAO = new AvertissementDAO();
+        $this->bannissementDAO = new BannissementDAO();
         $this->validateur = new CommunauteValidator();
         $this->erreurs = [];
     }
@@ -37,6 +41,8 @@ class CommunauteController implements ControllerInterface
                 $liste_attentes = [];
                 $erreurs_rename = [];
                 $erreurs_addmod = [];
+                $liste_warns = [];
+                $liste_bans = [];
                 
                 if (isset($_SESSION['Pseudo'])){
                     $role = $this->roleDAO->getRole($this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']), $communaute_id);
@@ -55,9 +61,18 @@ class CommunauteController implements ControllerInterface
                                 ];
                             }
 
+                            $liste_warns = $this->avertissementDAO->getAllAvertissementsByIdCommunaute($communaute_id);
+                            $liste_bans = $this->bannissementDAO->getAllBannissementsByIdCommunaute($communaute_id);
+                            $this->logger->info("Récupération des avertissements et bannissements pour la communauté: " . $_GET['nomCommu']);
+
                             $this->callbackAnnulerAdhesion();
                             $this->callbackGestionAdhesion();
                             $this->logger->info("Initialisation des tableaux de gestion des adhésions en attente et refusées.");
+
+                            $this->callbackAnnulerAvertissement();
+                            $this->callbackAnnulerBannissement();
+                            $this->logger->info("Initialisation des tableaux de gestion des avertissements et bannissements.");
+
                         }
                         if($role->peutGererCommunaute()){
                             $this->logger->info("L'utilisateur est le propriétaire de la communauté.");
@@ -91,7 +106,9 @@ class CommunauteController implements ControllerInterface
                 foreach($this->roleDAO->getMembresByCommunaute($communaute_id) as $unMembre){
                     $membres[] = [
                         'pseudo' => $this->utilisateurDAO->getPseudoById($unMembre->getUtilisateurId()),
-                        'pp' => $this->utilisateurDAO->getPpById($unMembre->getUtilisateurId())
+                        'pp' => $this->utilisateurDAO->getPpById($unMembre->getUtilisateurId()),
+                        'admin' => $this->utilisateurDAO->getAdminById($unMembre->getUtilisateurId()),
+                        'banglobal' => $this->bannissementDAO->getBannissementGlobalByIdUtilisateur($unMembre->getUtilisateurId()) !== null ? true : false
                     ];
                 }
 
@@ -267,5 +284,41 @@ class CommunauteController implements ControllerInterface
                 exit();
             }    
         }            
+    }
+
+    public function callbackAnnulerAvertissement(): void
+    {
+        if (isset($_POST['annulerAvertissement'])){
+            try{
+                $this->avertissementDAO->deleteAvertissementById($_POST['idAvertissement']);
+                $this->logger->info("Avertissement annulé avec succès: " . $_POST['idAvertissement']);
+                header('Location: ./?action=communaute&nomCommu=' . urlencode($_GET['nomCommu']). "#listeAvertiContainer");
+                exit();
+            }
+            catch(PDOException $e)
+            {
+                $this->logger->error("Erreur lors de l'annulation de l'avertissement: " . $e->getMessage());
+                header('Location: ./?action=erreur');
+                exit();
+            }
+        }
+    }
+
+    public function callbackAnnulerBannissement(): void
+    {
+        if (isset($_POST['annulerBannissement'])){
+            try{
+                $this->bannissementDAO->deleteBannissementById($_POST['idBannissement']);
+                $this->logger->info("Bannissement annulé avec succès: " . $_POST['idBannissement']);
+                header('Location: ./?action=communaute&nomCommu=' . urlencode($_GET['nomCommu']). "#listeBanniContainer");
+                exit();
+            }
+            catch(PDOException $e)
+            {
+                $this->logger->error("Erreur lors de l'annulation du bannissement: " . $e->getMessage());
+                header('Location: ./?action=erreur');
+                exit();
+            }
+        }
     }
 }

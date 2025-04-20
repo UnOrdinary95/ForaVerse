@@ -82,26 +82,64 @@ final class Utilisateur
     }
 
     public function getCommuCommunModeration(Utilisateur $utilisateur): array
-    {   
+    {
+        
+        $communaute_dao = new CommunauteDAO();
+        $bannissement_dao = new BannissementDAO();
+        $avertissement_dao = new AvertissementDAO();
         $communautes = [];         
         $mesRoles = $this->getRoles();
         $rolesUtilisateur = $utilisateur->getRoles();
 
+        if ($utilisateur->estAdministrateur()) {
+            foreach($mesRoles as $role){
+                if ($role->estMembre()){
+                    $communautes[$role->getCommunauteId()] = [
+                        'nom' => $communaute_dao->getNomById($role->getCommunauteId()),
+                        'estbanni' => $bannissement_dao->getBannissementByIdUtilisateurAndCommunaute($utilisateur->getId(), $role->getCommunauteId()) !== null,
+                        'aete_averti' => $avertissement_dao->getAvertissementsByIdUtilisateurAndCommunaute($utilisateur->getId(), $role->getCommunauteId()) !== null
+                    ];
+                }
+            }
+
+            return $communautes;
+        }
+
         $commu_moderation = [];
         foreach ($rolesUtilisateur as $role){
             if ($role->peutModerer()) {
-                $commu_moderation[$role->getCommunauteId()] = $role->getRole();
+                $commu_moderation[$role->getCommunauteId()] = $communaute_dao->getNomById($role->getCommunauteId());
             }
         }
 
         foreach ($mesRoles as $role) {
             if (array_key_exists($role->getCommunauteId(), $commu_moderation)) {
                 if ($role->estMembre()){
-                    $communautes[$role->getCommunauteId()] = $commu_moderation[$role->getCommunauteId()];
+                    $communautes[$role->getCommunauteId()] = [
+                        'nom' => $commu_moderation[$role->getCommunauteId()],
+                        'estbanni' => $bannissement_dao->getBannissementByIdUtilisateurAndCommunaute($utilisateur->getId(), $role->getCommunauteId()) !== null,
+                        'aete_averti' => $avertissement_dao->getAvertissementsByIdUtilisateurAndCommunaute($utilisateur->getId(), $role->getCommunauteId()) !== null
+                    ];
                 } 
             }
         }
 
         return $communautes;
     }
+
+    public function getBannissementByIdUtilisateurAndCommunaute(int $id_communaute): ?Bannissement
+    {
+        return (new BannissementDAO())->getBannissementByIdUtilisateurAndCommunaute($this->id, $id_communaute);
+    }
+
+    public function getAllBannissementsByIdUtilisateur(): array
+    {
+        return (new BannissementDAO())->getAllBannissementsByIdUtilisateur($this->id);
+    }
+
+    public function getAvertissementsByIdUtilisateurAndCommunaute(int $idCommunaute): array
+    {
+        return (new AvertissementDAO())->getAvertissementsByIdUtilisateurAndCommunaute($this->id, $idCommunaute);
+    }
+
 }

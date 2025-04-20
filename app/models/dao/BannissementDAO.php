@@ -31,8 +31,8 @@ final class BannissementDAO
         $curdate->modify('+1 month');
         $date_fin = $curdate->format('Y-m-d H:i:s.u');
 
-        $query = $this->pdo->prepare("INSERT INTO bannissement (idModerateur, idUtilisateur, idCommunaute, raison, date_fin) VALUES (?, ?, ?, ?, ?)");
-        return $query->execute([$idModerateur, $idUtilisateur, null, $raison, $date_fin]);
+        $query = $this->pdo->prepare("INSERT INTO bannissement (idModerateur, idUtilisateur, idCommunaute, raison, date_fin, est_global) VALUES (?, ?, ?, ?, ?, ?)");
+        return $query->execute([$idModerateur, $idUtilisateur, null, $raison, $date_fin, true]);
     }
 
     public function addBannissementGlobalPermanent(int $idModerateur, int $idUtilisateur, string $raison): bool
@@ -58,13 +58,13 @@ final class BannissementDAO
         }
 
         return new Bannissement(
-            $result['idModeration'],
-            $result['idModerateur'],
-            $result['idUtilisateur'],
-            $result['idCommunaute'],
-            $result['dateDebut'],
-            $result['dateFin'],
+            $result['idmoderation'],
+            $result['idmoderateur'],
+            $result['idutilisateur'],
+            $result['date_debut'],
+            $result['date_fin'],
             $result['est_global'],
+            $result['idcommunaute'],
             $result['raison']
         );
     }
@@ -80,14 +80,70 @@ final class BannissementDAO
         }
 
         return new Bannissement(
-            $result['idModeration'],
-            $result['idModerateur'],
-            $result['idUtilisateur'],
-            null,
-            $result['dateDebut'],
-            $result['dateFin'],
+            $result['idmoderation'],
+            $result['idmoderateur'],
+            $result['idutilisateur'],
+            $result['date_debut'],
+            $result['date_fin'],
             true,
+            null,
+
             $result['raison']
         );
+    }
+
+    public function getAllBannissementsByIdUtilisateur(int $idUtilisateur): array
+    {
+        $query = $this->pdo->prepare("SELECT * FROM bannissement WHERE idUtilisateur = ? ORDER BY idCommunaute");
+        $query->execute([$idUtilisateur]);
+        $result = $query->fetchAll(PDO::FETCH_ASSOC);
+        
+        if (!$result) {
+            return [];
+        }
+
+        $bannissements = [];
+        foreach ($result as $ligne) {
+            $bannissements[] = new Bannissement(
+                $ligne['idmoderation'],
+                $ligne['idmoderateur'],
+                $ligne['idutilisateur'],
+                $ligne['date_debut'],
+                $ligne['date_fin'],
+                $ligne['est_global'],
+                $ligne['idcommunaute'],
+
+                $ligne['raison']
+            );
+        }
+
+        return $bannissements;
+    }
+
+    public function getAllBannissementsByIdCommunaute(int $idCommunaute): array
+    {
+        $query = $this->pdo->prepare("SELECT * FROM bannissement WHERE idCommunaute = ? ORDER BY idUtilisateur, date_debut");
+        $query->execute([$idCommunaute]);
+        $result = $query->fetchAll(PDO::FETCH_ASSOC);
+        
+        if (!$result) {
+            return [];
+        }
+
+        $bannissements = [];
+        foreach ($result as $ligne) {
+            $bannissements[] = new Bannissement(
+                $ligne['idmoderation'],
+                $ligne['idmoderateur'],
+                $ligne['idutilisateur'],
+                $ligne['date_debut'],
+                $ligne['date_fin'],
+                $ligne['est_global'],
+                $ligne['idcommunaute'],
+                $ligne['raison']
+            );
+        }
+
+        return $bannissements;
     }
 }

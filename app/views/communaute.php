@@ -12,6 +12,8 @@
  * @var ?Adhesion $adhesion
  * @var array $liste_refus
  * @var array $liste_attentes
+ * @var array $liste_warns
+ * @var array $liste_bans
 */
 ?>
 
@@ -62,15 +64,21 @@
                 <div class="modal-content">
                     <h1>Modération</h1><h1 id="closeModContainer" style="cursor: pointer;">❌</h1>
                     <div id="param_moderation" style="display: block; border: 1px solid black;">
+                        <div style="border-bottom: 1px solid silver; cursor: pointer;" id="gestionadhesion">
+                            <h2>Gestion des adhésions</h2>
+                        </div>
                         
-                        <?php if (!$communaute->getVisibilite()): ?>
-                            <div style="border-bottom: 1px solid silver; cursor: pointer;" id="gestionadhesion">
-                                <h2>Gestion des adhésions</h2>
-                            </div>
-                        <?php endif; ?>
+                        <div style="border-bottom: 1px solid silver; cursor: pointer;" id="gestionaverti">
+                            <h2>Liste des utilisateurs avertis</h2>
+                        </div>
+                        
+                        <div style="border-bottom: 1px solid silver; cursor: pointer;" id="gestionbanni">
+                            <h2>Liste des utilisateurs bannis</h2>
+                        </div>
                     </div>
                 </div>
             </div>
+
             <div id="gestionAdhesionContainer" class="modal">
                 <div class="modal-content">
                     <h1>Gestion des demandes d'adhésion</h1><h1 id="closeGestionAdhesionContainer" style="cursor: pointer;">❌</h1>
@@ -115,6 +123,57 @@
                 </div>
             </div>
             
+            <div id="listeAvertiContainer" class="modal">
+                <div class="modal-content">
+                    <h1>Liste des utilisateurs avertis</h1><h1 id="closeListeAvertiContainer" style="cursor: pointer;">❌</h1>
+                    <div id="avertiList" style="display: block; border: 1px solid black;">
+                        <?php if (count($liste_warns) > 0): ?>
+                            <?php foreach ($liste_warns as $avertissement): ?>
+                                <div>
+                                    <a href="./?action=profil&utilisateur=<?=$avertissement->getUtilisateur()->getPseudo()?>"><span><?= htmlspecialchars($avertissement->getUtilisateur()->getPseudo()) . " - le " . (new DateTime($avertissement->getDateDebut()))->format('d/m/Y')?></span></a>
+                                    <form method="POST" action="?action=communaute&nomCommu=<?= htmlspecialchars($communaute->getNom()) ?>#listeAvertiContainer" style="display:inline">
+                                        <input type="hidden" name="idAvertissement" value="<?= $avertissement->getId() ?>">
+                                        <button type="submit" name="annulerAvertissement">➖</button>
+                                    </form>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <p>Aucun utilisateur averti pour le moment.</p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+
+            <div id="listeBanniContainer" class="modal">
+                <div class="modal-content">
+                    <h1>Liste des utilisateurs bannis</h1><h1 id="closeListeBanniContainer" style="cursor: pointer;">❌</h1>
+                    <div id="banniList" style="display: block; border: 1px solid black;">
+                        <?php if (count($liste_bans) > 0): ?>
+                            <?php foreach ($liste_bans as $bannissement): ?>
+                                <div>
+                                    <a href="./?action=profil&utilisateur=<?=$bannissement->getUtilisateur()->getPseudo()?>">
+                                        <span>
+                                            <?= htmlspecialchars($bannissement->getUtilisateur()->getPseudo()) ?> - du 
+                                            <?= (new DateTime($bannissement->getDateDebut()))->format('d/m/Y') ?>
+                                            <?php if ($bannissement->getDateFin()): ?>
+                                                au <?= (new DateTime($bannissement->getDateFin()))->format('d/m/Y') ?>
+                                            <?php else: ?>
+                                                (Permanent)
+                                            <?php endif; ?>
+                                        </span>
+                                    </a>
+                                    <form method="POST" action="?action=communaute&nomCommu=<?= htmlspecialchars($communaute->getNom()) ?>#listeBanniContainer" style="display:inline">
+                                        <input type="hidden" name="idBannissement" value="<?= $bannissement->getId() ?>">
+                                        <button type="submit" name="annulerBannissement">➖</button>
+                                    </form>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <p>Aucun utilisateur banni pour le moment.</p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
 
 
             <div id="ParamCommuContainer" class="modal">
@@ -134,6 +193,7 @@
                     </div>
                 </div>
             </div>
+
             <div class="modal" id="modalMod">
                 <div class="modal-content">
                     <h1>Gestion des modérateurs</h1><h1 id="closeModalMod" style="cursor: pointer;">❌</h1>
@@ -235,6 +295,12 @@
                         <a href="./?action=profil&utilisateur=<?= htmlspecialchars($membre['pseudo']) ?>" style="text-decoration: none; display:flex; align-items: center; gap: 3px;">
                             <img src="../../public/<?= htmlspecialchars($membre['pp'])?>" style="width: 40px; height: 40px; border-radius: 30%;" alt="Profil">
                             <span style="font-size: 18px;"><?= htmlspecialchars($membre['pseudo']) ?></span>
+                            <?php if($membre['admin']): ?>
+                                <span style="color: red; font-weight: bold;">{Admin}</span>
+                            <?php endif; ?>
+                            <?php if($membre['banglobal']): ?>
+                                <span style="color: green; font-weight: bold;">{Ban global}</span>
+                            <?php endif; ?>
                         </a>
                     <?php endforeach; ?>
                 <?php else: ?>

@@ -3,13 +3,11 @@
 class ProfilController implements ControllerInterface
 {
     private UtilisateurDAO $utilisateurDAO;
-    private RoleDAO $roleDAO;
     private InscriptionValidator $validateur;
     private Logger $logger;
 
     public function __construct(){
         $this->utilisateurDAO = new UtilisateurDAO();
-        $this->roleDAO = new RoleDAO();
         $this->validateur = new InscriptionValidator();
         $this->logger = new Logger();
     }
@@ -23,6 +21,7 @@ class ProfilController implements ControllerInterface
                 $utilisateur = $this->utilisateurDAO->getProfilUtilisateurById($profil_id);
                 $session_user = $this->utilisateurDAO->getProfilUtilisateurById($this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']));
                 $liste_commu_moderation = $utilisateur->getCommuCommunModeration($session_user);
+                $est_banni_global = (new BannissementDAO)->getBannissementGlobalByIdUtilisateur($profil_id);
                 $this->logger->info("Profil trouvé: " . $_GET['utilisateur'] . " (ID: $profil_id)");
                 
                 // Si c'est le profil de l'utilisateur connecté, on traite les formulaires de modification
@@ -34,13 +33,19 @@ class ProfilController implements ControllerInterface
                     $this->callbackModifierMdp();
                 }
 
+                if($session_user->estAdministrateur()){
+                    $this->logger->info("L'utilisateur " . $_SESSION['Pseudo'] . " est administrateur et peut supprimer le compte de " . $_GET['utilisateur']);
+                    $this->callbackSupprimerCompte($profil_id);
+                }
+
+                $this->callbackAvertirCompte($utilisateur, $session_user->getId());
+                $this->callbackBannirCompte($utilisateur, $session_user->getId());
+                $this->callbackAnnulerBanGlobal($utilisateur);
+
                 if ($_SESSION['Pseudo'] != $_GET['utilisateur'] && count($liste_commu_moderation) > 0){
                     $this->logger->info("L'utilisateur " . $_SESSION['Pseudo'] . " est modérateur dans les communautés de " . $_GET['utilisateur']);
                 }
 
-
-                                
-                
                 require_once __DIR__ . '/../views/profil.php';
             }
             else{
@@ -203,6 +208,104 @@ class ProfilController implements ControllerInterface
             }
         }
     }
-    
 
+    public function callbackSupprimerCompte(int $utilisateur_id): void
+    {
+        if (isset($_POST['Suppr'])){
+            try{
+                $this->logger->info("Tentative de suppression de compte par l'utilisateur: " . $_SESSION['Pseudo']);
+                $this->utilisateurDAO->deleteUtilisateurById($utilisateur_id);
+                $this->logger->info("Compte supprimé avec succès pour: " . $_SESSION['Pseudo']);
+                header('Location: ./?action=accueil');
+                exit();
+            }
+            catch (PDOException $e){
+                $this->logger->error("Erreur lors de la suppression du compte: " . $e->getMessage());
+                header('Location: ./?action=erreur');
+                exit();
+            }
+        }
+    }
+
+    public function callbackAvertirCompte(Utilisateur $utilisateur, int $moderateur_id): void
+    {
+        if(isset($_POST['liste_commu']) && isset($_POST['raisonWarn'])){
+            $this->logger->info("Tentative d'avertissement de compte par l'utilisateur: " . $_SESSION['Pseudo']);
+            $commu = htmlspecialchars($_POST['liste_commu']);
+            $raison = $_POST['raisonWarn'];
+            $this->logger->debug("Communauté sélectionnée: $commu, Raison: $raison");
+
+            if(strlen($raison) > 256){
+                $this->logger->warning("Raison d'avertissement trop longue pour: " . $_SESSION['Pseudo'] . " (" . strlen($raison) . " caractères)");
+                $_SESSION['erreurs']['raisonWarn'] = "Le motif ne doit pas dépasser 256 caractères.";
+            }
+            else{
+                $this->logger->info("Avertissement de compte pour: " . $_SESSION['Pseudo'] . " dans la communauté: $commu");
+                (new AvertissementDAO)->addAvertissement($moderateur_id, $utilisateur->getId(), $commu, $raison);
+                unset($_SESSION['erreurs']);
+                $this->logger->info("Avertissement ajouté avec succès pour: " . $_SESSION['Pseudo'] . " dans la communauté: $commu");
+                header("Location: ./?action=profil&utilisateur={$utilisateur->getPseudo()}#profilmodContainer");
+                exit();
+            }
+        }
+    }
+
+    public function callbackBannirCompte(Utilisateur $utilisateur, int $moderateur_id): void
+    {
+        if(isset($_POST['liste_commu']) && isset($_POST['dureeban']) && isset($_POST['raisonBan'])){
+            $this->logger->info("Tentative de bannissement de compte par l'utilisateur: " . $_SESSION['Pseudo']);
+            $commu = htmlspecialchars($_POST['liste_commu']);
+            $duree = $_POST['dureeban'];
+            $raison = $_POST['raisonBan'];
+            $this->logger->debug("Communauté sélectionnée: $commu, Raison: $raison, Durée: $duree");
+
+            if ($commu != "global" && (new BannissementDAO)->getBannissementByIdUtilisateurAndCommunaute($utilisateur->getId(), $commu)
+            || $commu == "global" && (new BannissementDAO)->getBannissementGlobalByIdUtilisateur($utilisateur->getId())){
+                $this->logger->warning("Échec de bannissement: l'utilisateur " . $_SESSION['Pseudo'] . " est déjà banni dans la communauté $commu");
+                $_SESSION['erreurs']['raisonBan'] = "Cet utilisateur est déjà banni.";
+            }
+            elseif(strlen($raison) > 256){
+                $this->logger->warning("Raison de bannissement trop longue pour: " . $_SESSION['Pseudo'] . " (" . strlen($raison) . " caractères)");
+                $_SESSION['erreurs']['raisonBan'] = "Le motif ne doit pas dépasser 256 caractères.";
+            }
+            else{
+                $this->logger->info("Bannissement de compte pour: " . $_SESSION['Pseudo'] . " dans la communauté: $commu");
+                if ($commu == "global"){
+                    if ($duree == "1m"){
+                        (new BannissementDAO)->addBannissementGlobalOneMonth($moderateur_id, $utilisateur->getId(), $raison);
+                    }
+                    else{
+                        (new BannissementDAO)->addBannissementGlobalPermanent($moderateur_id, $utilisateur->getId(), $raison);
+                    }
+                }
+                elseif ($duree == "1m"){
+                    (new BannissementDAO)->addBannissementCommuOneMonth($moderateur_id, $utilisateur->getId(), $commu, $raison);
+                }
+                else{
+                    (new BannissementDAO)->addBannissementCommuPermanent($moderateur_id, $utilisateur->getId(), $commu, $raison);
+                }
+                unset($_SESSION['erreurs']);
+                $this->logger->info("Bannissement ajouté avec succès pour: " . $_SESSION['Pseudo'] . " dans la communauté: $commu");
+                header("Location: ./?action=profil&utilisateur={$utilisateur->getPseudo()}#profilmodContainer");
+                exit();
+            }
+        }
+    }
+
+    public function callbackAnnulerBanGlobal(Utilisateur $utilisateur){
+        if (isset($_POST['AnnulerBanGlobal'])){
+            $this->logger->info("Tentative de suppression de bannissement global par l'utilisateur: " . $_SESSION['Pseudo']);
+            try{
+                (new BannissementDAO)->deleteBannissementById((new BannissementDAO)->getBannissementGlobalByIdUtilisateur($utilisateur->getId())->getId());
+                $this->logger->info("Bannissement global supprimé avec succès pour: " . $_SESSION['Pseudo']);
+                header("Location: ./?action=profil&utilisateur={$utilisateur->getPseudo()}#profilmodContainer");
+                exit();
+            }
+            catch (PDOException $e){
+                $this->logger->error("Erreur lors de la suppression du bannissement global: " . $e->getMessage());
+                header('Location: ./?action=erreur');
+                exit();
+            }
+        }
+    }
 }

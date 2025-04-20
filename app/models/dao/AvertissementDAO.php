@@ -27,10 +27,36 @@ final class AvertissementDAO{
         $avertissements = [];	
         foreach ($result as $ligne) {
             $avertissements[] = new Avertissement(
-                $ligne['idModeration'],
-                $ligne['idModerateur'],
-                $ligne['idUtilisateur'],
-                $ligne['idCommunaute'],
+                $ligne['idmoderation'],
+                $ligne['idmoderateur'],
+                $ligne['idutilisateur'],
+                $ligne['idcommunaute'],
+                $ligne['date_debut'],
+                $ligne['raison']
+            );
+        }
+
+        return $avertissements;
+    }
+
+    public function getAllAvertissementsByIdUtilisateur(int $idUtilisateur): array
+    {
+        $query = $this->pdo->prepare("SELECT * FROM avertissement WHERE idUtilisateur = ? ORDER BY idCommunaute");
+        $query->execute([$idUtilisateur]);
+        $result = $query->fetchAll(PDO::FETCH_ASSOC);
+
+        if (!$result) {
+            return [];
+        }
+
+        $avertissements = [];	
+        foreach ($result as $ligne) {
+            $avertissements[] = new Avertissement(
+                $ligne['idmoderation'],
+                $ligne['idmoderateur'],
+                $ligne['idutilisateur'],
+                $ligne['idcommunaute'],
+                $ligne['date_debut'],
                 $ligne['raison']
             );
         }
@@ -42,5 +68,30 @@ final class AvertissementDAO{
     {
         $query = $this->pdo->prepare("DELETE FROM avertissement WHERE idModeration = ?");
         return $query->execute([$idModeration]);
+    }
+
+    public function getAllAvertissementsByIdCommunaute(int $idCommunaute): array
+    {
+        $query = $this->pdo->prepare("SELECT * FROM avertissement WHERE idCommunaute = ? ORDER BY idUtilisateur, date_debut");
+        $query->execute([$idCommunaute]);
+        $result = $query->fetchAll(PDO::FETCH_ASSOC);
+
+        if (!$result) {
+            return [];
+        }
+
+        $avertissements = [];	
+        foreach ($result as $ligne) {
+            $avertissements[] = new Avertissement(
+                $ligne['idmoderation'],
+                $ligne['idmoderateur'],
+                $ligne['idutilisateur'],
+                $ligne['idcommunaute'],
+                $ligne['date_debut'],
+                $ligne['raison']
+            );
+        }
+
+        return $avertissements;
     }
 }

@@ -9,14 +9,14 @@ final class UtilisateurDAO
         $this->pdo = PostgreSQLDB::getConnexion();
     }
     
-    public function getProfilUtilisateurById(int $id): Utilisateur
+    public function getProfilUtilisateurById(int $id): ?Utilisateur
     {
         $query = $this->pdo->prepare("SELECT * FROM utilisateur WHERE idUtilisateur = ?");
         $query->execute([$id]);
         $result = $query->fetch(PDO::FETCH_ASSOC);
         
         if (!$result) {
-            throw new Exception("Aucun utilisateur trouvé avec l'ID: $id");
+            return null;
         }   
         
         return new Utilisateur(
@@ -162,4 +162,11 @@ final class UtilisateurDAO
         return $query->fetchColumn();
     }
 
+    public function deleteUtilisateurById(int $id):bool
+    {
+        $query = $this->pdo->prepare("DELETE FROM utilisateur WHERE idUtilisateur = ?");
+        return $query->execute([$id]);
+    }
+
 }
+

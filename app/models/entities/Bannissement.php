@@ -16,10 +16,10 @@ final class Bannissement
         int $unId,
         int $unIdModerateur,
         int $unIdUtilisateur,
-        ?int $unIdCommunaute = null,
         string $uneDateDebut,
-        string $uneDateFin,
+        ?string $uneDateFin,
         bool $estGlobal,
+        ?int $unIdCommunaute = null,
         string $uneRaison = '',
     ) {
         $this->id = $unId;
@@ -70,5 +70,10 @@ final class Bannissement
     public function getEstGlobal(): bool
     {
         return $this->estGlobal;
+    }
+
+    public function getUtilisateur(): Utilisateur
+    {
+        return (new UtilisateurDAO())->getProfilUtilisateurById($this->idUtilisateur);
     }
 }

@@ -54,4 +54,9 @@ final class Avertissement
     {
         return $this->dateDebut;
     }
+
+    public function getUtilisateur(): Utilisateur
+    {
+        return (new UtilisateurDAO())->getProfilUtilisateurById($this->idUtilisateur);
+    }
 }
