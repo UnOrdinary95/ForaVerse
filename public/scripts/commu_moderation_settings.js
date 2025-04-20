@@ -11,6 +11,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const refusadh = document.getElementById("refusadh");
     const demandeblock = document.getElementById("demandeblock");
     const refusblock = document.getElementById("refusblock");
+
+    const listeAvertiContainer = document.getElementById("listeAvertiContainer");
+    const gestionaverti = document.getElementById("gestionaverti"); 
+    const closeListeAvertiContainer = document.getElementById("closeListeAvertiContainer");
+
+    const listeBanniContainer = document.getElementById("listeBanniContainer");
+    const gestionbanni = document.getElementById("gestionbanni"); 
+    const closeListeBanniContainer = document.getElementById("closeListeBanniContainer");
     
     if (btnModeration) {
         btnModeration.onclick = function() {
@@ -33,6 +41,30 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (closeGestionAdhesionContainer) {
         closeGestionAdhesionContainer.onclick = function() {
+            window.location.hash = "modContainer";
+        };
+    }
+
+    if (gestionaverti) {
+        gestionaverti.onclick = function() {
+            window.location.hash = "listeAvertiContainer";
+        };
+    }
+
+    if (closeListeAvertiContainer) {
+        closeListeAvertiContainer.onclick = function() {
+            window.location.hash = "modContainer";
+        };
+    }
+
+    if (gestionbanni) {
+        gestionbanni.onclick = function() {
+            window.location.hash = "listeBanniContainer";
+        };
+    }
+
+    if (closeListeBanniContainer) {
+        closeListeBanniContainer.onclick = function() {
             window.location.hash = "modContainer";
         };
     }
@@ -66,6 +98,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (modContainer) modContainer.style.display = "none";
         if (gestionAdhesionContainer) gestionAdhesionContainer.style.display = "none";
+        if (listeAvertiContainer) listeAvertiContainer.style.display = "none"; 
+        if (listeBanniContainer) listeBanniContainer.style.display = "none"; 
         
         switch(hash) {
             case "#modContainer":
@@ -74,8 +108,13 @@ document.addEventListener('DOMContentLoaded', function() {
             case "#gestionAdhesionContainer":
                 if (gestionAdhesionContainer) gestionAdhesionContainer.style.display = "block";
                 break;
+            case "#listeAvertiContainer": 
+                if (listeAvertiContainer) listeAvertiContainer.style.display = "block";
+                break;
+            case "#listeBanniContainer": 
+                if (listeBanniContainer) listeBanniContainer.style.display = "block";
+                break;
             default:
-                // Aucun modal à afficher
                 break;
         }
     }
