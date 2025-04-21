@@ -150,11 +150,18 @@ class ProfilController implements ControllerInterface
                 $_SESSION['erreurs']['bio'] = "La bio ne doit pas dépasser 256 caractères.";
             }
             else{
-                $this->utilisateurDAO->updateBioByPseudo($_SESSION['Pseudo'], $bio);
-                unset($_SESSION['erreurs']);
-                $this->logger->info("Bio modifiée avec succès pour: " . $_SESSION['Pseudo']);
-                header("Location: ./?action=profil&utilisateur={$_SESSION['Pseudo']}#paramContainer");
-                exit();
+                try{
+                    $this->utilisateurDAO->updateBioByPseudo($_SESSION['Pseudo'], $bio);
+                    unset($_SESSION['erreurs']);
+                    $this->logger->info("Bio modifiée avec succès pour: " . $_SESSION['Pseudo']);
+                    header("Location: ./?action=profil&utilisateur={$_SESSION['Pseudo']}#paramContainer");
+                    exit();
+                }
+                catch(Exception $e){
+                    $this->logger->error("Erreur lors de la modification de la bio: " . $e->getMessage());
+                    header("Location: ./?action=erreur");
+                    exit();
+                }
             }
         }
     }
