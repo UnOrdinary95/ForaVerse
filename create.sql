@@ -182,3 +182,186 @@ CREATE TRIGGER after_acceptAdhesion
     AFTER UPDATE ON DemandeAdhesion
     FOR EACH ROW
     EXECUTE FUNCTION addMembre();
+
+ALTER TABLE DemandeAdhesion
+DROP CONSTRAINT  fk_adh_user,
+ADD CONSTRAINT fk_adh_user
+FOREIGN KEY(idUtilisateur) REFERENCES Utilisateur(idUtilisateur)
+ON DELETE CASCADE;
+
+ALTER TABLE DemandeAdhesion
+DROP CONSTRAINT fk_adh_commu,
+ADD CONSTRAINT fk_adh_commu
+FOREIGN KEY (idCommunaute) REFERENCES Communaute(idCommunaute)
+ON DELETE CASCADE;
+
+ALTER TABLE Moderation
+DROP CONSTRAINT fk_mod_mod,
+ADD CONSTRAINT fk_mod_mod
+FOREIGN KEY (idModerateur) REFERENCES Utilisateur(idUtilisateur)
+ON DELETE CASCADE;
+
+ALTER TABLE Moderation
+DROP CONSTRAINT fk_targeted_user,
+ADD CONSTRAINT fk_targeted_user
+FOREIGN KEY (idUtilisateur) REFERENCES Utilisateur(idUtilisateur)
+ON DELETE CASCADE;
+
+ALTER TABLE Moderation
+DROP CONSTRAINT fk_ban_commu,
+ADD CONSTRAINT fk_ban_commu
+FOREIGN KEY (idCommunaute) REFERENCES Communaute(idCommunaute)
+ON DELETE CASCADE;
+
+-- Je viens de me rendre compte que c'est un héritage de colonne et de type (donc sans les contraintes
+-- et cas particulier comme les 'INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY')
+-- Je vais devoir ALTER TABLE et ajouter ça à la main.
+ALTER TABLE avertissement ADD PRIMARY KEY (idmoderation);
+
+ALTER TABLE avertissement
+    ALTER COLUMN idmoderation ADD GENERATED ALWAYS AS IDENTITY;
+
+ALTER TABLE avertissement
+ALTER COLUMN idModerateur
+SET NOT NULL;
+
+ALTER TABLE avertissement
+ALTER COLUMN idUtilisateur
+SET NOT NULL;
+
+ALTER TABLE avertissement
+ADD CONSTRAINT fk_mod_mod_a
+FOREIGN KEY (idModerateur) REFERENCES Utilisateur(idUtilisateur)
+ON DELETE CASCADE;
+
+ALTER TABLE avertissement
+ADD CONSTRAINT fk_targeted_user_a
+FOREIGN KEY (idUtilisateur) REFERENCES Utilisateur(idUtilisateur)
+ON DELETE CASCADE;
+
+ALTER TABLE avertissement
+ADD CONSTRAINT fk_ban_commu_a
+FOREIGN KEY (idCommunaute) REFERENCES Communaute(idCommunaute)
+ON DELETE CASCADE;
+
+ALTER TABLE bannissement ADD PRIMARY KEY (idmoderation);
+
+ALTER TABLE bannissement
+    ALTER COLUMN idmoderation ADD GENERATED ALWAYS AS IDENTITY;
+
+ALTER TABLE bannissement
+ALTER COLUMN idModerateur
+SET NOT NULL;
+
+ALTER TABLE bannissement
+ALTER COLUMN idUtilisateur
+SET NOT NULL;
+
+ALTER TABLE bannissement
+ADD CONSTRAINT fk_mod_mod_b
+FOREIGN KEY (idModerateur) REFERENCES Utilisateur(idUtilisateur)
+ON DELETE CASCADE;
+
+ALTER TABLE bannissement
+ADD CONSTRAINT fk_targeted_user_b
+FOREIGN KEY (idUtilisateur) REFERENCES Utilisateur(idUtilisateur)
+ON DELETE CASCADE;
+
+ALTER TABLE bannissement
+ADD CONSTRAINT fk_ban_commu_b
+FOREIGN KEY (idCommunaute) REFERENCES Communaute(idCommunaute)
+ON DELETE CASCADE;
+
+CREATE OR REPLACE FUNCTION banMembre()
+RETURNS TRIGGER AS $$
+    DECLARE
+    compteur INT;
+    BEGIN
+       SELECT COUNT(*) INTO compteur FROM Avertissement
+        WHERE idUtilisateur = NEW.idUtilisateur
+        AND idCommunaute = NEW.idCommunaute;
+
+       IF compteur = 3 THEN
+           IF NOT EXISTS (
+               SELECT 1 FROM Bannissement
+               WHERE idUtilisateur = NEW.idUtilisateur
+               AND idCommunaute = NEW.idCommunaute
+               ) THEN
+                INSERT INTO Bannissement (idModerateur, idUtilisateur, idCommunaute, date_fin, raison)
+            VALUES (NEW.idModerateur, NEW.idUtilisateur, NEW.idCommunaute, NOW() + INTERVAL '1 month', 'Banni automatiquement après dépassement de ' || compteur || ' avertissements.');
+           ELSE
+               DELETE FROM Bannissement WHERE idUtilisateur = NEW.idUtilisateur
+               AND idCommunaute = NEW.idCommunaute;
+               INSERT INTO Bannissement (idModerateur, idUtilisateur, idCommunaute, date_fin, raison)
+            VALUES (NEW.idModerateur, NEW.idUtilisateur, NEW.idCommunaute, NOW() + INTERVAL '1 month', 'Banni automatiquement après dépassement de ' || compteur || ' avertissements.');
+           END IF;
+       END IF;
+
+       IF compteur = 5 THEN
+           IF NOT EXISTS (
+               SELECT 1 FROM Bannissement
+               WHERE idUtilisateur = NEW.idUtilisateur
+               AND idCommunaute = NEW.idCommunaute
+               ) THEN
+                INSERT INTO Bannissement (idModerateur, idUtilisateur, idCommunaute, date_fin, raison)
+            VALUES (NEW.idModerateur, NEW.idUtilisateur, NEW.idCommunaute, null, 'Banni automatiquement après dépassement de ' || compteur || ' avertissements.');
+           ELSE
+               DELETE FROM Bannissement WHERE idUtilisateur = NEW.idUtilisateur
+               AND idCommunaute = NEW.idCommunaute;
+               INSERT INTO Bannissement (idModerateur, idUtilisateur, idCommunaute, date_fin, raison)
+            VALUES (NEW.idModerateur, NEW.idUtilisateur, NEW.idCommunaute, null, 'Banni automatiquement après dépassement de ' || compteur || ' avertissements.');
+           END IF;
+       END IF;
+       RETURN NEW;
+    END;
+
+    $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER after_addAvertissement
+    AFTER INSERT ON Avertissement
+    FOR EACH ROW
+    EXECUTE FUNCTION banMembre();
+
+-- Problème : Je me retrouve avec deux Moderation avec la même ID (encore une conséquence de l'héritage)
+-- Pour régler ça soit je génère des UUID (peu de chance de tomber sur les mêmes)
+-- Ou soit je crée une séquence et je partage cette séquence sur les trois tables (je vais partir sur ça)
+ALTER TABLE Moderation
+    ALTER COLUMN idModeration DROP IDENTITY;
+
+ALTER TABLE Avertissement
+    ALTER COLUMN idModeration DROP IDENTITY;
+
+ALTER TABLE Bannissement
+    ALTER COLUMN idModeration DROP IDENTITY;
+
+CREATE SEQUENCE moderation_id_seq START WITH 1;
+
+ALTER TABLE Moderation
+    ALTER COLUMN idModeration SET DEFAULT nextval('moderation_id_seq');
+
+ALTER TABLE Avertissement
+    ALTER COLUMN idModeration SET DEFAULT nextval('moderation_id_seq');
+
+ALTER TABLE Bannissement
+    ALTER COLUMN idModeration SET DEFAULT nextval('moderation_id_seq');
+
+-- J'automatise la suppression de ban avec pg_cron (tous les jours à minuit psql va lancer la fonction ci-dessus)
+CREATE OR REPLACE FUNCTION deleteBan()
+RETURNS VOID AS $$
+    BEGIN
+        DELETE FROM Bannissement WHERE date_fin <= NOW();
+    END;
+    $$ LANGUAGE plpgsql;
+
+-- Active l'extension pg_cron
+CREATE EXTENSION pg_cron;
+
+-- Planification de la tâche
+SELECT cron.schedule(
+    'suppression-bans-expires',
+    '0 0 * * *',                -- Tous les jours à minuit (selon Europe/Paris)
+    'SELECT deleteBan();'
+);
+
+-- Vérification
+SELECT * FROM cron.job;
