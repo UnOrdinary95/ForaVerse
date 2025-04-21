@@ -126,20 +126,4 @@ final class Utilisateur
 
         return $communautes;
     }
-
-    public function getBannissementByIdUtilisateurAndCommunaute(int $id_communaute): ?Bannissement
-    {
-        return (new BannissementDAO())->getBannissementByIdUtilisateurAndCommunaute($this->id, $id_communaute);
-    }
-
-    public function getAllBannissementsByIdUtilisateur(): array
-    {
-        return (new BannissementDAO())->getAllBannissementsByIdUtilisateur($this->id);
-    }
-
-    public function getAvertissementsByIdUtilisateurAndCommunaute(int $idCommunaute): array
-    {
-        return (new AvertissementDAO())->getAvertissementsByIdUtilisateurAndCommunaute($this->id, $idCommunaute);
-    }
-
 }
