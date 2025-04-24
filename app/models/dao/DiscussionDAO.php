@@ -63,4 +63,26 @@ class DiscussionDAO
         $query = $this->pdo->prepare("UPDATE discussion SET est_epingle = ? WHERE idPublication = ?");
         return $query->execute([$estEpingle, $idPublication]);
     }
+
+    public function getDiscussionById(int $idPublication): ?Discussion
+    {
+        $query = $this->pdo->prepare("SELECT * FROM discussion WHERE idPublication = ?");
+        $query->execute([$idPublication]);
+        $result = $query->fetch(PDO::FETCH_ASSOC);
+
+        if (!$result){
+            return null;
+        }
+
+        return new Discussion(
+            $result['idpublication'],
+            $result['idcommunaute'],
+            $result['idutilisateur'],
+            $result['contenu'],
+            $result['datetime_creation'],
+            $result['score'],
+            $result['est_epingle'],
+            $result['titre']
+        );
+    }
 }

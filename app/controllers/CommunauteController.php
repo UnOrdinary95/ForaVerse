@@ -58,7 +58,7 @@ class CommunauteController implements ControllerInterface
                         $this->callbackCreerDiscussion();
                         $this->callbackGererFavoris();
                         if($role->peutModerer()){
-                            $this->logger->info("L'utilisateur peut modérer la communauté.");
+                            $this->logger->info(message: "L'utilisateur peut modérer la communauté.");
                             foreach($this->adhesionDAO->getRefusByCommunaute($communaute_id) as $refus){
                                 $liste_refus[$this->utilisateurDAO->getPseudoById($refus->getIdUtilisateur())] = $refus->getIdUtilisateur();
                             }

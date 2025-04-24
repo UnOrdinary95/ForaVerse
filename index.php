@@ -16,6 +16,7 @@ $connexionController = new ConnexionController();
 $profilController = new ProfilController();
 $resetMdpController = new ResetMdpController();
 $communauteController = new CommunauteController();
+$publicationController = new PublicationController();	
 
 $routeur->ajouterRoute('accueil', [$accueilController, 'afficherVue']);
 $routeur->ajouterRoute('inscription', [$inscriptionController, 'afficherVue']);
@@ -27,9 +28,10 @@ $routeur->ajouterRoute('confirmdemande_resetmdp', [$resetMdpController, 'affiche
 $routeur->ajouterRoute('resetmdp', [$resetMdpController, 'afficherVueResetMdp']);
 $routeur->ajouterRoute('erreur', [$erreurController, 'afficherVue']);
 $routeur->ajouterRoute('communaute', [$communauteController, 'afficherVue']);
+$routeur->ajouterRoute('publication', [$publicationController, 'afficherVue']);
 
 
-$routesPubliques = ['accueil', 'inscription', 'connexion', 'demande_resetmdp', 'confirmdemande_resetmdp', 'resetmdp', 'erreur', 'communaute'];
+$routesPubliques = ['accueil', 'inscription', 'connexion', 'demande_resetmdp', 'confirmdemande_resetmdp', 'resetmdp', 'erreur', 'communaute', 'publication', 'profil'];
 $action = $_GET['action'] ?? 'accueil';
 
 // On vérifie si l'utilisateur doit être connecté pour cette route
