@@ -56,7 +56,7 @@
             <?php endif; ?>
         <?php endif; ?>
         
-        <?php if (count($liste_commu_moderation) > 0 || $session_user->estAdministrateur() && $utilisateur->getPseudo() != $_SESSION['Pseudo']): ?>
+        <?php if ((count($liste_commu_moderation) > 0 || $session_user->estAdministrateur()) && !$utilisateur->estAdministrateur()): ?>
             <button id="btnModeration">⚙️Modération</button>
             <div id="profilmodContainer" class="modal">
                 <div class="modal-content">
