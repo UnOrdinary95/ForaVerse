@@ -19,8 +19,21 @@ class ProfilController implements ControllerInterface
             $profil_id = $this->utilisateurDAO->existeUtilisateur($_GET['utilisateur']);
             if ($profil_id) {
                 $utilisateur = $this->utilisateurDAO->getProfilUtilisateurById($profil_id);
-                $session_user = $this->utilisateurDAO->getProfilUtilisateurById($this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']));
-                $liste_commu_moderation = $utilisateur->getCommuCommunModeration($session_user);
+                $liste_commu_moderation = [];
+                if(isset($_SESSION['Pseudo'])){
+                    $session_user = $this->utilisateurDAO->getProfilUtilisateurById($this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']));
+                    $liste_commu_moderation = $utilisateur->getCommuCommunModeration($session_user);
+                    
+                    if($session_user->estAdministrateur()){
+                        $this->logger->info("L'utilisateur " . $_SESSION['Pseudo'] . " est administrateur et peut supprimer le compte de " . $_GET['utilisateur']);
+                        $this->callbackSupprimerCompte($profil_id);
+                    }
+
+                    $this->callbackAvertirCompte($utilisateur, $session_user->getId());
+                    $this->callbackBannirCompte($utilisateur, $session_user->getId());
+                    $this->callbackAnnulerBanGlobal($utilisateur);
+                }
+
                 $est_banni_global = (new BannissementDAO)->getBannissementGlobalByIdUtilisateur($profil_id);
                 $this->logger->info("Profil trouvé: " . $_GET['utilisateur'] . " (ID: $profil_id)");
                 
@@ -33,16 +46,7 @@ class ProfilController implements ControllerInterface
                     $this->callbackModifierMdp();
                 }
 
-                if($session_user->estAdministrateur()){
-                    $this->logger->info("L'utilisateur " . $_SESSION['Pseudo'] . " est administrateur et peut supprimer le compte de " . $_GET['utilisateur']);
-                    $this->callbackSupprimerCompte($profil_id);
-                }
-
-                $this->callbackAvertirCompte($utilisateur, $session_user->getId());
-                $this->callbackBannirCompte($utilisateur, $session_user->getId());
-                $this->callbackAnnulerBanGlobal($utilisateur);
-
-                if ($_SESSION['Pseudo'] != $_GET['utilisateur'] && count($liste_commu_moderation) > 0){
+                if (isset($_SESSION['Pseudo']) && $_SESSION['Pseudo'] != $_GET['utilisateur'] && count($liste_commu_moderation) > 0){
                     $this->logger->info("L'utilisateur " . $_SESSION['Pseudo'] . " est modérateur dans les communautés de " . $_GET['utilisateur']);
                 }
 

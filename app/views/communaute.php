@@ -282,7 +282,9 @@
                                 <a href="./?action=profil&utilisateur=<?= htmlspecialchars($discussion->getUtilisateur()->getPseudo()) ?>" style="text-decoration: none;">
                                     <p><?= htmlspecialchars($discussion->getUtilisateur()->getPseudo()) ?>, le <?= (new DateTime($discussion->getDateCreation()))->format('d/m/Y')?> à <?= (new DateTime($discussion->getDateCreation()))->format('H:i') ?></p>
                                 </a>
-                                <h2><?= htmlspecialchars($discussion->getTitre()) ?></h2>
+                                <a href="./?action=publication&nomCommu=<?= htmlspecialchars($communaute->getNom()) ?>&idPublication=<?= htmlspecialchars($discussion->getIdPublication()) ?>" style="text-decoration: none;">
+                                    <h2><?= htmlspecialchars($discussion->getTitre()) ?></h2>
+                                </a>
                                     <span style="display:flex; flex-direction: flex-row; gap: 10px;" class="vote-container" data-publication-id=<?=$discussion->getIdPublication()?>>
                                         <?php if(isset($_SESSION['Pseudo'])){
                                             switch($discussion->getVoteUtilisateurCourant()){

@@ -23,7 +23,7 @@
 <body>
     <h1><a href="./" style="text-decoration: none; width: 100px">⬅️</a></h1>
     <div>
-        <?php if ($utilisateur->getPseudo() == $_SESSION['Pseudo']): ?>
+        <?php if (isset($_SESSION['Pseudo']) && $utilisateur->getPseudo() == $_SESSION['Pseudo']): ?>
         <img src="../../public/<?= htmlspecialchars($utilisateur->getCheminPhoto())?>" style="width: 100px; height: 100px; border-radius: 30%; cursor: pointer;"
             id="profileImage" alt="Profil"
             <?php if ($utilisateur->getPseudo() == $_SESSION['Pseudo']): ?>
@@ -48,7 +48,7 @@
         <p><?="Compte créé le ". (new DateTime($utilisateur->getDateInscription()))->format('d/m/Y')?></p>
         <button onclick="partagerURL()">Partager le profil</button><br>
         
-        <?php if ($utilisateur->getPseudo() != $_SESSION['Pseudo']): ?>
+        <?php if (isset($_SESSION['Pseudo']) && $utilisateur->getPseudo() != $_SESSION['Pseudo']): ?>
             <?php if ($utilisateur->getSystemeAbonnement()->estAbonne($session_user->getId())): ?>
                 <button id="btnAbonnement" data-pseudo="<?= $utilisateur->getPseudo() ?>">Se désabonner</button>
             <?php else: ?>
@@ -56,7 +56,7 @@
             <?php endif; ?>
         <?php endif; ?>
         
-        <?php if ((count($liste_commu_moderation) > 0 || $session_user->estAdministrateur()) && !$utilisateur->estAdministrateur()): ?>
+        <?php if (isset($_SESSION['Pseudo']) && (count($liste_commu_moderation) > 0 || $session_user->estAdministrateur()) && !$utilisateur->estAdministrateur()): ?>
             <button id="btnModeration">⚙️Modération</button>
             <div id="profilmodContainer" class="modal">
                 <div class="modal-content">
