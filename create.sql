@@ -129,7 +129,7 @@ CREATE TABLE Vote(
     resultat SMALLINT CHECK (resultat IN (-1, 0, 1)) DEFAULT 1,
     CONSTRAINT pk_vote PRIMARY KEY(idUtilisateur, idPublication),
     CONSTRAINT fk_vote_user FOREIGN KEY(idUtilisateur) REFERENCES Utilisateur(idUtilisateur),
-    CONSTRAINT fk_vote_post FOREIGN KEY(idPublication) REFERENCES Publication(idPublication)
+    CONSTRAINT fk_vote_post FOREIGN KEY(idPublication) REFERENCES Discussion(idPublication)
 );
 
 -- Update
@@ -365,3 +365,113 @@ SELECT cron.schedule(
 
 -- Vérification
 SELECT * FROM cron.job;
+
+-- Finalement, je compte initialiser le score à 0, car j'utiliserai ici un trigger pour incrémenter ou décrémenter de
+-- manière automatique.
+ALTER TABLE Publication
+ALTER COLUMN score SET DEFAULT 0;
+
+-- Même problème que modération (héritage)
+CREATE SEQUENCE publication_id_seq START WITH 1;
+ALTER TABLE Publication
+ALTER COLUMN idPublication DROP IDENTITY,
+ALTER COLUMN idPublication SET DEFAULT nextval('publication_id_seq'),
+DROP CONSTRAINT fk_post_commu,
+ADD CONSTRAINT fk_post_commu
+FOREIGN KEY (idCommunaute) REFERENCES Communaute(idCommunaute)
+ON DELETE CASCADE,
+DROP CONSTRAINT fk_post_user,
+ADD CONSTRAINT fk_post_user
+FOREIGN KEY (idUtilisateur) REFERENCES Utilisateur(idUtilisateur)
+ON DELETE CASCADE;
+
+ALTER TABLE Discussion
+ALTER COLUMN idPublication SET DEFAULT nextval('publication_id_seq'),
+ALTER COLUMN idCommunaute SET NOT NULL,
+ALTER COLUMN idUtilisateur SET NOT NULL,
+ADD CONSTRAINT fk_post_commu_d
+FOREIGN KEY (idCommunaute) REFERENCES Communaute(idCommunaute)
+ON DELETE CASCADE,
+ADD CONSTRAINT fk_post_user_d
+FOREIGN KEY (idUtilisateur) REFERENCES Utilisateur(idUtilisateur)
+ON DELETE CASCADE;
+
+ALTER TABLE Commentaire
+ALTER COLUMN idPublication SET DEFAULT nextval('publication_id_seq'),
+ALTER COLUMN idCommunaute SET NOT NULL,
+ALTER COLUMN idUtilisateur SET NOT NULL,
+ADD CONSTRAINT fk_post_commu_c
+FOREIGN KEY (idCommunaute) REFERENCES Communaute(idCommunaute)
+ON DELETE CASCADE,
+ADD CONSTRAINT fk_post_user_c
+FOREIGN KEY (idUtilisateur) REFERENCES Utilisateur(idUtilisateur)
+ON DELETE CASCADE;
+
+-- DELETE CASCADE dans la table 'Vote'
+ALTER TABLE Vote
+DROP CONSTRAINT fk_vote_user,
+ADD CONSTRAINT fk_vote_user
+FOREIGN KEY (idUtilisateur) REFERENCES Utilisateur(idUtilisateur)
+ON DELETE CASCADE,
+DROP CONSTRAINT fk_vote_post,
+ADD CONSTRAINT fk_vote_post
+FOREIGN KEY (idPublication) REFERENCES Publication(idPublication)
+ON DELETE CASCADE;
+
+----------
+-- Trigger qui permet d'update le score d'une discussion en fonction du vote
+CREATE OR REPLACE FUNCTION updateScore()
+RETURNS TRIGGER AS $$
+    BEGIN
+        IF TG_OP = 'UPDATE' THEN -- Si l'opération est une INSERT
+            IF NEW.type_publication = 'discussion' THEN
+                UPDATE Discussion SET score = score + (NEW.resultat - OLD.resultat)
+                WHERE idPublication = NEW.idPublication;
+            END IF;
+        ELSIF TG_OP = 'INSERT' THEN
+            IF NEW.type_publication = 'discussion' THEN
+                UPDATE Discussion SET score = score + NEW.resultat
+                WHERE idPublication = NEW.idPublication;
+            END IF;
+        ELSE
+            IF NEW.type_publication = 'discussion' THEN
+                UPDATE Discussion SET score = score - OLD.resultat
+                WHERE idPublication = OLD.idPublication;
+            END IF;
+
+        END IF;
+        RETURN NEW;
+    END;
+    $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER after_addVote
+    AFTER INSERT OR UPDATE ON Vote
+    FOR EACH ROW
+    EXECUTE FUNCTION updateScore();
+
+-- Supprime le trigger
+DROP TRIGGER IF EXISTS after_addVote ON Vote;
+
+-- Supprime la fonction associée
+DROP FUNCTION IF EXISTS updateScore();
+
+/*
+ Pour cause des limitations de l'héritage (le fait que les contraintes ne soient pas transmise
+ aux tables enfants, je ne peux pas créer de trigger, car les clés primaires ne sont pas partagées
+ entre une classe mère et enfant.
+ */
+;
+ALTER TABLE Vote
+ADD COLUMN type_publication TEXT,
+ADD CONSTRAINT chk_type_publication CHECK (type_publication IN ('discussion', 'commentaire'));
+
+ALTER TABLE Vote
+DROP CONSTRAINT IF EXISTS fk_vote_post;
+
+-- Même problème
+ALTER TABLE Favoris
+ADD COLUMN type_publication TEXT,
+ADD CONSTRAINT chk_type_publication CHECK (type_publication IN ('discussion', 'commentaire'));
+
+ALTER TABLE Favoris
+DROP CONSTRAINT IF EXISTS fk_fav_post;
