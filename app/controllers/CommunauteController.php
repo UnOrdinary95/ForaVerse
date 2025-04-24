@@ -10,6 +10,8 @@ class CommunauteController implements ControllerInterface
     private AdhesionDAO $adhesionDAO;
     private AvertissementDAO $avertissementDAO;
     private BannissementDAO $bannissementDAO;
+    private DiscussionDAO $discussionDAO;
+    private FavorisDAO $favorisDAO;
     private array $erreurs;
 
     public function __construct()
@@ -21,7 +23,9 @@ class CommunauteController implements ControllerInterface
         $this->adhesionDAO = new AdhesionDAO();
         $this->avertissementDAO = new AvertissementDAO();
         $this->bannissementDAO = new BannissementDAO();
+        $this->discussionDAO = new DiscussionDAO();
         $this->validateur = new CommunauteValidator();
+        $this->favorisDAO = new FavorisDAO();
         $this->erreurs = [];
     }
 
@@ -43,11 +47,16 @@ class CommunauteController implements ControllerInterface
                 $erreurs_addmod = [];
                 $liste_warns = [];
                 $liste_bans = [];
+                $discussions = $this->discussionDAO->getDiscussionsByCommunaute($communaute_id);
+                $this->logger->info("Récupération des discussions pour la communauté: " . $_GET['nomCommu']);
                 
                 if (isset($_SESSION['Pseudo'])){
                     $role = $this->roleDAO->getRole($this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']), $communaute_id);
                     if ($role){
                         $this->logger->info("Rôle de l'utilisateur dans la communauté: " . $role->getRole());
+                        $erreurs = $this->erreurs;
+                        $this->callbackCreerDiscussion();
+                        $this->callbackGererFavoris();
                         if($role->peutModerer()){
                             $this->logger->info("L'utilisateur peut modérer la communauté.");
                             foreach($this->adhesionDAO->getRefusByCommunaute($communaute_id) as $refus){
@@ -73,6 +82,7 @@ class CommunauteController implements ControllerInterface
                             $this->callbackAnnulerBannissement();
                             $this->logger->info("Initialisation des tableaux de gestion des avertissements et bannissements.");
 
+                            $this->callbackEpinglerDiscussion();
                         }
                         if($role->peutGererCommunaute()){
                             $this->logger->info("L'utilisateur est le propriétaire de la communauté.");
@@ -321,4 +331,100 @@ class CommunauteController implements ControllerInterface
             }
         }
     }
+
+    public function callbackCreerDiscussion(): void
+    {
+        if (isset($_POST['titreDiscussion'], $_POST['contenuDiscussion'])){
+            $this->logger->info("Création d'une nouvelle discussion dans la communauté: " . $_GET['nomCommu']);
+            $titre = trim(filter_input(INPUT_POST, 'titreDiscussion', FILTER_SANITIZE_SPECIAL_CHARS));
+            $contenu = $_POST['contenuDiscussion'];
+
+            if(empty($titre)){
+                $this->logger->warning("Titre de la discussion vide.");
+                $this->erreurs['titreDiscussion'] = "Veuillez entrer un titre.";
+            }
+            elseif(strlen($titre) > 50){
+                $this->logger->warning("Titre de la discussion trop long.");
+                $this->erreurs['titreDiscussion'] = "Le titre doit faire moins de 50 caractères.";
+            }
+            elseif(empty($contenu)){
+                $this->logger->warning("Contenu de la discussion vide.");
+                $this->erreurs['contenuDiscussion'] = "Veuillez entrer un contenu.";
+            }
+            elseif(strlen($contenu) > 2048){
+                $this->logger->warning("Contenu de la discussion trop long.");   
+            }
+            else{
+                try{
+                    $this->discussionDAO->addDiscussion(
+                        $this->communauteDAO->getIdByNom($_GET['nomCommu']),
+                        $this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']),
+                        $titre,
+                        $contenu
+                    );
+                    header("Location: ./?action=communaute&nomCommu=" . urlencode($_GET['nomCommu']));
+                    exit();
+                }
+                catch (PDOException $e)
+                {
+                    $this->logger->error("Erreur lors de la création de la discussion: " . $e->getMessage());
+                    header('Location: ./?action=erreur');
+                    exit();
+                }
+            }
+        }
+    }
+
+    public function callbackEpinglerDiscussion(): void
+    {
+        if (isset($_POST['epinglerPublication'])){
+            $idPublication = (int)$_POST['idPublication']; // Conversion en entier
+            $this->logger->info("Épinglage de la discussion: " . $idPublication);
+            try{
+                if($this->discussionDAO->estEpingle($idPublication)){
+                    $this->discussionDAO->updateEpingle($idPublication, false);
+                    $this->logger->info("Discussion désépinglée avec succès: " . $idPublication);
+                }
+                else{
+                    $this->discussionDAO->updateEpingle($idPublication, true);
+                    $this->logger->info("Discussion épinglée avec succès: " . $idPublication);
+                }
+                header('Location: ./?action=communaute&nomCommu=' . urlencode($_GET['nomCommu']));
+                exit();
+            }
+            catch (PDOException $e)
+            {
+                $this->logger->error("Erreur lors de l'épinglage de la discussion: " . $e->getMessage());
+                header('Location: ./?action=erreur');
+                exit();
+            }
+        }
+    }
+
+    public function callbackGererFavoris(): void
+    {
+        if (isset($_POST['Favoris'])){
+            $idPublication = (int)$_POST['idPublication'];
+            $this->logger->info("Gestion des favoris pour la publication: " . $idPublication);
+            try{
+                if($this->favorisDAO->estFavoris($idPublication, $this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']))){
+                    $this->favorisDAO->deleteFavoris($idPublication, $this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']));
+                    $this->logger->info("Publication retirée des favoris: " . $idPublication);
+                }
+                else{
+                    $this->favorisDAO->addFavoris($idPublication, $this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']));
+                    $this->logger->info("Publication ajoutée aux favoris: " . $idPublication);
+                }
+                header('Location: ./?action=communaute&nomCommu=' . urlencode($_GET['nomCommu']));
+                exit();
+            }
+            catch (PDOException $e)
+            {
+                $this->logger->error("Erreur lors de la gestion des favoris: " . $e->getMessage());
+                header('Location: ./?action=erreur');
+                exit();
+            }
+        }
+    }
+
 }

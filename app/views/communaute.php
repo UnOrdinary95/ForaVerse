@@ -14,6 +14,8 @@
  * @var array $liste_attentes
  * @var array $liste_warns
  * @var array $liste_bans
+ * @var array $discussions
+ * @var array $erreurs
 */
 ?>
 
@@ -36,6 +38,10 @@
             <img src="../../public/<?= htmlspecialchars($communaute->getCheminPhoto()) ?>" alt="ProfilCommunaute" style="width: 50px; height: 50px; border-radius: 50%">
             <h1><?= htmlspecialchars($communaute->getNom()) ?></h1>
             <?php if (isset($_SESSION['Pseudo'])): ?>
+                <?php if($role): ?>
+                    <button id="btnCreerDiscussion">➕Créer</button>
+                <?php endif; ?>
+
                 <?php if ($communaute->getVisibilite()):?>
                     <?php if (!$role): ?>
                         <button id="btnAdhesion" data-communaute_id="<?= $communaute->getId() ?>">Rejoindre</button>
@@ -44,23 +50,41 @@
                     <?php endif; ?>
                 <?php else: ?>
                     <?php if (!$role && !isset($adhesion)):?>
-                        <button id="btnAdhesionPrivee" data-communaute_id="<?= $communaute->getId() ?>">Demander à rejoindre</button>
+                        <button id="btnAdhesionPrivee" data-communaute_id="<?= $communaute->getId() ?>">➡️Demander à rejoindre</button>
                     <?php elseif (!$role && isset($adhesion) && $adhesion->getStatut() == 'en attente'): ?>
-                        <button id="btnAdhesionPrivee" data-communaute_id="<?= $communaute->getId() ?>">Demande en attente</button>
+                        <button id="btnAdhesionPrivee" data-communaute_id="<?= $communaute->getId() ?>">🔄️Demande en attente</button>
                     <?php elseif (!$role && isset($adhesion) && $adhesion->getStatut() == 'refusée'): ?>
-                        <button id="btnAdhesionPrivee" data-communaute_id="<?= $communaute->getId() ?>">Demande refusé</button>
+                        <button id="btnAdhesionPrivee" data-communaute_id="<?= $communaute->getId() ?>">⛔Demande refusé</button>
                     <?php elseif ($role->estMembreOuModerateur()): ?>
-                        <button id="btnAdhesionPrivee" data-communaute_id="<?= $communaute->getId() ?>">Quitter</button>
+                        <button id="btnAdhesionPrivee" data-communaute_id="<?= $communaute->getId() ?>">🚪Quitter</button>
                     <?php endif; ?>
                 <?php endif; ?>
                 <?php if (isset($role) && $role->estProprietaire()): ?>
-                    <button id="btnGestion">Gérer</button>
+                    <button id="btnGestion">🔑Gérer</button>
                 <?php endif; ?>
             <?php endif; ?>
             <?php if(isset($_SESSION['Pseudo']) && $role && $role->peutModerer()): ?>
-                <button id="btnModeration">Modération</button>
+                <button id="btnModeration">🔧Modération</button>
             <?php endif; ?>
-                <div id="modContainer" class="modal">
+
+            <div id="creerDiscussionContainer" class="modal">
+                <div class="modal-content">
+                    <h1>Créer une discussion</h1><h1 id="closeDiscussionContainer" style="cursor: pointer;">❌</h1>
+                    <form method="POST" action="?action=communaute&nomCommu=<?= htmlspecialchars($communaute->getNom()) ?>#creerDiscussionContainer" novalidate>
+                        <input type="text" name="titreDiscussion" placeholder="Titre de la discussion"><br><br>
+                        <?php if (!empty($erreurs['titreDiscussion'])): ?>
+                            <span style="color: red"><?= $erreurs['titreDiscussion'] ?></span><br>
+                        <?php endif; ?>
+                        <textarea name="contenuDiscussion" style="resize: none;" rows="20" cols="100" placeholder="Contenu de la discussion"></textarea><br><br>
+                        <?php if (!empty($erreurs['contenuDiscussion'])): ?>
+                            <span style="color: red"><?= $erreurs['contenuDiscussion'] ?></span><br>
+                        <?php endif; ?>
+                        <button type="submit">Créer</button>
+                    </form>
+                </div>
+            </div>
+
+            <div id="modContainer" class="modal">
                 <div class="modal-content">
                     <h1>Modération</h1><h1 id="closeModContainer" style="cursor: pointer;">❌</h1>
                     <div id="param_moderation" style="display: block; border: 1px solid black;">
@@ -175,7 +199,6 @@
                 </div>
             </div>
 
-
             <div id="ParamCommuContainer" class="modal">
                 <div class="modal-content">
                     <h1>Paramètres de la communauté</h1><h1 id="closeParamCommuContainer" style="cursor: pointer;">❌</h1>
@@ -222,6 +245,7 @@
                     </div>
                 </div>
             </div>
+
             <div class="modal" id="modalRename">
                 <div class="modal-content">
                     <h1>Renommer la communauté</h1><h1 id="closeModalRename" style="cursor: pointer;">❌</h1>
@@ -234,6 +258,7 @@
                     </form>
                 </div>
             </div>
+
             <div class="modal" id="modalDelete">
                 <div class="modal-content">
                     <h1>Supprimer la communauté</h1><h1 id="closeModalDelete" style="cursor: pointer;">❌</h1>
@@ -248,7 +273,79 @@
                     </div>
                 </div>
             </div>
+            
+            <hr>
+                <div id="discussionContainer">
+                    <?php if (isset($discussions) && count($discussions) > 0): ?>
+                        <?php foreach ($discussions as $discussion): ?>
+                            <div class="discussion">
+                                <a href="./?action=profil&utilisateur=<?= htmlspecialchars($discussion->getUtilisateur()->getPseudo()) ?>" style="text-decoration: none;">
+                                    <p><?= htmlspecialchars($discussion->getUtilisateur()->getPseudo()) ?>, le <?= (new DateTime($discussion->getDateCreation()))->format('d/m/Y')?> à <?= (new DateTime($discussion->getDateCreation()))->format('H:i') ?></p>
+                                </a>
+                                <h2><?= htmlspecialchars($discussion->getTitre()) ?></h2>
+                                    <span style="display:flex; flex-direction: flex-row; gap: 10px;" class="vote-container" data-publication-id=<?=$discussion->getIdPublication()?>>
+                                        <?php if(isset($_SESSION['Pseudo'])){
+                                            switch($discussion->getVoteUtilisateurCourant()){
+                                                case 1:
+                                                    print '
+                                                    <button class="vote-up active">⬆️</button>
+                                                    <span class="score-value">'.htmlspecialchars($discussion->getScore()).'</span>
+                                                    <button class="vote-down">⬇️</button>';
+                                                    break;
+                                                case -1:
+                                                    print '
+                                                    <button class="vote-up">⬆️</button>
+                                                    <span class="score-value">'.htmlspecialchars($discussion->getScore()).'</span>
+                                                    <button class="vote-down">⬇️</button>;';
+                                                    break;
+                                                default:
+                                                    print '
+                                                    <button class="vote-up">⬆️</button>
+                                                    <span class="score-value">'.htmlspecialchars($discussion->getScore()).'</span>
+                                                    <button class="vote-down">⬇️</button>';
+                                            }
+                                            print '
+                                            <button>🗨️Commentaire</button>
+                                            <form method="POST" action="?action=communaute&nomCommu='.htmlspecialchars($communaute->getNom()).'">
+                                                <input type="hidden" name="idPublication" value="'.htmlspecialchars($discussion->getIdPublication()).'">';
+                                            if ($discussion->estFavoris()){
+                                                print '<button type="submit" name="Favoris">❌Favoris</button>';
+                                            }
+                                            else{
+                                                print '<button type="submit" name="Favoris">⭐Favoris</button>';
+                                            }
+                                            print '</form>';
+                                            
+                                            if (isset($role) && $role->peutModerer()){
+                                                print '
+                                                <form method="POST" action="?action=communaute&nomCommu='.htmlspecialchars($communaute->getNom()).'">
+                                                    <input type="hidden" name="idPublication" value="'.htmlspecialchars($discussion->getIdPublication()).'">';
+                                                if ($discussion->estEpingle()){
+                                                    print '<button type="submit" name="epinglerPublication">❌Désépingler</button>';
+                                                }
+                                                else{
+                                                    print '<button type="submit" name="epinglerPublication">📌Epingler</button>';
+                                                }
+                                                print '</form>';
+                                            }
+                                        }
+                                        else{
+                                            print '
+                                            <a href="./?action=connexion"><button>⬆️</button></a>
+                                            <span class="score-value">'.htmlspecialchars($discussion->getScore()).'</span>
+                                            <a href="./?action=connexion"><button>⬇️</button></a>
+                                            <a href="./?action=connexion"><button>🗨️Commentaire</button></a>';
+                                        }?>
+                                    </span>
+                                <hr>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <p>Aucune discussion pour le moment.</p>
+                    <?php endif; ?>
+                </div>
         </div>
+
         <div style="width: 20vw;border: 3px solid black;">
             <img id="communauteImage" src="../../public/<?= htmlspecialchars($communaute->getCheminPhoto()) ?>" alt="ProfilCommunaute" style="width: 75px; height: 75px; border-radius: 50%; cursor: pointer;" 
                 <?php if (isset($_SESSION['Pseudo'])): ?>
@@ -309,6 +406,7 @@
             </div>
         </div>
     </div>
+
     <script>
         if (window.location.hash === "creerCommu"){
             window.history.replaceState("", document.title, window.location.pathname + window.location.search);
@@ -318,5 +416,7 @@
     <script src="../../public/scripts/image_cropper_commu.js"></script>
     <script src="../../public/scripts/communaute_settings.js"></script>
     <script src="../../public/scripts/commu_moderation_settings.js"></script>
+    <script src="../../public/scripts/communaute_discussion.js"></script>
+    <script src="../../public/scripts/vote_publication.js"> </script>
 </body>
 </html>
