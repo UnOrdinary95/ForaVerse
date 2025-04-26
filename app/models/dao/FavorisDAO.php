@@ -38,10 +38,10 @@ class FavorisDAO
         return (bool)$query->fetchColumn();
     }
 
-    public function addFavoris(int $idPublication, int $idUtilisateur): bool
+    public function addFavoris(int $idPublication, int $idUtilisateur, string $type_publication): bool
     {
         $query = $this->pdo->prepare("INSERT INTO favoris (idPublication, idUtilisateur, type_publication) VALUES (?, ?, ?)");
-        return $query->execute([$idPublication, $idUtilisateur, 'discussion']);
+        return $query->execute([$idPublication, $idUtilisateur, $type_publication]);
     }
 
     public function deleteFavoris(int $idPublication, int $idUtilisateur): bool

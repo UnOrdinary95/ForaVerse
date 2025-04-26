@@ -12,6 +12,7 @@ if (!isset($_SESSION['Pseudo']) || !isset($_POST['action']) || !isset($_POST['pu
 $utilisateur_dao = new UtilisateurDAO();
 $vote_dao = new VoteDAO();
 $discussion_dao = new DiscussionDAO();
+$commentaire_dao = new CommentaireDAO();
 $logger = new Logger();
 
 $utilisateur_id = $utilisateur_dao->getIdByPseudo($_SESSION['Pseudo']);
@@ -23,8 +24,18 @@ $logger->debug("Valeur du vote: " . $valeur_vote);
 $resultat = false;
 
 if ($_POST['action'] == 'voter') {
+    if ($discussion_dao->getDiscussionById($publication_id)){
+        $type_publication = 'discussion';
+    } elseif ($commentaire_dao->getCommentaireById($publication_id)) {
+        $type_publication = 'commentaire';
+    } else {
+        header('Content-Type: application/json');
+        echo json_encode(['error' => 'Erreur: Publication introuvable']);
+        exit;
+    }
+
     if ($vote_existant === false) {
-        $resultat = $vote_dao->addVote($publication_id, $utilisateur_id, $valeur_vote, 'discussion');
+        $resultat = $vote_dao->addVote($publication_id, $utilisateur_id, $valeur_vote, $type_publication);  
     } else {
         $resultat = $vote_dao->updateVote($publication_id, $utilisateur_id, $valeur_vote);
     }
@@ -41,15 +52,27 @@ if ($_POST['action'] == 'voter') {
         $valeur_vote_actuel = 0;
     }
     
-    $score_total = $discussion_dao->getScoreById($publication_id);
-    
+    if ($type_publication == 'discussion') {
+        $score_total = $discussion_dao->getScoreById($publication_id);
+    } elseif ($type_publication == 'commentaire') {
+        $score_total = $commentaire_dao->getScoreById($publication_id);
+    } else {
+        header('Content-Type: application/json');
+        echo json_encode(['error' => 'Erreur: Type de publication invalide']);
+        exit;
+    }
+    // TODO : L'enlever
+    $logger->debug("Score total: " . $score_total);
+    $logger->debug("Valeur du vote actuel: " . $valeur_vote_actuel);
+
     header('Content-Type: application/json');
-    echo json_encode([
-        'success' => true,
-        'vote' => $valeur_vote_actuel,
-        'score' => $score_total
-    ]);
+        echo json_encode([
+            'success' => true,
+            'vote' => $valeur_vote_actuel,
+            'score' => $score_total
+        ]);
     exit;
+    
 } else {
     header('Content-Type: application/json');
     echo json_encode(['error' => 'Erreur: Action invalide']);

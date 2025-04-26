@@ -5,6 +5,7 @@ class PublicationController implements ControllerInterface
     private Logger $logger;
     private CommunauteDAO $communauteDAO;
     private DiscussionDAO $discussionDAO;
+    private CommentaireDAO $commentaireDAO;
     private RoleDAO $roleDAO;
     private UtilisateurDAO $utilisateurDAO;
     private BannissementDAO $bannissementDAO;
@@ -15,6 +16,7 @@ class PublicationController implements ControllerInterface
         $this->logger = new Logger();
         $this->communauteDAO = new CommunauteDAO();
         $this->discussionDAO = new DiscussionDAO();
+        $this->commentaireDAO = new CommentaireDAO();
         $this->roleDAO = new RoleDAO();
         $this->utilisateurDAO = new UtilisateurDAO();
         $this->bannissementDAO = new BannissementDAO();
@@ -31,36 +33,64 @@ class PublicationController implements ControllerInterface
                 header('HTTP/1.0 404 Not Found');
                 exit();
             }
-            
+
             $publication = $this->discussionDAO->getDiscussionById($_GET['idPublication']);
             if ($publication){
-                // TODO : Permissions
-            }
-            else{
-                $this->logger->warning("Tentative d'accès à une publication inexistante: " . $_GET['idPublication']);
-                header('HTTP/1.0 404 Not Found');
-                exit();
-            }
+                if (isset($_SESSION['Pseudo'])){
+                    $session_user = $this->utilisateurDAO->getProfilUtilisateurById($this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']));
+                    $role = $this->roleDAO->getRole($this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']), $communaute_id);
+                    if ($role){
+                        $this->logger->info("Utilisateur avec le rôle " . $role->getRole() . " accède à la communauté " . $_GET['nomCommu']);
+                        $this->callbackGererFavoris();
+    
+                        if($role->peutModerer()){
+                            $this->logger->info(message: "L'utilisateur peut modérer la publication.");
+                            $this->callbackEpinglerDiscussion();
+                        }
+                        
+                        $this->callbackCreerCommentaire();
+                    }
+                    else{
+                        $this->logger->info("Utilisateur sans rôle accède à la communauté " . $_GET['nomCommu']);
+                    }
+                }
 
-            if (isset($_SESSION['Pseudo'])){
-                $role = $this->roleDAO->getRole($this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']), $communaute_id);
-                if ($role){
-                    $this->logger->info("Utilisateur avec le rôle " . $role->getRole() . " accède à la communauté " . $_GET['nomCommu']);
-                    $this->callbackGererFavoris();
-
-                    if($role->peutModerer()){
-                        $this->logger->info(message: "L'utilisateur peut modérer la publication.");
-                        $this->callbackEpinglerDiscussion();
+                // Callback pour le tri
+                if (isset($_POST['tri'])){
+                    $tri = $_POST['tri'];
+                    if ($tri == 'recents'){
+                        $commentaires = $this->commentaireDAO->getCommentairesByCommunauteAndDiscussionOrderByDatesDESC($communaute_id, $_GET['idPublication']);
+                    }
+                    elseif ($tri == 'anciens'){
+                        $commentaires = $this->commentaireDAO->getCommentairesByCommunauteAndDiscussionOrderByDatesASC($communaute_id, $_GET['idPublication']);
+                    }
+                    elseif ($tri == 'upvotes'){
+                        $commentaires = $this->commentaireDAO->getCommentairesByCommunauteAndDiscussionOrderByUpvotes($communaute_id, $_GET['idPublication']);
+                    }
+                    elseif ($tri == 'downvotes'){
+                        $commentaires = $this->commentaireDAO->getCommentairesByCommunauteAndDiscussionOrderByDownvotes($communaute_id, $_GET['idPublication']);
+                    }
+                    else{
+                        // Récent par défaut
+                        $commentaires = $this->commentaireDAO->getCommentairesByCommunauteAndDiscussionOrderByDatesDESC($communaute_id, $_GET['idPublication']);
                     }
                 }
                 else{
-                    $this->logger->info("Utilisateur sans rôle accède à la communauté " . $_GET['nomCommu']);
+                    // Récent par défaut
+                    $commentaires = $this->commentaireDAO->getCommentairesByCommunauteAndDiscussionOrderByDatesDESC($communaute_id, $_GET['idPublication']);
+                }   
+
+                // Callback pour la recherche de commentaire
+                if  (isset($_POST['commentaire_mot_cle'])){
+                    $mot_cle = $_POST['commentaire_mot_cle'];
+                    $commentaires = $this->commentaireDAO->getCommentairesByCommunauteAndDiscussionAndMotcle($communaute_id, $_GET['idPublication'], $mot_cle);
                 }
-            }
-
-            
-
-            $communaute = $this->communauteDAO->getCommunauteById($communaute_id);
+                else{
+                    // Récent par défaut
+                    $commentaires = $this->commentaireDAO->getCommentairesByCommunauteAndDiscussionOrderByDatesDESC($communaute_id, $_GET['idPublication']);
+                }
+                    
+                $communaute = $this->communauteDAO->getCommunauteById($communaute_id);
                 $nbr_membres = $this->roleDAO->getNbrRolesByCommunaute($communaute_id);
                 $proprio = [
                     'pseudo' => $this->utilisateurDAO->getPseudoById($this->roleDAO->getProprioByCommunaute($communaute_id)->getUtilisateurId()),
@@ -85,6 +115,12 @@ class PublicationController implements ControllerInterface
                     ];
                 }
                 require_once __DIR__ . '/../views/publication.php';
+            }
+            else{
+                $this->logger->warning("Tentative d'accès à une publication inexistante: " . $_GET['idPublication']);
+                header('HTTP/1.0 404 Not Found');
+                exit();
+            }
         }
         catch(PDOException $e){
             $this->logger->error("Erreur lors de l'affichage de la vue de publication: " . $e->getMessage());
@@ -99,15 +135,27 @@ class PublicationController implements ControllerInterface
             $idPublication = (int)$_POST['idPublication']; // Conversion en entier
             $this->logger->info("Épinglage de la discussion: " . $idPublication);
             try{
-                if($this->discussionDAO->estEpingle($idPublication)){
-                    $this->discussionDAO->updateEpingle($idPublication, false);
-                    $this->logger->info("Discussion désépinglée avec succès: " . $idPublication);
+                if($idPublication == $_GET['idPublication']){
+                    if($this->discussionDAO->estEpingle($idPublication)){
+                        $this->discussionDAO->updateEpingle($idPublication, false);
+                        $this->logger->info("Discussion désépinglée avec succès: " . $idPublication);
+                    }
+                    else{
+                        $this->discussionDAO->updateEpingle($idPublication, true);
+                        $this->logger->info("Discussion épinglée avec succès: " . $idPublication);
+                    }
                 }
                 else{
-                    $this->discussionDAO->updateEpingle($idPublication, true);
-                    $this->logger->info("Discussion épinglée avec succès: " . $idPublication);
+                    if($this->commentaireDAO->estEpingle($idPublication)){
+                        $this->commentaireDAO->updateEpingle($idPublication, false);
+                        $this->logger->info("Commentaire désépinglée avec succès: " . $idPublication);
+                    }
+                    else{
+                        $this->commentaireDAO->updateEpingle($idPublication, true);
+                        $this->logger->info("Commentaire épinglée avec succès: " . $idPublication);
+                    }
                 }
-                header('Location: ./?action=publication&nomCommu='.urlencode(string: $_GET['nomCommu']).'&idPublication='.urlencode($idPublication));
+                header('Location: ./?action=publication&nomCommu='.urlencode($_GET['nomCommu']).'&idPublication='.urlencode($_GET['idPublication']));
                 exit();
             }
             catch (PDOException $e)
@@ -125,15 +173,29 @@ class PublicationController implements ControllerInterface
             $idPublication = (int)$_POST['idPublication'];
             $this->logger->info("Gestion des favoris pour la publication: " . $idPublication);
             try{
-                if($this->favorisDAO->estFavoris($idPublication, $this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']))){
-                    $this->favorisDAO->deleteFavoris($idPublication, $this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']));
-                    $this->logger->info("Publication retirée des favoris: " . $idPublication);
+                if($idPublication == $_GET['idPublication']){
+                    $this->logger->info("Gestion des favoris pour la discussion: " . $idPublication);
+                    if($this->favorisDAO->estFavoris($idPublication, $this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']))){
+                        $this->favorisDAO->deleteFavoris($idPublication, $this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']));
+                        $this->logger->info("Publication retirée des favoris: " . $idPublication);
+                    }
+                    else{
+                        $this->favorisDAO->addFavoris($idPublication, $this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']), 'discussion');
+                        $this->logger->info("Publication ajoutée aux favoris: " . $idPublication);
+                    }
                 }
                 else{
-                    $this->favorisDAO->addFavoris($idPublication, $this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']));
-                    $this->logger->info("Publication ajoutée aux favoris: " . $idPublication);
+                    $this->logger->info("Gestion des favoris pour le commentaire: " . $idPublication);
+                    if($this->favorisDAO->estFavoris($idPublication, $this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']))){
+                        $this->favorisDAO->deleteFavoris($idPublication, $this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']));
+                        $this->logger->info("Commentaire retiré des favoris: " . $idPublication);
+                    }
+                    else{
+                        $this->favorisDAO->addFavoris($idPublication, $this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']), 'commentaire');
+                        $this->logger->info("Commentaire ajouté aux favoris: " . $idPublication);
+                    }
                 }
-                header('Location: ./?action=publication&nomCommu='.urlencode(string: $_GET['nomCommu']).'&idPublication='.urlencode($idPublication));
+                header('Location: ./?action=publication&nomCommu='.urlencode($_GET['nomCommu']).'&idPublication='.urlencode($_GET['idPublication']));
                 exit();
             }
             catch (PDOException $e)
@@ -145,5 +207,33 @@ class PublicationController implements ControllerInterface
         }
     }
 
+    public function callbackCreerCommentaire(): void
+    {
+        if (isset($_POST['CreerCommentaire'])){
+            $this->logger->info("Création d'un nouveau commentaire dans la discussion: " . $_GET['idPublication']);
+            $contenu = $_POST['contenuCommentaire'];
 
+            if(strlen($contenu) > 2048){
+                $contenu = substr($contenu, 0, 2048);
+                $this->logger->info("Contenu du commentaire trop long et tronqué.");
+            }
+            
+            try{
+                $this->commentaireDAO->addCommentaire(
+                    $_GET['idPublication'],
+                    $this->communauteDAO->getIdByNom($_GET['nomCommu']),
+                    $this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']),
+                    $contenu
+                );
+                header('Location: ./?action=publication&nomCommu='.urlencode(string: $_GET['nomCommu']).'&idPublication='.urlencode($_GET['idPublication']));
+                exit();
+            }
+            catch (PDOException $e)
+            {
+                $this->logger->error("Erreur lors de la création de la discussion: " . $e->getMessage());
+                header('Location: ./?action=erreur');
+                exit();
+            }
+        }
+    }
 }
