@@ -279,8 +279,11 @@
                     <?php if (isset($discussions) && count($discussions) > 0): ?>
                         <?php foreach ($discussions as $discussion): ?>
                             <div class="discussion">
-                                <a href="./?action=profil&utilisateur=<?= htmlspecialchars($discussion->getUtilisateur()->getPseudo()) ?>" style="text-decoration: none;">
-                                    <p><?= htmlspecialchars($discussion->getUtilisateur()->getPseudo()) ?>, le <?= (new DateTime($discussion->getDateCreation()))->format('d/m/Y')?> à <?= (new DateTime($discussion->getDateCreation()))->format('H:i') ?></p>
+                                <a href="./?action=profil&utilisateur=<?= htmlspecialchars($discussion->getUtilisateur()->getPseudo()) ?>" style="text-decoration: none; display: flex; align-items: center;">
+                                    <p style="margin: 0;"><?= htmlspecialchars($discussion->getUtilisateur()->getPseudo()) ?>, le <?= (new DateTime($discussion->getDateCreation()))->format('d/m/Y')?> à <?= (new DateTime($discussion->getDateCreation()))->format('H:i') ?></p>
+                                    <?php if ($discussion->estEpingle()): ?>
+                                        <p style="margin: 0;">📌</p>
+                                    <?php endif; ?>
                                 </a>
                                 <a href="./?action=publication&nomCommu=<?= htmlspecialchars($communaute->getNom()) ?>&idPublication=<?= htmlspecialchars($discussion->getIdPublication()) ?>" style="text-decoration: none;">
                                     <h2><?= htmlspecialchars($discussion->getTitre()) ?></h2>
@@ -298,7 +301,7 @@
                                                     print '
                                                     <button class="vote-up">⬆️</button>
                                                     <span class="score-value">'.htmlspecialchars($discussion->getScore()).'</span>
-                                                    <button class="vote-down">⬇️</button>;';
+                                                    <button class="vote-down active">⬇️</button>';
                                                     break;
                                                 default:
                                                     print '
@@ -370,7 +373,7 @@
             <h2>Propriétaire</h2>
             <a href="./?action=profil&utilisateur=<?= htmlspecialchars($proprio['pseudo']) ?>" style="text-decoration: none; display:flex; align-items: center; gap: 3px;">
                 <img src="../../public/<?= htmlspecialchars($proprio['pp'])?>" style="width: 40px; height: 40px; border-radius: 30%;" alt="Profil">
-                <span style="font-size: 18px;"><?= htmlspecialchars($proprio['pseudo']) ?></span>
+                <span style="font-size: 18px;<?php if(isset($_SESSION['Pseudo']) && $_SESSION['Pseudo'] == $proprio['pseudo']){print 'font-weight: bold;';} ?>"><?= htmlspecialchars($proprio['pseudo']) ?></span>
             </a>
 
             <h2>Modérateurs</h2>
@@ -379,7 +382,7 @@
                     <?php foreach($mods as $mod): ?>
                         <a href="./?action=profil&utilisateur=<?= htmlspecialchars($mod['pseudo']) ?>" style="text-decoration: none; display:flex; align-items: center; gap: 3px;">
                             <img src="../../public/<?= htmlspecialchars($mod['pp'])?>" style="width: 40px; height: 40px; border-radius: 30%;" alt="Profil">
-                            <span style="font-size: 18px;"><?= htmlspecialchars($mod['pseudo']) ?></span>
+                            <span style="font-size: 18px;<?php if(isset($_SESSION['Pseudo']) && $_SESSION['Pseudo'] == $mod['pseudo']){print 'font-weight: bold;';} ?>"><?= htmlspecialchars($mod['pseudo']) ?></span>
                         </a>
                     <?php endforeach; ?>
                 <?php else: ?>
@@ -393,12 +396,12 @@
                     <?php foreach($membres as $membre): ?>
                         <a href="./?action=profil&utilisateur=<?= htmlspecialchars($membre['pseudo']) ?>" style="text-decoration: none; display:flex; align-items: center; gap: 3px;">
                             <img src="../../public/<?= htmlspecialchars($membre['pp'])?>" style="width: 40px; height: 40px; border-radius: 30%;" alt="Profil">
-                            <span style="font-size: 18px;"><?= htmlspecialchars($membre['pseudo']) ?></span>
+                            <span style="font-size: 18px;<?php if(isset($_SESSION['Pseudo']) && $_SESSION['Pseudo'] == $membre['pseudo']){print 'font-weight: bold;';} ?>"><?= htmlspecialchars($membre['pseudo']) ?></span>
                             <?php if($membre['admin']): ?>
                                 <span style="color: red; font-weight: bold;">{Admin}</span>
                             <?php endif; ?>
                             <?php if($membre['banglobal']): ?>
-                                <span style="color: green; font-weight: bold;">{Ban global}</span>
+                                <span style="color: green; font-weight: bold;">{Utilisateur banni}</span>
                             <?php endif; ?>
                         </a>
                     <?php endforeach; ?>
