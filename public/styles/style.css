@@ -4,6 +4,31 @@ body{
     box-sizing: border-box;
 }
 
+/* Pour tous les liens */
+a {
+    color: #000000;
+    text-decoration: none; 
+    transition: color 0.2s ease;
+    font-weight: 500;
+}
+  
+/* Pour les liens visités */
+a:visited {
+    color: #000000; 
+}
+  
+/* Pour les liens au survol */
+a:hover {
+    color: #444444; 
+    opacity: 0.9;
+}
+  
+/* Pour les liens actifs (au clic) */
+a:active {
+    color: #666666;
+    opacity: 0.8;
+}
+
 @font-face{
     src: url(../fonts/GameOfSquids.ttf);
     font-family: GameOfSquids;
