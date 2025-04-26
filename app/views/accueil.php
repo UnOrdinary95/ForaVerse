@@ -19,8 +19,12 @@
         <img src="../../public/images/Logo_ForaVerse.png" alt="Logo" style="width: 100px; height: auto;">
         <h1 id="title">ForaVerse</h1>
         <?php if (!isset($_SESSION['Pseudo'])): ?>
-            <a href="./?action=connexion">Connexion</a>
-            <a href="./?action=inscription">Inscription</a>
+            <a href="./?action=connexion">
+                <button>Connexion</button>    
+            </a>
+            <a href="./?action=inscription">
+                <button>Inscription</button>
+            </a>
         <?php else: ?>
             <button id="btnCreerCommu">➕Créer</button>
             <div id="creerCommuContainer" class="modal">
@@ -44,7 +48,9 @@
                     </form>
                 </div>
             </div>
-            <a href="./?action=deconnexion">Déconnexion</a>
+            <a href="./?action=deconnexion">
+                <button>Déconnexion</button>
+            </a>
             <a href="./?action=profil&utilisateur=<?= htmlspecialchars($_SESSION['Pseudo'])?>">
                 <img src="../../public/<?= htmlspecialchars($utilisateur->getCheminPhoto()) ?>" alt="Profil" style="width: 50px; height: 50px; border-radius: 30%">
             </a>
