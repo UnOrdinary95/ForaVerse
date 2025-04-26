@@ -412,7 +412,7 @@ class CommunauteController implements ControllerInterface
                     $this->logger->info("Publication retirée des favoris: " . $idPublication);
                 }
                 else{
-                    $this->favorisDAO->addFavoris($idPublication, $this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']));
+                    $this->favorisDAO->addFavoris($idPublication, $this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']), 'discussion');
                     $this->logger->info("Publication ajoutée aux favoris: " . $idPublication);
                 }
                 header('Location: ./?action=communaute&nomCommu=' . urlencode($_GET['nomCommu']));
