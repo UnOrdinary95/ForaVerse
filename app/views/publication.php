@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Accueil</title>
+    <title><?=htmlspecialchars($publication->getTitre())?></title>
     <link rel="icon" href="../../public/images/favicon/favicon_foraverse.png"/>
     <link rel="stylesheet" href="../../public/styles/style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
