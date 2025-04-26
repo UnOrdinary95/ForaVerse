@@ -24,7 +24,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Communauté - <?= htmlspecialchars($communaute->getNom()) ?></title>
+    <title><?= htmlspecialchars($communaute->getNom()) ?></title>
     <link rel="icon" href="../../public/images/favicon/favicon_foraverse.png"/>
     <link rel="stylesheet" href="../../public/styles/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
