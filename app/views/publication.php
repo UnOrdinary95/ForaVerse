@@ -53,7 +53,6 @@
                             <button class="vote-down">⬇️</button>';
                     }
                     print '
-                    <button>🗨️Commentaire</button>
                     <form method="POST" action="?action=publication&nomCommu='.htmlspecialchars($communaute->getNom()).'&idPublication='.htmlspecialchars($publication->getIdPublication()).'">
                         <input type="hidden" name="idPublication" value="'.htmlspecialchars($publication->getIdPublication()).'">';
                     if ($publication->estFavoris()){
@@ -91,7 +90,6 @@
                     <a href="./?action=connexion"><button>⬆️</button></a>
                     <span class="score-value">'.htmlspecialchars($publication->getScore()).'</span>
                     <a href="./?action=connexion"><button>⬇️</button></a>
-                    <a href="./?action=connexion"><button>🗨️Commentaire</button></a>
                     <button onclick="partagerURL()">Partager la publication</button>
                     </span>
                     <br>';

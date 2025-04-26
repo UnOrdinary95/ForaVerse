@@ -310,7 +310,9 @@
                                                     <button class="vote-down">⬇️</button>';
                                             }
                                             print '
+                                            <a href="./?action=publication&nomCommu='.htmlspecialchars($communaute->getNom()).'&idPublication='.htmlspecialchars($discussion->getIdPublication()).'">
                                             <button>🗨️Commentaire</button>
+                                            </a>
                                             <form method="POST" action="?action=communaute&nomCommu='.htmlspecialchars($communaute->getNom()).'">
                                                 <input type="hidden" name="idPublication" value="'.htmlspecialchars($discussion->getIdPublication()).'">';
                                             if ($discussion->estFavoris()){
