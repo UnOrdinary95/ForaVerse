@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', function() {
             demandeadh.style.color = "red";
             refusadh.style.textDecoration = "none";
             refusadh.style.textDecorationColor = "none";
-            refusadh.style.color = "black";
+            refusadh.style.color = "white";
         };
         
         refusadh.onclick = function() {
@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', function() {
             refusadh.style.color = "red";
             demandeadh.style.textDecoration = "none";
             demandeadh.style.textDecorationColor = "none";
-            demandeadh.style.color = "black";
+            demandeadh.style.color = "white";
         };
     }
     
