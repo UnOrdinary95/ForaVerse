@@ -1,6 +1,6 @@
 <?php
 
-class CommentaireDAO
+final class CommentaireDAO
 {
     private PDO $pdo;
 

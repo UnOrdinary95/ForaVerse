@@ -19,7 +19,7 @@
             </form>
         </div>
 
-    <?php elseif($_GET['action'] == 'communaute' || $_GET['action'] == 'publication'): ?>
+    <?php elseif($_GET['action'] == 'communaute' || $_GET['action'] == 'publication' || $_GET['action'] == 'commentaire'): ?>
         <div class="header_container" id="hcontainer2">
             <form  method="POST" action="?action=communaute&nomCommu=<?= htmlspecialchars($communaute->getNom()) ?>">
                 <input name="discussion_mot_cle" type="text" placeholder="🔍Rechercher une discussion">

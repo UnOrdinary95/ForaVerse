@@ -77,7 +77,7 @@ class Commentaire
         return $this->estEpingle;
     }
 
-    public function getDiscussion(): Discussion
+    public function estuneDiscussion(): ?Discussion
     {
         return (new DiscussionDAO())->getDiscussionById($this->idDiscussion);
     }

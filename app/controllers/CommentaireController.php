@@ -1,26 +1,11 @@
 <?php
 
-class PublicationController implements ControllerInterface
+class CommentaireController extends PublicationController implements ControllerInterface
 {
-    protected Logger $logger;
-    protected CommunauteDAO $communauteDAO;
-    protected DiscussionDAO $discussionDAO;
-    protected CommentaireDAO $commentaireDAO;
-    protected RoleDAO $roleDAO;
-    protected UtilisateurDAO $utilisateurDAO;
-    protected BannissementDAO $bannissementDAO;
-    protected FavorisDAO $favorisDAO;
-
+    
     public function __construct()
     {
-        $this->logger = new Logger();
-        $this->communauteDAO = new CommunauteDAO();
-        $this->discussionDAO = new DiscussionDAO();
-        $this->commentaireDAO = new CommentaireDAO();
-        $this->roleDAO = new RoleDAO();
-        $this->utilisateurDAO = new UtilisateurDAO();
-        $this->bannissementDAO = new BannissementDAO();
-        $this->favorisDAO = new FavorisDAO();
+        parent::__construct();
     }
 
     public function afficherVue(): void
@@ -34,8 +19,9 @@ class PublicationController implements ControllerInterface
                 exit();
             }
 
-            $publication = $this->discussionDAO->getDiscussionById($_GET['idPublication']);
-            if ($publication){
+            $commentaire = $this->commentaireDAO->getCommentaireById($_GET['idPublication']); // Commentaire
+            if ($commentaire){
+                $publication = $this->discussionDAO->getDiscussionById($commentaire->getIdDiscussion());
                 if (isset($_SESSION['Pseudo'])){
                     include_once __DIR__ . '/../utils/left_sidebar_callback.php';
                     $session_user = $this->utilisateurDAO->getProfilUtilisateurById($this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']));
@@ -55,7 +41,6 @@ class PublicationController implements ControllerInterface
                         $this->logger->info("Utilisateur sans rôle accède à la communauté " . $_GET['nomCommu']);
                     }
                 }
-                
 
                 // Par défaut, on affiche les commentaires récents
                 $commentaires = $this->commentaireDAO->getCommentairesByCommunauteAndDiscussionOrderByDatesDESC($communaute_id, $_GET['idPublication']);
@@ -107,7 +92,7 @@ class PublicationController implements ControllerInterface
                         'banglobal' => $this->bannissementDAO->getBannissementGlobalByIdUtilisateur($unMembre->getUtilisateurId()) !== null ? true : false
                     ];
                 }
-                require_once __DIR__ . '/../views/publication.php';
+                require_once __DIR__ . '/../views/commentaire.php'; // Commentaire
             }
             else{
                 $this->logger->warning("Tentative d'accès à une publication inexistante: " . $_GET['idPublication']);
@@ -148,7 +133,7 @@ class PublicationController implements ControllerInterface
                         $this->logger->info("Commentaire épinglée avec succès: " . $idPublication);
                     }
                 }
-                header('Location: ./?action=publication&nomCommu='.urlencode($_GET['nomCommu']).'&idPublication='.urlencode($_GET['idPublication']));
+                header('Location: ./?action=commentaire&nomCommu='.urlencode($_GET['nomCommu']).'&idPublication='.urlencode($_GET['idPublication']));
                 exit();
             }
             catch (PDOException $e)
@@ -188,7 +173,7 @@ class PublicationController implements ControllerInterface
                         $this->logger->info("Commentaire ajouté aux favoris: " . $idPublication);
                     }
                 }
-                header('Location: ./?action=publication&nomCommu='.urlencode($_GET['nomCommu']).'&idPublication='.urlencode($_GET['idPublication']));
+                header('Location: ./?action=commentaire&nomCommu='.urlencode($_GET['nomCommu']).'&idPublication='.urlencode($_GET['idPublication']));
                 exit();
             }
             catch (PDOException $e)
@@ -218,7 +203,7 @@ class PublicationController implements ControllerInterface
                     $this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']),
                     $contenu
                 );
-                header('Location: ./?action=publication&nomCommu='.urlencode(string: $_GET['nomCommu']).'&idPublication='.urlencode($_GET['idPublication']));
+                header('Location: ./?action=commentaire&nomCommu='.urlencode(string: $_GET['nomCommu']).'&idPublication='.urlencode($_GET['idPublication']));
                 exit();
             }
             catch (PDOException $e)
@@ -229,4 +214,5 @@ class PublicationController implements ControllerInterface
             }
         }
     }
+
 }
