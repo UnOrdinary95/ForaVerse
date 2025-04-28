@@ -12,12 +12,43 @@ class DiscussionDAO
     public function addDiscussion(int $idCommunaute, int $idUtilisateur, string $titre, string $contenu): bool
     {
         $query = $this->pdo->prepare("INSERT INTO discussion (idCommunaute, idUtilisateur, titre, contenu) VALUES (?, ?, ?, ?)");
-        return $query->execute([$idCommunaute, $idUtilisateur, $titre, $contenu]);
+        $query->execute([$idCommunaute, $idUtilisateur, $titre, $contenu]);
+        
+        return (int)$this->pdo->lastInsertId('publication_id_seq');
     }
 
-    public function getDiscussionsByCommunaute(int $idCommunaute): array
+    public function getDiscussionsByCommunauteAndMotcle(int $idCommunaute, string $motcle): array
     {
-        $query = $this->pdo->prepare("SELECT * FROM discussion WHERE idCommunaute = ?");
+        $query = $this->pdo->prepare("SELECT * FROM discussion WHERE idCommunaute = ? AND contenu LIKE ?
+        UNION ALL
+        SELECT * FROM discussion WHERE idCommunaute = ? AND titre LIKE ?");
+        $query->execute([$idCommunaute, "%$motcle%", $idCommunaute, "%$motcle%"]);
+        $result = $query->fetchAll(PDO::FETCH_ASSOC);
+
+        if (!$result){
+            return [];
+        }
+
+        $discussions = [];
+        foreach ($result as $ligne){
+            $discussions[] = new Discussion(
+                $ligne['idpublication'],
+                $ligne['idcommunaute'],
+                $ligne['idutilisateur'],
+                $ligne['contenu'],
+                $ligne['datetime_creation'],
+                $ligne['score'],
+                $ligne['est_epingle'],
+                $ligne['titre']
+            );
+        }
+        return $discussions;
+    }
+
+    // Récents
+    public function getDiscussionsByCommunauteOrderByDatesDESC(int $idCommunaute): array
+    {
+        $query = $this->pdo->prepare("SELECT * FROM discussion WHERE idCommunaute = ? ORDER BY est_epingle DESC, datetime_creation DESC");
         $query->execute([$idCommunaute]);
         $result = $query->fetchAll(PDO::FETCH_ASSOC);
 
@@ -40,6 +71,103 @@ class DiscussionDAO
         }
         return $discussions;
     }
+
+    // Anciens
+    public function getDiscussionsByCommunauteOrderByDatesASC(int $idCommunaute): array
+    {
+        $query = $this->pdo->prepare("SELECT * FROM discussion WHERE idCommunaute = ? ORDER BY est_epingle DESC, datetime_creation ASC");
+        $query->execute([$idCommunaute]);
+        $result = $query->fetchAll(PDO::FETCH_ASSOC);
+
+        if (!$result){
+            return [];
+        }
+
+        $discussions = [];
+        foreach ($result as $ligne){
+            $discussions[] = new Discussion(
+                $ligne['idpublication'],
+                $ligne['idcommunaute'],
+                $ligne['idutilisateur'],
+                $ligne['contenu'],
+                $ligne['datetime_creation'],
+                $ligne['score'],
+                $ligne['est_epingle'],
+                $ligne['titre']
+            );
+        }
+        return $discussions;
+    }
+
+    // Upvotes
+    public function getDiscussionsByCommunauteOrderByUpvotes(int $idCommunaute): array
+    {
+        $req = "SELECT c.*, COUNT(CASE WHEN v.resultat = 1 THEN 1 ELSE NULL END) AS total_upvotes
+                FROM discussion c
+                LEFT JOIN vote v ON c.idPublication = v.idPublication
+                WHERE c.idCommunaute = ?
+                GROUP BY c.idPublication
+                ORDER BY c.est_epingle DESC, total_upvotes DESC;";
+
+        $query = $this->pdo->prepare($req);
+        $query->execute([$idCommunaute]);
+        $result = $query->fetchAll(PDO::FETCH_ASSOC);
+
+        if (!$result){
+            return [];
+        }
+
+        $discussions = [];
+        foreach ($result as $ligne){
+            $discussions[] = new Discussion(
+                $ligne['idpublication'],
+                $ligne['idcommunaute'],
+                $ligne['idutilisateur'],
+                $ligne['contenu'],
+                $ligne['datetime_creation'],
+                $ligne['score'],
+                $ligne['est_epingle'],
+                $ligne['titre'],
+            );
+        }
+        return $discussions;
+    }
+
+    // Downvotes
+    public function getDiscussionsByCommunauteOrderByDownvotes(int $idCommunaute): array
+    {    
+        $req = "SELECT c.*, COUNT(CASE WHEN v.resultat = -1 THEN 1 ELSE NULL END) AS total_downvotes
+                FROM discussion c
+                LEFT JOIN vote v ON c.idPublication = v.idPublication
+                WHERE c.idCommunaute = ?
+                GROUP BY c.idPublication
+                ORDER BY c.est_epingle DESC, total_downvotes DESC;";
+
+        $query = $this->pdo->prepare($req);
+        $query->execute([$idCommunaute]);
+        $result = $query->fetchAll(PDO::FETCH_ASSOC);
+
+        if (!$result){
+            return [];
+        }
+
+        $discussions = [];
+        foreach ($result as $ligne){
+            $discussions[] = new Discussion(
+                $ligne['idpublication'],
+                $ligne['idcommunaute'],
+                $ligne['idutilisateur'],
+                $ligne['contenu'],
+                $ligne['datetime_creation'],
+                $ligne['score'],
+                $ligne['est_epingle'],
+                $ligne['titre'],
+            );
+        }
+        return $discussions;
+    }
+
+
 
     public function getScoreById(int $idPublication): int
     {

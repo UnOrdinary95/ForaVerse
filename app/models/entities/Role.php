@@ -68,4 +68,8 @@ final class Role
         return $this->estModerateur() || $this->estMembre() || $this->estAdmin();
     }
 
+    public function getCommunaute(): Communaute
+    {
+        return (new CommunauteDAO())->getCommunauteById($this->communaute_id);
+    }
 }

@@ -76,6 +76,31 @@ final class CommunauteDAO
         );
     }
 
+    public function getCommunautesByIdUtilisateur(int $idUtilisateur): array
+    {
+        $query = $this->pdo->prepare("SELECT * FROM communaute WHERE idcommunaute IN (SELECT idcommunaute FROM abonnement WHERE idutilisateur = ?)");
+        $query->execute([$idUtilisateur]);
+        
+        $result = $query->fetchAll(PDO::FETCH_ASSOC);
+
+        if (!$result) {
+            return [];
+        }
+        
+        $communautes = [];
+        foreach ($result as $ligne) {
+            $communautes[] = new Communaute(
+                $ligne['idcommunaute'],
+                $ligne['nom'],
+                $ligne['description'],
+                $ligne['chemin_photo'],
+                $ligne['visibilite']
+            );
+        }
+        
+        return $communautes;
+    }
+
     public function getCommunautes(): array
     {
         $query = $this->pdo->prepare("SELECT * FROM communaute");

@@ -37,6 +37,7 @@ class PublicationController implements ControllerInterface
             $publication = $this->discussionDAO->getDiscussionById($_GET['idPublication']);
             if ($publication){
                 if (isset($_SESSION['Pseudo'])){
+                    include_once __DIR__ . '/../utils/left_sidebar_callback.php';
                     $session_user = $this->utilisateurDAO->getProfilUtilisateurById($this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']));
                     $role = $this->roleDAO->getRole($this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']), $communaute_id);
                     if ($role){

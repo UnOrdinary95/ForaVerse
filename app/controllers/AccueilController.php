@@ -42,10 +42,11 @@ class AccueilController implements ControllerInterface
         try{
             $this->logger->info("Affichage de la page d'accueil");
             if (isset($_SESSION['Pseudo'])){
-                $utilisateur = $this->utilisateurDAO->getProfilUtilisateurById($this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo'])) ?? null;
+                $session_user = $this->utilisateurDAO->getProfilUtilisateurById($this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']));
                 $this->logger->info("Utilisateur connecté: " . $_SESSION['Pseudo']);
                 $this->callbackCreerCommu();
                 $erreurs = $this->erreurs;
+                include_once __DIR__ . '/../utils/left_sidebar_callback.php';
             } else {
                 $this->logger->info("Accès visiteur (non connecté)");
             }

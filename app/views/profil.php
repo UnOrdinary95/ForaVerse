@@ -17,11 +17,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
-    <link rel="stylesheet" href="../../public/styles/style.css">
+    <link rel="stylesheet" href="../../public/styles/style.css?<?php echo time(); ?>">
 </head>
 
 <body>
-    <h1><a href="./" style="text-decoration: none; width: 100px">⬅️</a></h1>
+    <?php include_once 'components/header.php'; ?>
+    <main class="flex">
+        <?php include_once 'components/left_sidebar.php'; ?>
+        <h1><a href="./" style="text-decoration: none; width: 100px">⬅️</a></h1>
     <div>
         <?php if (isset($_SESSION['Pseudo']) && $utilisateur->getPseudo() == $_SESSION['Pseudo']): ?>
         <img src="../../public/<?= htmlspecialchars($utilisateur->getCheminPhoto())?>" style="width: 100px; height: 100px; border-radius: 30%; cursor: pointer;"
@@ -254,6 +257,9 @@
             </div>
         </div>
     </div>
+    </main>
+    
+    <script src="../../public/scripts/creer_commu.js"></script>
     <script src="../../public/scripts/profil_settings.js"></script>
     <script src="../../public/scripts/profil_moderation_settings.js"></script>
     <script src="../../public/scripts/gestion_abonnement.js"></script>

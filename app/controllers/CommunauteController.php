@@ -47,15 +47,52 @@ class CommunauteController implements ControllerInterface
                 $erreurs_addmod = [];
                 $liste_warns = [];
                 $liste_bans = [];
-                $discussions = $this->discussionDAO->getDiscussionsByCommunaute($communaute_id);
+
+                // Callback pour le tri
+                if (isset($_POST['tri'])){
+                    $tri = $_POST['tri'];
+                    if ($tri == 'recents'){
+                        $discussions = $this->discussionDAO->getDiscussionsByCommunauteOrderByDatesDESC($communaute_id);
+                    }
+                    elseif ($tri == 'anciens'){
+                        $discussions = $this->discussionDAO->getDiscussionsByCommunauteOrderByDatesASC($communaute_id);
+                    }
+                    elseif ($tri == 'upvotes'){
+                        $discussions = $this->discussionDAO->getDiscussionsByCommunauteOrderByUpvotes($communaute_id);
+                    }
+                    elseif ($tri == 'downvotes'){
+                        $discussions = $this->discussionDAO->getDiscussionsByCommunauteOrderByDownvotes($communaute_id);
+                    }
+                    else{
+                        // Récent par défaut
+                        $discussions = $this->discussionDAO->getDiscussionsByCommunauteOrderByDatesDESC($communaute_id);
+                    }
+                }
+                else{
+                    // Récent par défaut
+                    $discussions = $this->discussionDAO->getDiscussionsByCommunauteOrderByDatesDESC($communaute_id);
+                } 
+
+                // Callback pour la recherche de discussions
+                if  (isset($_POST['discussion_mot_cle'])){
+                    $mot_cle = $_POST['discussion_mot_cle'];
+                    $discussions = $this->discussionDAO->getDiscussionsByCommunauteAndMotcle($communaute_id, $mot_cle);
+                }
+                else{
+                    // Récent par défaut
+                    $discussions = $this->discussionDAO->getDiscussionsByCommunauteOrderByDatesDESC($communaute_id);
+                }
+
                 $this->logger->info("Récupération des discussions pour la communauté: " . $_GET['nomCommu']);
                 
                 if (isset($_SESSION['Pseudo'])){
+                    include_once __DIR__ . '/../utils/left_sidebar_callback.php';
+                    $session_user = $this->utilisateurDAO->getProfilUtilisateurById($this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']));
                     $role = $this->roleDAO->getRole($this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']), $communaute_id);
                     if ($role){
                         $this->logger->info("Rôle de l'utilisateur dans la communauté: " . $role->getRole());
-                        $erreurs = $this->erreurs;
                         $this->callbackCreerDiscussion();
+                        $erreurs = $this->erreurs;
                         $this->callbackGererFavoris();
                         if($role->peutModerer()){
                             $this->logger->info(message: "L'utilisateur peut modérer la communauté.");
@@ -356,13 +393,15 @@ class CommunauteController implements ControllerInterface
             }
             else{
                 try{
-                    $this->discussionDAO->addDiscussion(
+                    $idPublication = $this->discussionDAO->addDiscussion(
                         $this->communauteDAO->getIdByNom($_GET['nomCommu']),
                         $this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']),
                         $titre,
                         $contenu
                     );
-                    header("Location: ./?action=communaute&nomCommu=" . urlencode($_GET['nomCommu']));
+                    header("Location: ./?action=publication&nomCommu=" . urlencode($_GET['nomCommu']).'&idPublication='. $idPublication);
+                    $this->logger->info("Discussion créée avec succès: " . $titre);
+                    $this->logger->info("ID de la publication: " . $idPublication);
                     exit();
                 }
                 catch (PDOException $e)

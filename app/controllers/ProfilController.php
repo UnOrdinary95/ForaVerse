@@ -21,6 +21,7 @@ class ProfilController implements ControllerInterface
                 $utilisateur = $this->utilisateurDAO->getProfilUtilisateurById($profil_id);
                 $liste_commu_moderation = [];
                 if(isset($_SESSION['Pseudo'])){
+                    include_once __DIR__ . '/../utils/left_sidebar_callback.php';
                     $session_user = $this->utilisateurDAO->getProfilUtilisateurById($this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']));
                     $liste_commu_moderation = $utilisateur->getCommuCommunModeration($session_user);
                     

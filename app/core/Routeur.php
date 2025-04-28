@@ -40,8 +40,12 @@ final class Routeur
      */
     public function executerRoute():void
     {
-        $action = $_GET['action'] ?? 'accueil';
+        if (!isset($_GET['action'])){
+            $_GET['action'] = 'accueil';
+        }
 
+        $action = $_GET['action'];
+        
         if (array_key_exists($action, $this->routes)){
             call_user_func($this->routes[$action]);
         }
