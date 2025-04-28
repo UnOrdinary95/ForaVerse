@@ -22,9 +22,11 @@ $(document).ready(function() {
     });
 
     $('#btnAdhesionPrivee').click(function(){
+        console.log('Button clicked');
         const communaute_id = $(this).data('communaute_id');
-        const buttonText = $(this).text();
-        
+        const buttonText = $(this).text().trim();
+        console.log('Button text:', buttonText);
+        console.log('Communauté ID:', communaute_id);
         let action = '';
         
         if(buttonText === 'Demander à rejoindre') {
@@ -32,9 +34,12 @@ $(document).ready(function() {
         } else if(buttonText === 'Quitter') {
             action = 'quittercommu';
         } else {
+            console.log('Aucune action à effectuer');
             return; // Aucune action à effectuer
         }
 
+        console.log('Action:', action);
+        // Envoi de la requête AJAX
         $.post('../../app/utils/traitement_adhesion.php',
             {
                 action: action,
