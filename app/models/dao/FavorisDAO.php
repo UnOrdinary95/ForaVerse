@@ -1,6 +1,6 @@
 <?php
 
-class FavorisDAO
+final class FavorisDAO
 {
     private PDO $pdo;
 
