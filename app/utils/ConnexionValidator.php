@@ -62,9 +62,6 @@ class ConnexionValidator extends AuthValidatorAbstract
         elseif(!in_array($identifiant, $this->utilisateur_dao->getPseudos()) && !in_array($identifiant, $this->utilisateur_dao->getEmails())){
             $this->erreurs['idmdp'] = "Identifiant ou mot de passe incorrect.";
         }
-//        elseif(str_contains($identifiant, '@')) {
-//            $validation = 1;
-//        }
         else{
             $validation = true;
         }
