@@ -5,15 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Réinitialisation du mot de passe</title>
     <link rel="icon" href="../../public/images/favicon/favicon_foraverse.png"/>
+    <link rel="stylesheet" href="../../public/styles/style.css?<?php echo time(); ?>">
 </head>
 
-<body>
-    <form action="?action=demande_resetmdp" method="POST" novalidate>
-        <h1><a href="./" style="text-decoration: none">⬅️</a>Réinitialiser votre mot de passe</h1>
-        <p>Saississez votre adresse électronique et nous vous enverrons un lien pour réinitialiser votre mot de passe.</p>
-        <input type="email" name="email" placeholder="Email" required><br><br>
-        <input type="submit" name="envoyer" value="Réinitialiser votre mot de passe">
-    </form>
-    <script src="../../public/scripts/emailcustomvalidity.js"></script>
+<body class="flex justify-center items-center" style="height:92vh;">
+    <main class="card" style="max-width:400px; width:90%; padding:2rem;">
+        <form action="?action=demande_resetmdp" method="POST" novalidate>
+            <div class="margin3">
+                <h1>Réinitialiser votre mot de passe</h1>
+                <p>Saississez votre adresse électronique et nous vous enverrons un lien pour réinitialiser votre mot de passe.</p>
+            </div>
+            
+            <input type="email" name="email" placeholder="Email" required><br><br>
+            <input type="submit" name="envoyer" value="Réinitialiser votre mot de passe">
+        </form>
+        <script src="../../public/scripts/emailcustomvalidity.js"></script>
+    </main>
 </body>
 </html>

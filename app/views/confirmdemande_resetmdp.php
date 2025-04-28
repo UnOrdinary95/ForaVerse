@@ -5,14 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Réinitialisation du mot de passe</title>
     <link rel="icon" href="../../public/images/favicon/favicon_foraverse.png"/>
+    <link rel="stylesheet" href="../../public/styles/style.css?<?php echo time(); ?>">
 </head>
 
-<body>
-    <h1><a href="./" style="text-decoration: none">⬅️</a>Réinitialiser votre mot de passe</h1>
-    <p>
-        Nous avons envoyé un email à l'adresse associée à votre compte ForaVerse. 
-        Veuillez vérifier votre boîte de réception et suivre les instructions pour réinitialiser votre mot de passe. 
-        Si vous ne trouvez pas l'email, pensez à vérifier votre dossier de spam ou de courriers indésirables.
-    </p>
+<body class="flex justify-center items-center" style="height:92vh;">
+    <main class="card" style="max-width:400px; width:90%; padding:2rem;">
+        <h1>Réinitialiser votre mot de passe</h1>
+        <br>
+        <p>Nous avons envoyé un email à l'adresse associée à votre compte ForaVerse.<br>
+        Veuillez vérifier votre boîte de réception et suivre les instructions pour réinitialiser votre mot de passe.<br>
+        Si vous ne trouvez pas l'email, pensez à vérifier votre dossier de spam ou de courriers indésirables.</p>
+    </main>
 </body>
 </html>
