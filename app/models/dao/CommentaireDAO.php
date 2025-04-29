@@ -209,4 +209,10 @@ final class CommentaireDAO
             $result['est_epingle'],
         );
     }
+
+    public function deleteCommentaire(int $idPublication): bool
+    {
+        $query = $this->pdo->prepare("DELETE FROM commentaire WHERE idPublication = ?");
+        return $query->execute([$idPublication]);
+    }
 }

@@ -72,4 +72,9 @@ final class Role
     {
         return (new CommunauteDAO())->getCommunauteById($this->communaute_id);
     }
+
+    public function estBanni(): bool
+    {
+        return (new BannissementDAO())->getBannissementByIdUtilisateurAndCommunaute($this->utilisateur_id, $this->communaute_id) !== null;
+    }
 }

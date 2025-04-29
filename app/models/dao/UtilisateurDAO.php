@@ -168,5 +168,31 @@ final class UtilisateurDAO
         return $query->execute([$id]);
     }
 
+    public function getUtilisateursByMotcle(string $motcle):array
+    {
+        $query = $this->pdo->prepare("SELECT * FROM utilisateur WHERE pseudo LIKE ?");
+        $query->execute(["%$motcle%"]);
+        $result = $query->fetchAll(PDO::FETCH_ASSOC);
+
+        if (!$result) {
+            return [];
+        }
+
+        $utilisateurs = [];
+        foreach ($result as $ligne) {
+            $utilisateurs[] = new Utilisateur(
+                $ligne['pseudo'], 
+                $ligne['email'], 
+                $ligne['motdepasse'], 
+                $ligne['idutilisateur'],  
+                $ligne['date_inscription'], 
+                $ligne['chemin_photo'], 
+                $ligne['bio'], 
+                $ligne['est_admin']
+            );
+        }
+        
+        return $utilisateurs;
+    }
 }
 

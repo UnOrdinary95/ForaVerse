@@ -94,6 +94,11 @@ class Discussion
         return $this->vote_utilisateur_courant;
     }
 
+    public function getCommunaute(): ?Communaute
+    {
+        return (new CommunauteDAO())->getCommunauteById($this->idCommunaute);
+    }
+
     public function estFavoris(): bool
     {
         if (isset($_SESSION['Pseudo'])) {

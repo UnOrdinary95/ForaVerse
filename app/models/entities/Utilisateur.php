@@ -126,4 +126,9 @@ final class Utilisateur
 
         return $communautes;
     }
+
+    public function estBanniGlobal(): bool
+    {
+        return (new BannissementDAO())->getBannissementGlobalByIdUtilisateur($this->id) !== null;
+    }
 }

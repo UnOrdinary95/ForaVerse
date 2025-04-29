@@ -150,4 +150,29 @@ final class CommunauteDAO
         $query = $this->pdo->prepare("DELETE FROM communaute WHERE idcommunaute = ?");
         return $query->execute([$id]);
     }
+
+    public function getCommunautesByMotcle(string $motcle): array
+    {
+        $query = $this->pdo->prepare("SELECT * FROM communaute WHERE nom LIKE ?");
+        $query->execute(["%$motcle%"]);
+        
+        $result = $query->fetchAll(PDO::FETCH_ASSOC);
+
+        if (!$result) {
+            return [];
+        }
+        
+        $communautes = [];
+        foreach ($result as $ligne) {
+            $communautes[] = new Communaute(
+                $ligne['idcommunaute'],
+                $ligne['nom'],
+                $ligne['description'],
+                $ligne['chemin_photo'],
+                $ligne['visibilite']
+            );
+        }
+        
+        return $communautes;
+    }
 }

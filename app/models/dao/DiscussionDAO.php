@@ -9,12 +9,38 @@ final class DiscussionDAO
         $this->pdo = PostgreSQLDB::getConnexion();
     }
 
-    public function addDiscussion(int $idCommunaute, int $idUtilisateur, string $titre, string $contenu): bool
+    public function addDiscussion(int $idCommunaute, int $idUtilisateur, string $titre, string $contenu): int
     {
         $query = $this->pdo->prepare("INSERT INTO discussion (idCommunaute, idUtilisateur, titre, contenu) VALUES (?, ?, ?, ?)");
         $query->execute([$idCommunaute, $idUtilisateur, $titre, $contenu]);
         
         return (int)$this->pdo->lastInsertId('publication_id_seq');
+    }
+
+    public function getRandomDiscussions(int $limit = 20): array
+    {
+        $query = $this->pdo->prepare("SELECT * FROM discussion ORDER BY RANDOM() LIMIT ?");
+        $query->execute([$limit]);
+        $result = $query->fetchAll(PDO::FETCH_ASSOC);
+
+        if (!$result){
+            return [];
+        }
+
+        $discussions = [];
+        foreach ($result as $ligne){
+            $discussions[] = new Discussion(
+                $ligne['idpublication'],
+                $ligne['idcommunaute'],
+                $ligne['idutilisateur'],
+                $ligne['contenu'],
+                $ligne['datetime_creation'],
+                $ligne['score'],
+                $ligne['est_epingle'],
+                $ligne['titre']
+            );
+        }
+        return $discussions;
     }
 
     public function getDiscussionsByCommunauteAndMotcle(int $idCommunaute, string $motcle): array
@@ -212,5 +238,37 @@ final class DiscussionDAO
             $result['est_epingle'],
             $result['titre']
         );
+    }
+
+    public function deleteDiscussion(int $idPublication): bool
+    {
+        $query = $this->pdo->prepare("DELETE FROM discussion WHERE idPublication = ?");
+        return $query->execute([$idPublication]);
+    }
+
+    public function getDiscussionsByMotcle(string $motcle): array
+    {
+        $query = $this->pdo->prepare("SELECT * FROM discussion WHERE titre LIKE ?");
+        $query->execute(["%$motcle%"]);
+        $result = $query->fetchAll(PDO::FETCH_ASSOC);
+
+        if (!$result){
+            return [];
+        }
+
+        $discussions = [];
+        foreach ($result as $ligne){
+            $discussions[] = new Discussion(
+                $ligne['idpublication'],
+                $ligne['idcommunaute'],
+                $ligne['idutilisateur'],
+                $ligne['contenu'],
+                $ligne['datetime_creation'],
+                $ligne['score'],
+                $ligne['est_epingle'],
+                $ligne['titre']
+            );
+        }
+        return $discussions;
     }
 }
