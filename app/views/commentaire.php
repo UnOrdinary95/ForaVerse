@@ -120,7 +120,7 @@
             <br>
             <form method="POST" class="flex items-end gap2" action="?action=commentaire&nomCommu='.htmlspecialchars($communaute->getNom()).'&idPublication='.htmlspecialchars($commentaire->getIdPublication()).'">
                 <img src="../../public/'.htmlspecialchars($session_user->getCheminPhoto()).'" alt="ProfilCommentaire" style="width: 50px; height: 50px; border-radius: 50%">
-                <textarea name="contenuCommentaire" style="resize: vertical; border-radius: 30px; width: 70%; min-height: 40px; height: 40px; padding: 10px 20px;" placeholder="Commentaire"></textarea>
+                <textarea name="contenuCommentaire" style="resize: vertical; border-radius: 30px; width: 70%; min-height: 42px; height: 42px; padding: 10px 20px;" placeholder="Commentaire"></textarea>
                 <div><button type="submit" name="CreerCommentaire">Commenter</button></div>
             </form>';
                 }
@@ -187,6 +187,13 @@
 
                                             <?php if($uneCommentaire->estEpingle()): ?>
                                                 <span>📌</span>
+                                            <?php endif; ?>
+
+                                            <?php if (isset($role) && $role->peutModerer() || isset($session_user) && $uneCommentaire->getIdUtilisateur() == $session_user->getId()): ?>
+                                                <form class="flex justify-end" style="margin: 0; padding: 0;" method="POST" action="?action=commentaire&nomCommu=<?= htmlspecialchars($_GET['nomCommu']) ?>&idPublication=<?= htmlspecialchars($_GET['idPublication']) ?>">
+                                                    <input type="hidden" name="deleteCommentaire" value="<?= $uneCommentaire->getIdPublication() ?>">
+                                                    <svg onclick="this.closest('form').submit();" class="pointer svg_red" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 -960 960 960"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224z"/></svg>    
+                                                </form>
                                             <?php endif; ?>
                                         </div>
                                         <small>le <?= (new DateTime($uneCommentaire->getDateCreation()))->format('d/m/Y')?> à <?= (new DateTime($uneCommentaire->getDateCreation()))->format('H:i') ?></small>
