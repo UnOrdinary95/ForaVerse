@@ -67,22 +67,18 @@
                     <?php else: ?>
                         <?php if (!$role && !isset($adhesion)):?>
                             <button id="btnAdhesionPrivee" class="flex items-center gap2" data-communaute_id="<?= $communaute->getId() ?>">
-                                <svg class="svg_white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 -960 960 960"><path d="M120-160v-640l760 320zm80-120 474-200-474-200v140l240 60-240 60zm0 0v-400z"/></svg>
                                 Demander à rejoindre
                             </button>
                         <?php elseif (!$role && isset($adhesion) && $adhesion->getStatut() == 'en attente'): ?>
                             <button id="btnAdhesionPrivee" class="flex items-center gap2" data-communaute_id="<?= $communaute->getId() ?>">
-                                <svg class="svg_white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 -960 960 960"><path d="M280-420q25 0 42.5-17.5T340-480t-17.5-42.5T280-540t-42.5 17.5T220-480t17.5 42.5T280-420m200 0q25 0 42.5-17.5T540-480t-17.5-42.5T480-540t-42.5 17.5T420-480t17.5 42.5T480-420m200 0q25 0 42.5-17.5T740-480t-17.5-42.5T680-540t-42.5 17.5T620-480t17.5 42.5T680-420M480-80q-83 0-156-31.5T197-197t-85.5-127T80-480t31.5-156T197-763t127-85.5T480-880t156 31.5T763-763t85.5 127T880-480t-31.5 156T763-197t-127 85.5T480-80m0-80q134 0 227-93t93-227-93-227-227-93-227 93-93 227 93 227 227 93m0-320"/></svg>
                                 Demande en attente
                             </button>
                         <?php elseif (!$role && isset($adhesion) && $adhesion->getStatut() == 'refusée'): ?>
                             <button id="btnAdhesionPrivee" class="flex items-center gap2" data-communaute_id="<?= $communaute->getId() ?>">
-                                <svg class="svg_white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 -960 960 960"><path d="M480-240q100 0 170-70t70-170-70-170-170-70-170 70-70 170 70 170 170 70M360-440v-80h240v80zM480-80q-83 0-156-31.5T197-197t-85.5-127T80-480t31.5-156T197-763t127-85.5T480-880t156 31.5T763-763t85.5 127T880-480t-31.5 156T763-197t-127 85.5T480-80m0-80q134 0 227-93t93-227-93-227-227-93-227 93-93 227 93 227 227 93m0-320"/></svg>
                                 Demande refusé
                             </button>
                         <?php elseif ($role->estMembreOuModerateur()): ?>
                             <button id="btnAdhesionPrivee" class="flex items-center gap2" data-communaute_id="<?= $communaute->getId() ?>">
-                                <svg class="svg_white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 -960 960 960"><path d="M680-160v-400H313l144 144-56 57-241-241 240-240 57 57-144 143h447v480z"/></svg>
                                 Quitter
                             </button>
                         <?php endif; ?>
@@ -366,6 +362,13 @@
                     <?php foreach ($discussions as $discussion): ?>
                         <div class="flex justify-center items-center auto_w margin4">
                             <div class="discussion card" style="border: 1px solid silver; width: 90%;">
+                                <?php if (isset($role) && $role->peutModerer() || isset($session_user) && $discussion->getIdUtilisateur() == $session_user->getId()): ?>
+                                    <form class="flex justify-end" style="margin: 0; padding: 0;" method="POST" action="?action=communaute&nomCommu=<?= htmlspecialchars($communaute->getNom()) ?>">
+                                        <input type="hidden" name="deleteDiscussion" value="<?= $discussion->getIdPublication() ?>">
+                                        <svg onclick="this.closest('form').submit();" class="pointer svg_red" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 -960 960 960"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224z"/></svg>    
+                                    </form>
+                                <?php endif; ?>
+
                                 <a href="./?action=profil&utilisateur=<?= htmlspecialchars($discussion->getUtilisateur()->getPseudo()) ?>" style="text-decoration: none; display: flex; align-items: center;">
                                     <p><?= htmlspecialchars($discussion->getUtilisateur()->getPseudo()) ?>, le <?= (new DateTime($discussion->getDateCreation()))->format('d/m/Y')?> à <?= (new DateTime($discussion->getDateCreation()))->format('H:i') ?></p>
                                     <?php if ($discussion->estEpingle()): ?>
