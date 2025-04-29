@@ -17,17 +17,6 @@ CREATE TABLE Communaute(
     visibilité BOOLEAN DEFAULT TRUE
 );
 
-CREATE TABLE Notification(
-    idNotification INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    idUtilisateur INT NOT NULL,
-    type_notification VARCHAR(50)
-       CHECK (type_notification IN ('votes', 'publications', 'abonnement', 'abonne', 'demande')),
-    contenu VARCHAR(256) NOT NULL,
-    datetime_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    est_lu BOOLEAN DEFAULT FALSE,
-    CONSTRAINT fk_notif_user FOREIGN KEY(idUtilisateur) REFERENCES Utilisateur(idUtilisateur)
-);
-
 CREATE TABLE Moderation (
     idModeration INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     idModerateur INT NOT NULL,
@@ -93,15 +82,6 @@ CREATE TABLE Abonne(
     CONSTRAINT fk_abo_user FOREIGN KEY(idUtilisateur) REFERENCES Utilisateur(idUtilisateur),
     CONSTRAINT fk_abo_follower FOREIGN KEY(idAbonne) REFERENCES Utilisateur(idUtilisateur),
     CHECK (idUtilisateur != idAbonne)
-);
-
-CREATE TABLE SousCommentaire (
-    idCommentaireParent INT NOT NULL,
-    idCommentaireEnfant INT NOT NULL,
-    CONSTRAINT pk_nestedcomm PRIMARY KEY(idCommentaireParent, idCommentaireEnfant),
-    CONSTRAINT fk_comm_parent FOREIGN KEY(idCommentaireParent) REFERENCES Commentaire(idPublication),
-    CONSTRAINT fk_comm_child FOREIGN KEY(idCommentaireEnfant) REFERENCES Commentaire(idPublication),
-    CHECK (idCommentaireParent != idCommentaireEnfant)
 );
 
 CREATE TABLE DemandeAdhesion(
@@ -427,18 +407,26 @@ RETURNS TRIGGER AS $$
             IF NEW.type_publication = 'discussion' THEN
                 UPDATE Discussion SET score = score + (NEW.resultat - OLD.resultat)
                 WHERE idPublication = NEW.idPublication;
+            ELSIF NEW.type_publication = 'commentaire' THEN
+                UPDATE Commentaire SET score = score + (NEW.resultat - OLD.resultat)
+                WHERE idPublication = NEW.idPublication;
             END IF;
         ELSIF TG_OP = 'INSERT' THEN
             IF NEW.type_publication = 'discussion' THEN
                 UPDATE Discussion SET score = score + NEW.resultat
+                WHERE idPublication = NEW.idPublication;
+            ELSIF NEW.type_publication = 'commentaire' THEN
+                UPDATE Commentaire SET score = score + NEW.resultat
                 WHERE idPublication = NEW.idPublication;
             END IF;
         ELSE
             IF NEW.type_publication = 'discussion' THEN
                 UPDATE Discussion SET score = score - OLD.resultat
                 WHERE idPublication = OLD.idPublication;
+            ELSIF NEW.type_publication = 'commentaire' THEN
+                UPDATE Commentaire SET score = score - OLD.resultat
+                WHERE idPublication = OLD.idPublication;
             END IF;
-
         END IF;
         RETURN NEW;
     END;
@@ -458,7 +446,7 @@ DROP FUNCTION IF EXISTS updateScore();
 /*
  Pour cause des limitations de l'héritage (le fait que les contraintes ne soient pas transmise
  aux tables enfants, je ne peux pas créer de trigger, car les clés primaires ne sont pas partagées
- entre une classe mère et enfant.
+ entre une classe mère et enfant).
  */
 ;
 ALTER TABLE Vote
@@ -475,3 +463,25 @@ ADD CONSTRAINT chk_type_publication CHECK (type_publication IN ('discussion', 'c
 
 ALTER TABLE Favoris
 DROP CONSTRAINT IF EXISTS fk_fav_post;
+
+
+-- Tri par upvotes
+SELECT c.*, COUNT(CASE WHEN v.resultat = 1 THEN 1 ELSE NULL END) AS total_upvotes
+FROM commentaire c
+LEFT JOIN vote v ON c.idPublication = v.idPublication -- 'LEFT' permet d'inclure les lignes sans correspondance
+WHERE c.idCommunaute = 15 and c.idDiscussion = 1
+GROUP BY c.idPublication -- La clé primaire suffit dans les récentes versions de PostgreSQL (pas besoin de tt mettre)
+ORDER BY total_upvotes DESC;
+
+-- Tri par downvotes
+SELECT c.*, COUNT(CASE WHEN v.resultat = -1 THEN 1 ELSE NULL END) AS total_downvotes
+FROM commentaire c
+LEFT JOIN vote v ON c.idPublication = v.idPublication
+WHERE c.idCommunaute = 15 and c.idDiscussion = 1
+GROUP BY c.idPublication
+ORDER BY total_downvotes DESC;
+
+-- On va se passer de sous commentaire et plutôt utiliser commentaire pour gérer les sous commentaire
+-- → idDiscussion = idCommentaireParent
+ALTER TABLE Commentaire
+DROP CONSTRAINT fk_comm_disc;
