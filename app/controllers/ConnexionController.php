@@ -14,6 +14,7 @@ class ConnexionController implements ControllerInterface, AuthControllerInterfac
      * @var ConnexionValidator Instance du validateur de connexion
      */
     private ConnexionValidator $validateur;
+    private UtilisateurDAO $utilisateurDAO;
 
     /**
      * @var array Tableau contenant les messages d'erreurs de validation
@@ -34,6 +35,7 @@ class ConnexionController implements ControllerInterface, AuthControllerInterfac
         $this->validateur = new ConnexionValidator();
         $this->erreurs = [];
         $this->logger = new Logger();
+        $this->utilisateurDAO = new UtilisateurDAO();
     }
 
     /**
@@ -85,12 +87,24 @@ class ConnexionController implements ControllerInterface, AuthControllerInterfac
 
             if ($this->validateur->valider($identifiant, $identifiant, $mdp) == 1) {
                 $_SESSION['Pseudo'] = $this->validateur->getUtilisateurDAO()->getPseudoByEmail($identifiant);
+                if ($this->utilisateurDAO->getProfilUtilisateurById($this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']))->estBanniGlobal()){
+                    header("Location: ./?action=erreur");
+                    session_unset();
+                    session_destroy();
+                    exit();
+                }
                 $this->logger->info("Connexion réussie avec email: " . $identifiant . " (Pseudo: " . $_SESSION['Pseudo'] . ")");
                 header("Location: ./?action=accueil");
                 exit();
             }
             elseif($this->validateur->valider($identifiant, $identifiant, $mdp) == 2){
                 $_SESSION['Pseudo'] = $identifiant;
+                if ($this->utilisateurDAO->getProfilUtilisateurById($this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']))->estBanniGlobal()){
+                    header("Location: ./?action=erreur");
+                    session_unset();
+                    session_destroy();
+                    exit();
+                }
                 $this->logger->info("Connexion réussie avec pseudo: " . $identifiant);
                 header("Location: ./?action=accueil");
                 exit();

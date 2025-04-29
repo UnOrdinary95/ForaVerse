@@ -41,6 +41,12 @@ class PublicationController implements ControllerInterface
                     $session_user = $this->utilisateurDAO->getProfilUtilisateurById($this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']));
                     $role = $this->roleDAO->getRole($this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']), $communaute_id);
                     if ($role){
+                        if ($role->estBanni()){
+                            $this->logger->info("L'utilisateur est banni de la communauté.");
+                            header('Location: ./?action=erreur');
+                            exit();
+                        }
+
                         $this->logger->info("Utilisateur avec le rôle " . $role->getRole() . " accède à la communauté " . $_GET['nomCommu']);
                         $this->callbackGererFavoris();
     
@@ -48,7 +54,7 @@ class PublicationController implements ControllerInterface
                             $this->logger->info(message: "L'utilisateur peut modérer la publication.");
                             $this->callbackEpinglerDiscussion();
                         }
-                        
+                        $this->callbackDeleteCommentaire();
                         $this->callbackCreerCommentaire();
                     }
                     else{
@@ -224,6 +230,24 @@ class PublicationController implements ControllerInterface
             catch (PDOException $e)
             {
                 $this->logger->error("Erreur lors de la création de la discussion: " . $e->getMessage());
+                header('Location: ./?action=erreur');
+                exit();
+            }
+        }
+    }
+
+    public function callbackDeleteCommentaire(): void
+    {
+        if (isset($_POST['deleteCommentaire'])){
+            $this->logger->info("Suppression d'un commentaire: " . $_POST['deleteCommentaire']);
+            try{
+                $this->commentaireDAO->deleteCommentaire($_POST['deleteCommentaire']);
+                header('Location: ./?action=publication&nomCommu='.urlencode($_GET['nomCommu']).'&idPublication='.urlencode($_GET['idPublication']));
+                exit();
+            }
+            catch (PDOException $e)
+            {
+                $this->logger->error("Erreur lors de la suppression du commentaire: " . $e->getMessage());
                 header('Location: ./?action=erreur');
                 exit();
             }

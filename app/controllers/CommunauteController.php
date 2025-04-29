@@ -90,10 +90,16 @@ class CommunauteController implements ControllerInterface
                     $session_user = $this->utilisateurDAO->getProfilUtilisateurById($this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']));
                     $role = $this->roleDAO->getRole($this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']), $communaute_id);
                     if ($role){
+                        if ($role->estBanni()){
+                            $this->logger->info("L'utilisateur est banni de la communauté.");
+                            header('Location: ./?action=erreur');
+                            exit();
+                        }
                         $this->logger->info("Rôle de l'utilisateur dans la communauté: " . $role->getRole());
                         $this->callbackCreerDiscussion();
                         $erreurs = $this->erreurs;
                         $this->callbackGererFavoris();
+                        $this->callbackDeleteDiscussion();
                         if($role->peutModerer()){
                             $this->logger->info(message: "L'utilisateur peut modérer la communauté.");
                             foreach($this->adhesionDAO->getRefusByCommunaute($communaute_id) as $refus){
@@ -118,7 +124,6 @@ class CommunauteController implements ControllerInterface
                             $this->callbackAnnulerAvertissement();
                             $this->callbackAnnulerBannissement();
                             $this->logger->info("Initialisation des tableaux de gestion des avertissements et bannissements.");
-
                             $this->callbackEpinglerDiscussion();
                         }
                         if($role->peutGererCommunaute()){
@@ -460,6 +465,25 @@ class CommunauteController implements ControllerInterface
             catch (PDOException $e)
             {
                 $this->logger->error("Erreur lors de la gestion des favoris: " . $e->getMessage());
+                header('Location: ./?action=erreur');
+                exit();
+            }
+        }
+    }
+
+    public function callbackDeleteDiscussion(): void
+    {
+        if (isset($_POST['deleteDiscussion'])){
+            $this->logger->info("Suppression de la discussion: " . $_POST['deleteDiscussion']);
+            try{
+                $this->discussionDAO->deleteDiscussion($_POST['deleteDiscussion']);
+                $this->logger->info("Discussion supprimée avec succès: " . $_POST['deleteDiscussion']);
+                header('Location: ./?action=communaute&nomCommu=' . urlencode($_GET['nomCommu']));
+                exit();
+            }
+            catch (PDOException $e)
+            {
+                $this->logger->error("Erreur lors de la suppression de la discussion: " . $e->getMessage());
                 header('Location: ./?action=erreur');
                 exit();
             }
