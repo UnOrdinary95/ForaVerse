@@ -378,7 +378,7 @@ class CommunauteController implements ControllerInterface
     {
         if (isset($_POST['titreDiscussion'], $_POST['contenuDiscussion'])){
             $this->logger->info("Création d'une nouvelle discussion dans la communauté: " . $_GET['nomCommu']);
-            $titre = trim(filter_input(INPUT_POST, 'titreDiscussion', FILTER_SANITIZE_SPECIAL_CHARS));
+            $titre = $_POST['titreDiscussion'];
             $contenu = $_POST['contenuDiscussion'];
 
             if(empty($titre)){
