@@ -12,9 +12,9 @@
         </a>
     </div>
 
-    <?php if($_GET['action'] == 'accueil' || $_GET['action'] == 'profil'): ?>
+    <?php if($_GET['action'] == 'accueil' || $_GET['action'] == 'profil' || $_GET['action'] == 'recherche'): ?>
         <div class="header_container <?php if($_GET['action'] == 'profil'){print 'invisible';}?>" id="hcontainer2">
-            <form  method="POST" action="?action=">
+            <form  method="POST" action="?action=recherche">
                 <input name="recherche_mot_cle" type="text" placeholder="🔍Rechercher dans ForaVerse">
             </form>
         </div>
