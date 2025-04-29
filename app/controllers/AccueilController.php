@@ -51,6 +51,7 @@ class AccueilController implements ControllerInterface
                 $this->logger->info("Accès visiteur (non connecté)");
             }
             $communautes = $this->communauteDAO->getCommunautes();
+            $discussions = (new DiscussionDAO())->getRandomDiscussions(20);
             require_once __DIR__ . '/../views/accueil.php';
         } catch (PDOException $e) {
             $this->logger->error("Erreur PDO lors de l'affichage de la page d'accueil: " . $e->getMessage());
