@@ -15,7 +15,7 @@
     <main class="flex auto_w">
         <?php include_once 'components/left_sidebar.php'; ?>
 
-        <div class="flex flex-col" style="flex-grow: 1; margin: 0 5vw;">
+        <div class="flex flex-col flex-grow">
             <h1>Résultats de la recherche</h1><br>
                 <div class="flex flex-col">
                     <?php if (empty($utilisateurs) && empty($communautes) && empty($discussions)): ?>
@@ -28,7 +28,7 @@
                                     <a href="./?action=profil&utilisateur=<?= htmlspecialchars($utilisateur->getPseudo()) ?>">
                                         <div class="card flex flex-row gap3">
                                             <div class="flex flex-col">
-                                                <img src="../../public/<?= htmlspecialchars($utilisateur->getCheminPhoto()) ?>" alt="Logo profil" style="width: 50px; height: 50px; border-radius: 30%;">
+                                                <img src="../../public/<?= htmlspecialchars($utilisateur->getCheminPhoto()) ?>" alt="Logo profil" class="header_img">
                                                 <p class="text-gradient text-bold"><?= htmlspecialchars($utilisateur->getPseudo()) ?><p>
                                             </div>
                                             <div>
@@ -48,7 +48,7 @@
                                 <?php foreach ($communautes as $communaute): ?>
                                     <a href="./?action=communaute&nomCommu=<?= htmlspecialchars($communaute->getNom()) ?>">
                                         <div class="card flex flex-col gap2">
-                                            <img src="../../public/<?= htmlspecialchars($communaute->getCheminPhoto()) ?>" alt="Logo de la communauté" style="width: 50px; height: 50px; border-radius: 30%;">
+                                            <img src="../../public/<?= htmlspecialchars($communaute->getCheminPhoto()) ?>" alt="Logo de la communauté" class="header_img">
                                             <p class="text-gradient text-bold"><?= htmlspecialchars($communaute->getNom()) ?><p>
                                         </div>
                                     </a>
@@ -63,7 +63,7 @@
                             <div class="flex justify-center items-center auto_w margin4">
                                 <div class="discussion card" style="border: 1px solid silver; width: 70vw;">
                                     <a href="./?action=profil&utilisateur=<?= htmlspecialchars($discussion->getUtilisateur()->getPseudo()) ?>" style="text-decoration: none; display: flex; align-items: center;">
-                                        <p><?= htmlspecialchars($discussion->getUtilisateur()->getPseudo()) ?>, le <?= (new DateTime($discussion->getDateCreation()))->format('d/m/Y')?> à <?= (new DateTime($discussion->getDateCreation()))->format('H:i') ?></p>
+                                        <p><?= htmlspecialchars($discussion->getUtilisateur()->getPseudo()) ?>, le <?= $discussion->getDateCreationFormatee()?> à <?= $discussion->getHeureCreationFormatee() ?></p>
                                         <?php if ($discussion->estEpingle()): ?>
                                             <p>📌</p>
                                         <?php endif; ?>

@@ -110,7 +110,7 @@
                         <?php if (!empty($erreurs['titreDiscussion'])): ?>
                             <span class="error"><?= $erreurs['titreDiscussion'] ?></span><br>
                         <?php endif; ?>
-                        <textarea name="contenuDiscussion" style="resize: none;" rows="20" cols="100" placeholder="Contenu de la discussion"></textarea><br><br>
+                        <textarea name="contenuDiscussion" class="no_resize" rows="20" cols="100" placeholder="Contenu de la discussion"></textarea><br><br>
                         <?php if (!empty($erreurs['contenuDiscussion'])): ?>
                             <span class="error"><?= $erreurs['contenuDiscussion'] ?></span><br>
                         <?php endif; ?>
@@ -158,7 +158,7 @@
                             <?php if (count($liste_attentes) > 0): ?>
                                 <?php foreach ($liste_attentes as $pseudo_adhesion => $adhesion): ?>
                                     <div class="card">
-                                        <a href="./?action=profil&utilisateur=<?=$pseudo_adhesion?>"><span><?= htmlspecialchars($pseudo_adhesion) . " - le " . (new DateTime($adhesion['datedemande']))->format('d/m/Y') ?></span></a>
+                                        <a href="./?action=profil&utilisateur=<?=$pseudo_adhesion?>"><span><?= htmlspecialchars($pseudo_adhesion) . " - le " . $adhesion['datedemande'] ?></span></a>
                                         <form method="POST" action="?action=communaute&nomCommu=<?= htmlspecialchars($communaute->getNom()) ?>#gestionAdhesion" style="display:inline">
                                             <input type="hidden" name="idAdhesion" value="<?= $adhesion['id'] ?>">
                                             <button type="submit" name="validerAdhesion">✔️</button>
@@ -201,7 +201,7 @@
                         <?php if (count($liste_warns) > 0): ?>
                             <?php foreach ($liste_warns as $avertissement): ?>
                                 <div class="card">
-                                    <a href="./?action=profil&utilisateur=<?=$avertissement->getUtilisateur()->getPseudo()?>"><span><?= htmlspecialchars($avertissement->getUtilisateur()->getPseudo()) . " - le " . (new DateTime($avertissement->getDateDebut()))->format('d/m/Y')?></span></a>
+                                    <a href="./?action=profil&utilisateur=<?=$avertissement->getUtilisateur()->getPseudo()?>"><span><?= htmlspecialchars($avertissement->getUtilisateur()->getPseudo()) . " - le " . $avertissement->getDateDebut()?></span></a>
                                     <form method="POST" action="?action=communaute&nomCommu=<?= htmlspecialchars($communaute->getNom()) ?>#listeAvertiContainer" style="display:inline">
                                         <input type="hidden" name="idAvertissement" value="<?= $avertissement->getId() ?>">
                                         <button type="submit" name="annulerAvertissement">➖</button>
@@ -229,9 +229,9 @@
                                     <a href="./?action=profil&utilisateur=<?=$bannissement->getUtilisateur()->getPseudo()?>">
                                         <span>
                                             <?= htmlspecialchars($bannissement->getUtilisateur()->getPseudo()) ?> - du 
-                                            <?= (new DateTime($bannissement->getDateDebut()))->format('d/m/Y') ?>
+                                            <?= $bannissement->getDateDebut() ?>
                                             <?php if ($bannissement->getDateFin()): ?>
-                                                au <?= (new DateTime($bannissement->getDateFin()))->format('d/m/Y') ?>
+                                                au <?= $bannissement->getDateFin() ?>
                                             <?php else: ?>
                                                 (Permanent)
                                             <?php endif; ?>
@@ -370,7 +370,7 @@
                                 <?php endif; ?>
 
                                 <a href="./?action=profil&utilisateur=<?= htmlspecialchars($discussion->getUtilisateur()->getPseudo()) ?>" style="text-decoration: none; display: flex; align-items: center;">
-                                    <p><?= htmlspecialchars($discussion->getUtilisateur()->getPseudo()) ?>, le <?= (new DateTime($discussion->getDateCreation()))->format('d/m/Y')?> à <?= (new DateTime($discussion->getDateCreation()))->format('H:i') ?></p>
+                                    <p><?= htmlspecialchars($discussion->getUtilisateur()->getPseudo()) ?>, le <?= $discussion->getDateCreationFormatee()?> à <?= $discussion->getHeureCreationFormatee() ?></p>
                                     <?php if ($discussion->estEpingle()): ?>
                                         <p>📌</p>
                                     <?php endif; ?>

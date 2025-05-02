@@ -81,7 +81,7 @@
         </a>
     
         <a href="./?action=profil&utilisateur=<?= htmlspecialchars($_SESSION['Pseudo'])?>">
-            <img id="pp" src="../../public/<?= htmlspecialchars($session_user->getCheminPhoto()) ?>" alt="Profil" style="width: 50px; height: 50px; border-radius: 30%">
+            <img id="pp" src="../../public/<?= htmlspecialchars($session_user->getCheminPhoto()) ?>" alt="Profil" class="header_img">
         </a>
         <?php endif; ?>
     </div>
@@ -97,7 +97,7 @@
             <?php if (!empty($erreurs['nomCommu'])): ?>
                 <span class="error"><?= $erreurs['nomCommu'] ?></span><br>
             <?php endif; ?>
-            <textarea name="descriptionCommu" style="resize: none;" rows="10" cols="100" placeholder="Description de la communauté"></textarea><br><br>
+            <textarea name="descriptionCommu" class="no_resize" rows="10" cols="100" placeholder="Description de la communauté"></textarea><br><br>
             <?php if (!empty($erreurs['descriptionCommu'])): ?>
                 <span class="error"><?= $erreurs['descriptionCommu'] ?></span><br>
             <?php endif; ?>

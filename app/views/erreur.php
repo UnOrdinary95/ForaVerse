@@ -8,8 +8,8 @@
     <link rel="stylesheet" href="../../public/styles/style.css?<?php echo time(); ?>">
 </head>
 
-<body class="flex justify-center items-center" style="height:92vh;">
-    <main class="card center" style="max-width:400px; width:90%; padding:2rem;">
+<body class="flex justify-center items-center h92">
+    <main class="card center main_auth">
         <h1>Une erreur est survenue.</h1>
         <p>Désolé, une erreur inattendue s'est produite.</p>
         <div class="margin2">

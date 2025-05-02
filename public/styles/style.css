@@ -538,3 +538,74 @@ aside{
 #pub_container{
     flex-grow: 1;
 }
+
+.h92{
+    height: 92vh;
+}
+
+.main_auth{
+    max-width: 400px;
+    width: 90%;
+    padding: 2rem;
+}
+
+.header_img{
+    width: 50px; 
+    height: 50px; 
+    border-radius: 30%
+}
+
+.header_img2{
+    width: 40px;
+    height: 40px;
+    border-radius: 30%;
+}
+
+.no_resize{
+    resize: none;
+}
+
+.w80p{
+    width: 80%;
+}
+
+.w100p{
+    width: 100%;
+}
+
+.bradius50p{
+    border-radius: 50%;
+}
+
+.bold{
+    font-weight: bold;
+}
+
+.font_s{
+    font-size: 18px;
+}
+
+.red{
+    color: var(--gradient-red);
+}
+
+.green{
+    color: green;
+}
+
+.w50{
+    width: 50%;
+}
+
+.div_accueil{
+    border: 1px solid silver;
+    width: 100%;
+}
+
+.flex-grow{
+    flex-grow: 1;
+}
+
+.div_recherche1{
+    margin: 0 5vw;
+}

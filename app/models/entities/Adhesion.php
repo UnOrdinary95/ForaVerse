@@ -37,6 +37,9 @@ final class Adhesion
 
     public function getDateDemande(): string
     {
-        return $this->date_demande;
+        $datetime = new DateTime($this->date_demande);
+        $datetime->modify('+2 hours');
+        return $datetime->format('d/m/Y');
     }
+
 }

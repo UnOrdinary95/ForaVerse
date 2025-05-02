@@ -8,8 +8,8 @@
     <link rel="stylesheet" href="../../public/styles/style.css?<?php echo time(); ?>">
 </head>
 
-<body class="flex justify-center items-center" style="height:92vh;">
-    <main class="card" style="max-width:400px; width:90%; padding:2rem;">
+<body class="flex justify-center items-center h92">
+    <main class="card main_auth">
         <h1>Réinitialiser votre mot de passe</h1>
         <br>
         <p>Nous avons envoyé un email à l'adresse associée à votre compte ForaVerse.<br>

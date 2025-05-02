@@ -63,7 +63,9 @@ final class Utilisateur
 
     public function getDateInscription(): ?string
     {
-        return $this->date_inscription;
+        $datetime = new DateTime($this->date_inscription);
+        $datetime->modify('+2 hours');
+        return $datetime->format('d/m/Y');
     }
 
     public function estAdministrateur(): bool

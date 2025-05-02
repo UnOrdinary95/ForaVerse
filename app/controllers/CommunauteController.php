@@ -393,9 +393,6 @@ class CommunauteController implements ControllerInterface
                 $this->logger->warning("Contenu de la discussion vide.");
                 $this->erreurs['contenuDiscussion'] = "Veuillez entrer un contenu.";
             }
-            elseif(strlen($contenu) > 2048){
-                $this->logger->warning("Contenu de la discussion trop long.");   
-            }
             else{
                 try{
                     $idPublication = $this->discussionDAO->addDiscussion(

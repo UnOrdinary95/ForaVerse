@@ -30,7 +30,7 @@
                             </a>
                             <span style="color: orange; font-weight: bold;">{Auteur}</span>
                         </div>   
-                        <small> le <?= (new DateTime($publication->getDateCreation()))->format('d/m/Y')?> à <?= (new DateTime($publication->getDateCreation()))->format('H:i') ?></small>
+                        <small> le <?= $publication->getDateCreationFormatee()?> à <?= $publication->getHeureCreationFormatee() ?></small>
                     </div>
                 </div>
             </div>
@@ -199,7 +199,7 @@
                                                 </form>
                                             <?php endif; ?>
                                         </div>
-                                        <small>le <?= (new DateTime($commentaire->getDateCreation()))->format('d/m/Y')?> à <?= (new DateTime($commentaire->getDateCreation()))->format('H:i') ?></small>
+                                        <small>le <?= $commentaire->getDateCreationFormatee()?> à <?= $commentaire->getHeureCreationFormatee() ?></small>
                                     </div>
                                 </div>
                             </div>

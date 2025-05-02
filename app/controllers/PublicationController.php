@@ -212,8 +212,8 @@ class PublicationController implements ControllerInterface
             $this->logger->info("Création d'un nouveau commentaire dans la discussion: " . $_GET['idPublication']);
             $contenu = $_POST['contenuCommentaire'];
 
-            if(strlen($contenu) > 2048){
-                $contenu = substr($contenu, 0, 2048);
+            if(strlen($contenu) > 4096){
+                $contenu = substr($contenu, 0, 4096);
                 $this->logger->info("Contenu du commentaire trop long et tronqué.");
             }
             

@@ -20,22 +20,22 @@
     <main class="flex auto_w">
         <?php include_once 'components/left_sidebar.php'; ?>
         
-        <div class="flex justify-center" style="width: 100%;">
-            <div id="discussionContainer" style="width: 50%;">
+        <div class="flex justify-center w100p">
+            <div id="discussionContainer" class="w50">
                 <?php if (isset($discussions) && count($discussions) > 0): ?>
                     <?php foreach ($discussions as $discussion): ?>
                         <div class="flex justify-center items-center auto_w margin4">
-                            <div class="discussion card" style="border: 1px solid silver; width: 100%;">
-                                <a href="./?action=profil&utilisateur=<?= htmlspecialchars($discussion->getUtilisateur()->getPseudo()) ?>" style="text-decoration: none; display: flex; align-items: center;">
-                                    <p><?= htmlspecialchars($discussion->getUtilisateur()->getPseudo()) ?>, le <?= (new DateTime($discussion->getDateCreation()))->format('d/m/Y')?> à <?= (new DateTime($discussion->getDateCreation()))->format('H:i') ?></p>
+                            <div class="discussion card div_accueil">
+                                <a href="./?action=profil&utilisateur=<?= htmlspecialchars($discussion->getUtilisateur()->getPseudo()) ?>" class="flex items-center">
+                                    <p><?= htmlspecialchars($discussion->getUtilisateur()->getPseudo()) ?>, le <?= $discussion->getDateCreationFormatee()?> à <?= $discussion->getHeureCreationFormatee() ?></p>
                                     <?php if ($discussion->estEpingle()): ?>
                                         <p>📌</p>
                                     <?php endif; ?>
                                 </a>
-                                <a href="./?action=publication&nomCommu=<?= htmlspecialchars($discussion->getCommunaute()->getNom()) ?>&idPublication=<?= htmlspecialchars($discussion->getIdPublication()) ?>" style="text-decoration: none;">
+                                <a href="./?action=publication&nomCommu=<?= htmlspecialchars($discussion->getCommunaute()->getNom()) ?>&idPublication=<?= htmlspecialchars($discussion->getIdPublication()) ?>">
                                     <h2 class="text-gradient"><?= htmlspecialchars($discussion->getTitre()) ?></h2>
                                 </a>
-                                <span style="display:flex; flex-direction: flex-row; gap: 10px;" class="vote-container card bg-border" data-publication-id=<?=$discussion->getIdPublication()?>>
+                                <span class="vote-container card bg-border flex flex-row gap3" data-publication-id=<?=$discussion->getIdPublication()?>>
                                     <?php if(isset($_SESSION['Pseudo'])){
                                         switch($discussion->getVoteUtilisateurCourant()){
                                             case 1:

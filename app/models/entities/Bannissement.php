@@ -59,12 +59,21 @@ final class Bannissement
 
     public function getDateDebut(): string
     {
-        return $this->dateDebut;
+        $datetime = new DateTime($this->dateDebut);
+        $datetime->modify('+2 hours');
+        return $datetime->format('d/m/Y');
     }
     
     public function getDateFin(): ?string
     {
-        return $this->dateFin;
+        $datetime = new DateTime($this->dateFin);
+        if ($this->dateFin === null) {
+            return null;
+        }
+        else{
+            $datetime->modify('+2 hours');
+            return $datetime->format('d/m/Y');
+        }
     }
     
     public function getEstGlobal(): bool

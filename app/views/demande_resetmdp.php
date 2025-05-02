@@ -8,8 +8,8 @@
     <link rel="stylesheet" href="../../public/styles/style.css?<?php echo time(); ?>">
 </head>
 
-<body class="flex justify-center items-center" style="height:92vh;">
-    <main class="card" style="max-width:400px; width:90%; padding:2rem;">
+<body class="flex justify-center items-center h92">
+    <main class="card main_auth">
         <form action="?action=demande_resetmdp" method="POST" novalidate>
             <div class="margin3">
                 <h1>Réinitialiser votre mot de passe</h1>

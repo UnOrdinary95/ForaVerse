@@ -58,9 +58,23 @@ class Discussion
         return $this->contenu;
     }
 
-    public function getDateCreation(): string
+    // public function getDateCreation(): string
+    // {
+    //     return $this->dateCreation;
+    // }
+
+    public function getDateCreationFormatee(): string
     {
-        return $this->dateCreation;
+        $datetime = new DateTime($this->dateCreation);
+        $datetime->modify('+2 hours');
+        return $datetime->format('d/m/Y');
+    }
+
+    public function getHeureCreationFormatee(): string
+    {
+        $datetime = new DateTime($this->dateCreation);
+        $datetime->modify('+2 hours');
+        return $datetime->format('H:i');
     }
 
     public function getScore(): int

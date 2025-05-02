@@ -67,6 +67,20 @@ class Commentaire
         return $this->dateCreation;
     }
 
+    public function getDateCreationFormatee(): string
+    {
+        $datetime = new DateTime($this->dateCreation);
+        $datetime->modify('+2 hours');
+        return $datetime->format('d/m/Y');
+    }
+
+    public function getHeureCreationFormatee(): string
+    {
+        $datetime = new DateTime($this->dateCreation);
+        $datetime->modify('+2 hours');
+        return $datetime->format('H:i');
+    }
+
     public function getScore(): int
     {
         return $this->score;

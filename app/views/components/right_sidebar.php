@@ -1,7 +1,7 @@
 <aside id="communaute_container1-2">
     <div class="auto_w">
-        <div class="flex flex-col items-center justify-center margin3 card bg-background gap2" style="width: 80%;">
-            <img id="communauteImage" src="../../public/<?= htmlspecialchars($communaute->getCheminPhoto()) ?>" alt="ProfilCommunaute" style="border-radius: 50%;" class="logo2 pointer" 
+        <div class="flex flex-col items-center justify-center margin3 card bg-background gap2 w80p">
+            <img id="communauteImage" src="../../public/<?= htmlspecialchars($communaute->getCheminPhoto()) ?>" alt="ProfilCommunaute" class="logo2 pointer bradius50p" 
                 <?php if (isset($_SESSION['Pseudo'])): ?>
                     onclick="document.getElementById('imageInput').click();"
                 <?php endif; ?>
@@ -9,9 +9,9 @@
 
             <h5 class="text-bold"><?= htmlspecialchars($communaute->getNom()) ?></h5>
             
-            <p id="description" style="width: 100%;"><?= nl2br(htmlspecialchars($communaute->getDescription())) ?></p>
+            <p id="description" class="w100p"><?= nl2br(htmlspecialchars($communaute->getDescription())) ?></p>
             
-            <div class="flex flex-row justify-evenly test" style="width: 100%;">
+            <div class="flex flex-row justify-evenly test w100p">
                 <small><?= $communaute->getVisibilite() == true ? "Publique" : "Privée" ?></small>
                 <small id="compteurMembres"><?= htmlspecialchars($nbr_membres) . " Membres"?></small>
             </div>
@@ -29,8 +29,8 @@
     
     <h2>Propriétaire</h2>
     <a href="./?action=profil&utilisateur=<?= htmlspecialchars($proprio['pseudo']) ?>" class= "card flex items-center gap2 margin1">
-        <img src="../../public/<?= htmlspecialchars($proprio['pp'])?>" style="width: 40px; height: 40px; border-radius: 30%;" alt="Profil">
-        <span style="font-size: 18px;<?php if(isset($_SESSION['Pseudo']) && $_SESSION['Pseudo'] == $proprio['pseudo']){print 'font-weight: bold;';} ?>"><?= htmlspecialchars($proprio['pseudo']) ?></span>
+        <img src="../../public/<?= htmlspecialchars($proprio['pp'])?>" class="header_img2" alt="Profil">
+        <span class="font_s <?php if(isset($_SESSION['Pseudo']) && $_SESSION['Pseudo'] == $proprio['pseudo']){print 'bold;';} ?>"><?= htmlspecialchars($proprio['pseudo']) ?></span>
     </a>
 
     <h2>Modérateurs</h2>
@@ -38,8 +38,8 @@
         <?php if(isset($mods) && count($mods) > 0): ?>
             <?php foreach($mods as $mod): ?>
                 <a href="./?action=profil&utilisateur=<?= htmlspecialchars($mod['pseudo']) ?>" class= "card flex items-center gap2 margin1">
-                    <img src="../../public/<?= htmlspecialchars($mod['pp'])?>" style="width: 40px; height: 40px; border-radius: 30%;" alt="Profil">
-                    <span style="font-size: 18px;<?php if(isset($_SESSION['Pseudo']) && $_SESSION['Pseudo'] == $mod['pseudo']){print 'font-weight: bold;';} ?>"><?= htmlspecialchars($mod['pseudo']) ?></span>
+                    <img src="../../public/<?= htmlspecialchars($mod['pp'])?>" class="header_img2" alt="Profil">
+                    <span class="font_s <?php if(isset($_SESSION['Pseudo']) && $_SESSION['Pseudo'] == $mod['pseudo']){print 'bold';} ?>"><?= htmlspecialchars($mod['pseudo']) ?></span>
                 </a>
             <?php endforeach; ?>
         <?php else: ?>
@@ -52,13 +52,13 @@
         <?php if(isset($membres) && count($membres) > 0): ?>
             <?php foreach($membres as $membre): ?>
                 <a href="./?action=profil&utilisateur=<?= htmlspecialchars($membre['pseudo']) ?>" class= "card flex items-center gap2 margin1">
-                    <img src="../../public/<?= htmlspecialchars($membre['pp'])?>" style="width: 40px; height: 40px; border-radius: 30%;" alt="Profil">
-                    <span style="font-size: 18px;<?php if(isset($_SESSION['Pseudo']) && $_SESSION['Pseudo'] == $membre['pseudo']){print 'font-weight: bold;';} ?>"><?= htmlspecialchars($membre['pseudo']) ?></span>
+                    <img src="../../public/<?= htmlspecialchars($membre['pp'])?>" class="header_img2" alt="Profil">
+                    <span class="font_s <?php if(isset($_SESSION['Pseudo']) && $_SESSION['Pseudo'] == $membre['pseudo']){print 'bold';} ?>"><?= htmlspecialchars($membre['pseudo']) ?></span>
                     <?php if($membre['admin']): ?>
-                        <span style="color: red; font-weight: bold;">{Admin}</span>
+                        <span class="bold red">{Admin}</span>
                     <?php endif; ?>
                     <?php if($membre['banglobal']): ?>
-                        <span style="color: green; font-weight: bold;">{Utilisateur banni}</span>
+                        <span class="bold green">{Utilisateur banni}</span>
                     <?php endif; ?>
                 </a>
             <?php endforeach; ?>

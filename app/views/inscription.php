@@ -8,8 +8,8 @@
     <link rel="stylesheet" href="../../public/styles/style.css?<?php echo time(); ?>">
 </head>
 
-<body class="flex justify-center items-center" style="height:92vh;">
-    <main class="card" style="max-width:400px; width:90%; padding:2rem;">
+<body class="flex justify-center items-center h92">
+    <main class="card main_auth">
         <form action="?action=inscription" method="POST" autocomplete="on" novalidate>
             <h1 class="margin3">Créer un compte</h1>
             <input type="text" name="pseudo" placeholder="Pseudo"><br><br>

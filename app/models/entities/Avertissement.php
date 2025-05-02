@@ -52,7 +52,9 @@ final class Avertissement
 
     public function getDateDebut(): string
     {
-        return $this->dateDebut;
+        $datetime = new DateTime($this->dateDebut);
+        $datetime->modify('+2 hours');
+        return $datetime->format('d/m/Y');
     }
 
     public function getUtilisateur(): Utilisateur

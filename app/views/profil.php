@@ -39,8 +39,8 @@
 
                 <h2><?= htmlspecialchars($utilisateur->getPseudo())?></h2>
                 <p><?= nl2br(htmlspecialchars($utilisateur->getBio()))?></p>
-                <small class="margin2"><?="Compte créé le ". (new DateTime($utilisateur->getDateInscription()))->format('d/m/Y')?></small>
-                <div class="flex justify-evenly test" style="width: 80%;">
+                <small class="margin2"><?="Compte créé le ". $utilisateur->getDateInscription()?></small>
+                <div class="flex justify-evenly test w80p">
                     <small id="compteur_abonne">Abonnés : <?=count($utilisateur->getSystemeAbonnement()->getAbonnes()) ?></small>
                     <small>Abonnements : <?=count($utilisateur->getSystemeAbonnement()->getAbonnements())?></small>
                 </div>
@@ -111,7 +111,7 @@
                             </select>
                         </div>
                         <p>Motif de l'avertissement :</p>
-                        <textarea name="raisonWarn" style="resize: none;" rows="5" cols="80"></textarea><br><br>
+                        <textarea name="raisonWarn" class="no_resize" rows="5" cols="80"></textarea><br><br>
                         <?php if (isset($_SESSION['erreurs']['raisonWarn'])): ?>
                             <span class="error margin-left3"><?= $_SESSION['erreurs']['raisonWarn'] ?></span><br>
                             <?php unset($_SESSION['erreurs']['raisonWarn']); ?>
@@ -147,7 +147,7 @@
                         <input type="radio" name="dureeban" value="P">
                         <label for="perm">Permanent</label><br>
                         <p>Motif du bannissement :</p>
-                        <textarea name="raisonBan" style="resize: none;" rows="5" cols="80"></textarea><br><br>
+                        <textarea name="raisonBan" class="no_resize" rows="5" cols="80"></textarea><br><br>
                         <?php if (isset($_SESSION['erreurs']['raisonBan'])): ?>
                             <span class="error margin-left3"><?= $_SESSION['erreurs']['raisonBan'] ?></span><br>
                             <?php unset($_SESSION['erreurs']['raisonBan']); ?>
@@ -257,7 +257,7 @@
                     </div>
                     <form action="?action=profil&utilisateur=<?=htmlspecialchars($utilisateur->getPseudo())?>#modalBio" method="POST" novalidate>
                         <p>Veuillez entrer votre nouvelle bio.</p>
-                        <textarea name="modalBio" style="resize: none;" rows="5" cols="50" placeholder="<?=htmlspecialchars($utilisateur->getBio())?>"></textarea><br><br>
+                        <textarea name="modalBio" class="no_resize" rows="5" cols="50" placeholder="<?=htmlspecialchars($utilisateur->getBio())?>"></textarea><br><br>
                         <?php if (isset($_SESSION['erreurs']['bio'])): ?>
                             <span class="error margin-left3"><?= $_SESSION['erreurs']['bio'] ?></span><br>
                             <?php unset($_SESSION['erreurs']['bio']); ?>
