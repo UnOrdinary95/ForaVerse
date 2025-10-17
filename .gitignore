@@ -4,6 +4,7 @@ public/images/pp_user
 public/images/pp_commu
 vendor
 .htaccess
+.rooignore
 logs
 test
 .vscode
