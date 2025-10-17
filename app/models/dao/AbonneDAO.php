@@ -25,6 +25,23 @@ final class AbonneDAO
         return $query->fetchColumn();
     }
 
+    public function getAbonnesByUtilisateur(int $id): array
+    {
+        $query = $this->pdo->prepare("SELECT idAbonne FROM abonne WHERE idUtilisateur = ?");
+        $query->execute([$id]);
+
+        return array_column($query->fetchAll(PDO::FETCH_NUM), 0);
+    }
+
+    public function getAbonnementsByUtilisateur(int $id): array
+    {
+        $query = $this->pdo->prepare("SELECT idUtilisateur FROM abonne WHERE idAbonne = ?");
+        $query->execute([$id]);
+
+        return array_column($query->fetchAll(PDO::FETCH_NUM), 0);
+    }
+
+    
     public function estAbonne(int $idAbonne, int $idUtilisateur): bool
     {
         $query = $this->pdo->prepare("SELECT COUNT(*) FROM abonne WHERE idAbonne = ? AND idUtilisateur = ?");

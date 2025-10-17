@@ -1,4 +1,10 @@
 .idea
 public/sketch
+public/images/pp_user
+public/images/pp_commu
 vendor
 .htaccess
+logs
+test
+.vscode
+error.log

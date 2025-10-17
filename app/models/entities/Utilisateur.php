@@ -6,19 +6,19 @@ final class Utilisateur
     private ?string $pseudo;
     private ?string $email;
     private ?string $mdp;
-    private ?string $chemin_photo;
-    private ?string $bio;
+    private string $chemin_photo;
+    private string $bio;
     private ?string $date_inscription;
     private bool $est_admin;
 
     public function __construct(
-        string $unPseudo = null,
-        string $unEmail = null,
-        string $unMdp = null,
-        int $unId = null,
-        string $unCheminPhoto = null,
+        ?string $unPseudo = null,
+        ?string $unEmail = null,
+        ?string $unMdp = null,
+        ?int $unId = null,
+        ?string $uneDateInscription = null,
+        string $unCheminPhoto = 'images/pp_user/default.jpeg',
         string $uneBio = 'Pas de bio.',
-        string $uneDateInscription = null,
         bool $unEstAdmin = false
     ){
         $this->id = $unId;
@@ -63,14 +63,74 @@ final class Utilisateur
 
     public function getDateInscription(): ?string
     {
-        return $this->date_inscription;
+        $datetime = new DateTime($this->date_inscription);
+        $datetime->modify('+2 hours');
+        return $datetime->format('d/m/Y');
     }
 
-    public function getEstAdmin(): bool
+    public function estAdministrateur(): bool
     {
         return $this->est_admin;
     }
 
+    public function getSystemeAbonnement(): Abonne
+    {
+        return new Abonne($this->id);
+    }
 
+    public function getRoles(): array
+    {
+        return (new RoleDAO())->getRolesByUtilisateur($this->id);
+    }
 
+    public function getCommuCommunModeration(Utilisateur $utilisateur): array
+    {
+        
+        $communaute_dao = new CommunauteDAO();
+        $bannissement_dao = new BannissementDAO();
+        $avertissement_dao = new AvertissementDAO();
+        $communautes = [];         
+        $mesRoles = $this->getRoles();
+        $rolesUtilisateur = $utilisateur->getRoles();
+
+        if ($utilisateur->estAdministrateur()) {
+            foreach($mesRoles as $role){
+                if ($role->estMembre()){
+                    $communautes[$role->getCommunauteId()] = [
+                        'nom' => $communaute_dao->getNomById($role->getCommunauteId()),
+                        'estbanni' => $bannissement_dao->getBannissementByIdUtilisateurAndCommunaute($utilisateur->getId(), $role->getCommunauteId()) !== null,
+                        'aete_averti' => $avertissement_dao->getAvertissementsByIdUtilisateurAndCommunaute($utilisateur->getId(), $role->getCommunauteId()) !== null
+                    ];
+                }
+            }
+
+            return $communautes;
+        }
+
+        $commu_moderation = [];
+        foreach ($rolesUtilisateur as $role){
+            if ($role->peutModerer()) {
+                $commu_moderation[$role->getCommunauteId()] = $communaute_dao->getNomById($role->getCommunauteId());
+            }
+        }
+
+        foreach ($mesRoles as $role) {
+            if (array_key_exists($role->getCommunauteId(), $commu_moderation)) {
+                if ($role->estMembre()){
+                    $communautes[$role->getCommunauteId()] = [
+                        'nom' => $commu_moderation[$role->getCommunauteId()],
+                        'estbanni' => $bannissement_dao->getBannissementByIdUtilisateurAndCommunaute($utilisateur->getId(), $role->getCommunauteId()) !== null,
+                        'aete_averti' => $avertissement_dao->getAvertissementsByIdUtilisateurAndCommunaute($utilisateur->getId(), $role->getCommunauteId()) !== null
+                    ];
+                } 
+            }
+        }
+
+        return $communautes;
+    }
+
+    public function estBanniGlobal(): bool
+    {
+        return (new BannissementDAO())->getBannissementGlobalByIdUtilisateur($this->id) !== null;
+    }
 }

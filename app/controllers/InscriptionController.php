@@ -17,6 +17,10 @@ class InscriptionController implements ControllerInterface, AuthControllerInterf
      * @var array Tableau contenant les messages d'erreurs de validation
      */
     private array $erreurs;
+    /**
+     * @var Logger Instance du logger pour tracer les actions
+     */
+    private Logger $logger;
 
     /**
      * Constructeur de InscriptionController
@@ -26,6 +30,7 @@ class InscriptionController implements ControllerInterface, AuthControllerInterf
     {
         $this->validateur = new InscriptionValidator();
         $this->erreurs = [];
+        $this->logger = new Logger();
     }
 
     /**
@@ -40,11 +45,14 @@ class InscriptionController implements ControllerInterface, AuthControllerInterf
     public function afficherVue():void
     {
         try{
+            $this->logger->info("Affichage de la page d'inscription");
             $this->verifierUtilisateur();
             $erreurs = $this->erreurs;
             require_once __DIR__ . '/../views/inscription.php';
         } catch (PDOException $e) {
-            require_once __DIR__ . '/../views/erreur.php';
+            $this->logger->error("Erreur PDO lors de l'affichage de la page d'inscription: " . $e->getMessage());
+            header('HTTP/1.0 404 Not Found');
+            exit();
         }
     }
 
@@ -60,23 +68,30 @@ class InscriptionController implements ControllerInterface, AuthControllerInterf
     public function verifierUtilisateur(): void
     {
         if ($_SERVER["REQUEST_METHOD"] === "POST"){
+            $this->logger->info("Tentative d'inscription d'un nouvel utilisateur");
+            
             $pseudo = trim(filter_input(INPUT_POST, 'pseudo', FILTER_SANITIZE_SPECIAL_CHARS));
             $email = trim(filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL));
-            $mdp = trim(filter_input(INPUT_POST, 'mdp', FILTER_SANITIZE_SPECIAL_CHARS));
+            $mdp = trim($_POST['mdp']);
+            
+            $this->logger->debug("Données d'inscription reçues - Pseudo: $pseudo, Email: $email");
 
             if ($this->validateur->valider($pseudo, $email, $mdp)){
                 try{
                     $utilisateur_dao = new UtilisateurDAO();
                     $utilisateur_dao->addUtilisateur($pseudo, $email, $mdp);
+                    $this->logger->info("Inscription réussie pour l'utilisateur: $pseudo ($email)");
                     header("Location: ./?action=connexion");
                     exit();
                 } catch (PDOException $e) {
-                    require_once __DIR__ . '/../views/erreur.php';
+                    $this->logger->error("Erreur PDO lors de l'inscription de l'utilisateur: " . $e->getMessage());
+                    header("Location: ./?action=erreur");
                     exit();
                 }
             }
             else {
                 $this->erreurs = $this->validateur->getErreurs();
+                $this->logger->warning("Échec d'inscription pour: $pseudo - Erreurs: " . implode(", ", $this->erreurs));
             }
         }
     }

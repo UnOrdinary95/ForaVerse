@@ -14,11 +14,17 @@ class ConnexionController implements ControllerInterface, AuthControllerInterfac
      * @var ConnexionValidator Instance du validateur de connexion
      */
     private ConnexionValidator $validateur;
+    private UtilisateurDAO $utilisateurDAO;
 
     /**
      * @var array Tableau contenant les messages d'erreurs de validation
      */
     private array $erreurs;
+
+    /**
+     * @var Logger Instance du logger pour tracer les actions
+     */
+    private Logger $logger;
 
     /**
      * Constructeur du ConnexionController
@@ -28,6 +34,8 @@ class ConnexionController implements ControllerInterface, AuthControllerInterfac
     {
         $this->validateur = new ConnexionValidator();
         $this->erreurs = [];
+        $this->logger = new Logger();
+        $this->utilisateurDAO = new UtilisateurDAO();
     }
 
     /**
@@ -42,11 +50,14 @@ class ConnexionController implements ControllerInterface, AuthControllerInterfac
     public function afficherVue():void
     {
         try{
+            $this->logger->info("Affichage de la page de connexion");
             $this->verifierUtilisateur();
             $erreurs = $this->erreurs;
             require_once __DIR__ . '/../views/connexion.php';
         } catch (PDOException $e) {
-            require_once __DIR__ . '/../views/erreur.php';
+            $this->logger->error("Erreur PDO lors de l'affichage de la page de connexion: " . $e->getMessage());
+            header('HTTP/1.0 404 Not Found');
+            exit();
         }
     }
 
@@ -62,26 +73,45 @@ class ConnexionController implements ControllerInterface, AuthControllerInterfac
     public function verifierUtilisateur():void
     {
         if ($_SERVER["REQUEST_METHOD"] === "POST"){
+            $this->logger->info("Tentative de connexion");
+            
             if (str_contains($_POST['identifiant'], '@')) {
                 $identifiant = trim(filter_input(INPUT_POST, 'identifiant', FILTER_SANITIZE_EMAIL));
+                $this->logger->debug("Connexion avec email: " . $identifiant);
             }
             else{
                 $identifiant = trim(filter_input(INPUT_POST, 'identifiant', FILTER_SANITIZE_SPECIAL_CHARS));
+                $this->logger->debug("Connexion avec pseudo: " . $identifiant);
             }
             $mdp = trim(filter_input(INPUT_POST, 'mdp', FILTER_SANITIZE_SPECIAL_CHARS));
 
             if ($this->validateur->valider($identifiant, $identifiant, $mdp) == 1) {
                 $_SESSION['Pseudo'] = $this->validateur->getUtilisateurDAO()->getPseudoByEmail($identifiant);
+                if ($this->utilisateurDAO->getProfilUtilisateurById($this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']))->estBanniGlobal()){
+                    header("Location: ./?action=erreur");
+                    session_unset();
+                    session_destroy();
+                    exit();
+                }
+                $this->logger->info("Connexion réussie avec email: " . $identifiant . " (Pseudo: " . $_SESSION['Pseudo'] . ")");
                 header("Location: ./?action=accueil");
                 exit();
             }
             elseif($this->validateur->valider($identifiant, $identifiant, $mdp) == 2){
                 $_SESSION['Pseudo'] = $identifiant;
+                if ($this->utilisateurDAO->getProfilUtilisateurById($this->utilisateurDAO->getIdByPseudo($_SESSION['Pseudo']))->estBanniGlobal()){
+                    header("Location: ./?action=erreur");
+                    session_unset();
+                    session_destroy();
+                    exit();
+                }
+                $this->logger->info("Connexion réussie avec pseudo: " . $identifiant);
                 header("Location: ./?action=accueil");
                 exit();
             }
             else {
                 $this->erreurs = $this->validateur->getErreurs();
+                $this->logger->warning("Échec de connexion pour: " . $identifiant . " - Erreurs: " . implode(", ", $this->erreurs));
             }
         }
     }
@@ -96,6 +126,7 @@ class ConnexionController implements ControllerInterface, AuthControllerInterfac
     public function deconnexion():void
     {
         if (isset($_SESSION['Pseudo'])){
+            $this->logger->info("Déconnexion de l'utilisateur: " . $_SESSION['Pseudo']);
             session_unset();
             session_destroy();
             header("Location: ./?action=connexion");

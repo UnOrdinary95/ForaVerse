@@ -48,7 +48,7 @@ class InscriptionValidator extends AuthValidatorAbstract
      * @param string $pseudo Le pseudo à valider
      * @return bool True si le pseudo est valide, False sinon
      */
-    private function validerPseudo(string $pseudo):bool
+    public function validerPseudo(string $pseudo):bool
     {
         $validation = false;
 
@@ -82,7 +82,7 @@ class InscriptionValidator extends AuthValidatorAbstract
      * @param string $email L'email à valider
      * @return bool True si l'email est valide, False sinon
      */
-    private function validerEmail(string $email):bool
+    public function validerEmail(string $email):bool
     {
         $validation = false;
 
@@ -129,5 +129,14 @@ class InscriptionValidator extends AuthValidatorAbstract
             $validation = true;
         }
         return $validation;
+    }
+
+    public function clearErreurs():void
+    {
+        $this->erreurs = [
+            'pseudo' => "",
+            'email' => "",
+            'mdp' => ""
+        ];
     }
 }
