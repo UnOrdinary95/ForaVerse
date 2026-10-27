@@ -35,7 +35,7 @@
 
 ### Prerequisites
 
-- PHP 8.0+
+- PHP 8.2 or 8.3 (the current MailerSend dependency requires PHP < 8.4)
 - Composer
 - PostgreSQL (or compatible database)
 - Web server (Apache/Nginx recommended)
@@ -60,6 +60,22 @@ cp .env-template.txt .env
 # Edit .env with your database credentials
 
 # Start your web server and point the root to the project directory
+```
+
+The application reads configuration with `getenv()`: make sure your web server
+exports the configured variables; copying `.env` alone does not load them.
+For password-reset tokens, `SECRET_KEY` must contain at least 32 bytes for HS256
+(required by `firebase/php-jwt` 7). Generate a random secret, for example with
+`php -r 'echo bin2hex(random_bytes(32)), PHP_EOL;'`, and store it outside Git.
+If you replace an existing secret, previously issued reset links become invalid.
+
+### Dependency checks
+
+Run these commands using the same PHP version as the web server:
+
+```bash
+composer check-platform-reqs
+composer audit --locked
 ```
 
 ## Architecture
